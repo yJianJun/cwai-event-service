@@ -25,6 +25,7 @@ import (
 	}
 */
 type Event struct {
+	ID          uint          `json:"id" gorm:"primary_key"`
 	EventType   string        `json:"eventType" binding:"required"`
 	Level       string        `json:"level"`
 	Time        common.MyTime `json:"time" binding:"required"`

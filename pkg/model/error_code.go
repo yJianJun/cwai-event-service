@@ -23,3 +23,8 @@ var CodeMessage = ErrorCodeMap{
 	WatcherForbidden:     "观察模块不可访问",
 	WatcherInternalError: "服务异常",
 }
+
+// 错误信息
+const (
+	Message string = "message"
+)
