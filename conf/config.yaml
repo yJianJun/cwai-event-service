@@ -1,0 +1,13 @@
+ccaeServer:
+    protocol: https
+    host: ccae.manager.ctyun.cn
+    port: 26335
+    userName: lndxsy502cs
+    userPassword: Lnsydx502cs@2024
+    tokenTimeOut: 1800
+ccaeAPIs:
+    tokenUrl: /rest/plat/smapp/v1/oauth/token
+    qureyTopoUrl: /api/monitor/v1/query-topo  
+
+
+
