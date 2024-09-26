@@ -25,10 +25,10 @@ import (
 	}
 */
 type Event struct {
-	EventType   string        `json:"eventType"`
+	EventType   string        `json:"eventType" binding:"required"`
 	Level       string        `json:"level"`
-	Time        common.MyTime `json:"time"`
-	EventDetail EventDetail   `json:"eventDetail gorm:"type:json"`
+	Time        common.MyTime `json:"time" binding:"required"`
+	EventDetail EventDetail   `json:"eventDetail" gorm:"type:json" binding:"required"`
 }
 
 /*
@@ -54,8 +54,8 @@ type Event struct {
 		        }
 */
 type EventDetail struct {
-	LocalGuid    string `json:"localGuid"`
-	RemoteGuid   string `json:"remoteGuid"`
+	LocalGuid    string `json:"localGuid" binding:"required"`
+	RemoteGuid   string `json:"remoteGuid" binding:"required"`
 	ErrorCode    int64  `json:"errorCode"`
 	TimeDuration int64  `json:"timeDuration"`
 	DataSize     int64  `json:"dataSize"`
