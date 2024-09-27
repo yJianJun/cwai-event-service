@@ -2,11 +2,14 @@
 package router
 
 import (
+	docs "ctyun-code.srdcloud.cn/aiplat/cwai-watcher/cmd/server/docs"
 	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/handler/ctccl"
 	handlerv1 "ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/handler/v1"
 	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/router/router_middleware"
 	"github.com/gin-gonic/gin"
 	"github.com/golang/glog"
+	swaggerfiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 const (
@@ -27,6 +30,8 @@ func InitRoute() *gin.Engine {
 	groupv1 := router.Group(GROUP_V1)
 	// Register all routers
 	groupv1.POST("/server/topo", handlerv1.QueryNetTopo)
+	docs.SwaggerInfo.BasePath = "/api/v1"
+	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 
 	groupCTCCL := router.Group(CTCCL)
 	{

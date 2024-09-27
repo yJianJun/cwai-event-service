@@ -1,0 +1,18 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "监听CTCCL上报事件服务",
+        "title": "CTCCL事件监听",
+        "contact": {
+            "name": "yejianjun",
+            "email": "yejianjun@ideal.sh.cn"
+        },
+        "license": {
+            "name": "Apache 2.0",
+            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+        },
+        "version": "1.0"
+    },
+    "basePath": "/ctccl",
+    "paths": {}
+}
