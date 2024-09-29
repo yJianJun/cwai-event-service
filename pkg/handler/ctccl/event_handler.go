@@ -7,13 +7,13 @@ import (
 	"strconv"
 )
 
-// @Summary 获取事件列表
+// @Summary	获取事件列表
 // @Schemes
-// @Description 查询所有事件
-// @Tags ctccl
-// @Produce json
-// @Success 200 {array} model.Event
-// @Router /query [get]
+// @Description	查询所有事件
+// @Tags			ctccl
+// @Produce		json
+// @Success		200	{array}	model.Event
+// @Router			/query [get]
 func GetAllEvent(c *gin.Context) {
 	var events []model.Event
 	// 尝试从数据库中找到所有事件
@@ -62,15 +62,14 @@ func FindEventById(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"data": event})
 }
 
-// @Summary 修改事件
+// @Summary	修改事件
 // @Schemes
-// @Description 根据id修改事件
-// @Tags ctccl
-// @Param input body model.Event true "编辑参数"
-// @Accept json
-// @Produce json
-// @Success 200 {object} Map
-// @Router /update/:id [put]
+// @Description	根据id修改事件
+// @Tags			ctccl
+// @Param			input	body	model.Event	true	"编辑参数"
+// @Accept			json
+// @Produce		json
+// @Router			/update/:id [put]
 func UpdateEvent(c *gin.Context) {
 	// 获取并验证参数
 	idParam := c.Param("id")

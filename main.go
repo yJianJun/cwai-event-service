@@ -2,6 +2,7 @@
 package main
 
 import (
+	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/app"
 	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/model"
 	"fmt"
 	"log"
@@ -9,21 +10,19 @@ import (
 	"os"
 	"time"
 
-	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/cmd/server/app"
-
 	"github.com/golang/glog"
 )
 
-// @title CTCCL事件监听
-// @version 1.0
-// @description 监听CTCCL上报事件服务
+//	@title			CTCCL事件监听
+//	@version		1.0
+//	@description	监听CTCCL上报事件服务
 
-// @contact.name yejianjun
-// @contact.email yejianjun@ideal.sh.cn
+//	@contact.name	yejianjun
+//	@contact.email	yejianjun@ideal.sh.cn
 
-// @license.name Apache 2.0
-// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
-// @BasePath /ctccl
+// @license.name	Apache 2.0
+// @license.url	http://www.apache.org/licenses/LICENSE-2.0.html
+// @BasePath		/ctccl
 func main() {
 	time.Local = time.FixedZone("CST", 8*3600)
 	rand.New(rand.NewSource(time.Now().UnixNano()))

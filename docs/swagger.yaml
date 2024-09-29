@@ -1,0 +1,94 @@
+basePath: /ctccl
+definitions:
+  model.Event:
+    properties:
+      eventDetail:
+        allOf:
+        - $ref: '#/definitions/model.EventDetail'
+        description: 事件详情
+      eventType:
+        description: 事件类型
+        type: string
+      id:
+        description: id
+        type: integer
+      level:
+        description: 事件等级
+        type: string
+      timestamp:
+        description: 时间戳
+        type: string
+    required:
+    - eventDetail
+    - eventType
+    - timestamp
+    type: object
+  model.EventDetail:
+    properties:
+      bandwidth:
+        description: 带宽Gb/s
+        type: integer
+      dataSize:
+        description: 数据量（B）
+        type: integer
+      errorCode:
+        description: 异常代码
+        type: integer
+      localGuid:
+        description: 本端ib/roce设备nodegid
+        type: string
+      remoteGuid:
+        description: 对端ib/roce设备nodegid
+        type: string
+      timeDuration:
+        description: 时间间隔(ms)
+        type: integer
+    required:
+    - localGuid
+    - remoteGuid
+    type: object
+info:
+  contact:
+    email: yejianjun@ideal.sh.cn
+    name: yejianjun
+  description: 监听CTCCL上报事件服务
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  title: CTCCL事件监听
+  version: "1.0"
+paths:
+  /query:
+    get:
+      description: 查询所有事件
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.Event'
+            type: array
+      summary: 获取事件列表
+      tags:
+      - ctccl
+  /update/:id:
+    put:
+      consumes:
+      - application/json
+      description: 根据id修改事件
+      parameters:
+      - description: 编辑参数
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/model.Event'
+      produces:
+      - application/json
+      responses: {}
+      summary: 修改事件
+      tags:
+      - ctccl
+swagger: "2.0"

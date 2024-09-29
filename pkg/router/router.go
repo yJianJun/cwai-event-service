@@ -2,7 +2,7 @@
 package router
 
 import (
-	docs "ctyun-code.srdcloud.cn/aiplat/cwai-watcher/cmd/server/docs"
+	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/docs"
 	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/handler/ctccl"
 	handlerv1 "ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/handler/v1"
 	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/router/router_middleware"
