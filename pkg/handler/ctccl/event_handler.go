@@ -4,6 +4,7 @@ import (
 	"context"
 	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/model"
 	"errors"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/goccy/go-json"
 	"github.com/olivere/elastic"
@@ -15,46 +16,84 @@ import (
 )
 
 const (
-	invalidIDMsg        = "Invalid ID parameter"
-	recordNotFoundMsg   = "Record not found!"
-	esClientNotInitMsg  = "Elasticsearch client not initialized"
-	dataDeletionFailed  = "数据删除失败"
-	dataDeletionSuccess = "数据删除成功"
+	invalidIDMsg               = "ID参数无效"
+	recordNotFoundMsg          = "未找到记录！"
+	esClientNotInitMsg         = "Elasticsearch 客户端未初始化"
+	dataDeletionFailed         = "数据删除失败"
+	dataDeletionSuccess        = "数据删除成功"
+	errorMsg                   = "无法从数据库检索数据"
+	logMsg                     = "无法从数据库检索数据: %v"
+	errMessage                 = "message"
+	badRequestMsg              = "ID 参数无效或为零"
+	notFoundMsg                = "未找到记录！"
+	InvalidIDMessage           = "无效的ID参数"
+	RecordNotFoundMessage      = "记录未找到"
+	JSONBindFailureMessage     = "JSON绑定失败: "
+	TxStartFailureMessage      = "无法开始数据库事务"
+	RecordUpdateFailureMessage = "记录更新失败"
+	TxCommitFailureMessage     = "事务提交失败"
+	RecordUpdateSuccessMessage = "数据更新成功"
+	UpdateFailedMessage        = "更新记录失败"
+	UpdateSuccessMessage       = "数据更新成功"
+	ErrBindJSON                = "无法解析 JSON 数据"
+	ErrDBCreate                = "数据库创建失败"
+	SuccessCreate              = "数据创建成功"
 )
 
-// @Summary	获取事件列表
+// @Summary 获取事件列表
 // @Schemes
-// @Description	查询所有事件
-// @Tags			ctccl
-// @Produce		json
-// @Success		200	{array}	model.Event
-// @Router			/query [get]
+// @Description 查询所有事件
+// @Tags ctccl
+// @Produce json
+// @Success 200 {array} model.Event
+// @Router /query [get]
 func GetAllEventFromDB(c *gin.Context) {
 	var events []model.Event
 	// 尝试从数据库中找到所有事件
 	if err := model.DB.Find(&events).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{model.Message: "Failed to retrieve data from database"})
+		handleDBError(c, err, logMsg, errorMsg)
 		return
 	}
-
 	// 返回所有事件数据
 	c.JSON(http.StatusOK, gin.H{"data": events})
 }
 
+// 处理数据库错误
+func handleDBError(c *gin.Context, err error, logMsg, errorMsg string) {
+	// 错误日志记录
+	log.Printf(logMsg, err)
+	// 返回错误信息
+	c.JSON(http.StatusInternalServerError, gin.H{"message": errorMsg})
+}
+
 func CreateEventFromDB(c *gin.Context) {
 	newEvent := model.Event{}
-	// 绑定并验证JSON
+
+	if bindErr := bindJSON(c, &newEvent); bindErr != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": bindErr.Error()})
+		return
+	}
+
+	if dbErr := createInDB(&newEvent); dbErr != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": dbErr.Error()})
+		return
+	}
+
+	c.JSON(http.StatusCreated, gin.H{"message": SuccessCreate})
+}
+
+func bindJSON(c *gin.Context, newEvent *model.Event) error {
 	if err := c.ShouldBindJSON(&newEvent); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{model.Message: err.Error()})
-		return
+		return fmt.Errorf("%s: %v", ErrBindJSON, err)
 	}
-	// 数据库创建操作
+	return nil
+}
+
+func createInDB(newEvent *model.Event) error {
 	if err := model.DB.Create(&newEvent).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{model.Message: "数据创建失败"})
-		return
+		return fmt.Errorf("%s: %v", ErrDBCreate, err)
 	}
-	// 成功返回
-	c.JSON(http.StatusCreated, gin.H{model.Message: "数据创建成功"})
+	return nil
 }
 
 func CreateEventFromES(c *gin.Context) {
@@ -100,12 +139,6 @@ func storeEventInES(ctx context.Context, event model.Event) error {
 		Do(ctx)
 	return err
 }
-
-const (
-	errMessage    = "message"
-	badRequestMsg = "Invalid or zero ID parameter"
-	notFoundMsg   = "Record not found!"
-)
 
 func FindEventByIdFromDB(c *gin.Context) {
 	id, err := parseIDParam(c)
@@ -167,16 +200,6 @@ func getEventByIdFromES(c *gin.Context, id string) (*model.Event, error) {
 
 	return &event, nil
 }
-
-const (
-	InvalidIDMessage           = "无效的ID参数"
-	RecordNotFoundMessage      = "记录未找到"
-	JSONBindFailureMessage     = "JSON绑定失败: "
-	TxStartFailureMessage      = "无法开始数据库事务"
-	RecordUpdateFailureMessage = "记录更新失败"
-	TxCommitFailureMessage     = "事务提交失败"
-	RecordUpdateSuccessMessage = "数据更新成功"
-)
 
 // @Summary	修改事件
 // @Schemes
@@ -247,12 +270,6 @@ func updateEventRecord(event *model.Event, input *model.Event) error {
 	}
 	return nil
 }
-
-const (
-	BadRequestMessage    = "Invalid input"
-	UpdateFailedMessage  = "Failed to update record"
-	UpdateSuccessMessage = "数据更新成功"
-)
 
 func UpdateEventFromES(c *gin.Context) {
 	id, err := parseIDParam(c)
