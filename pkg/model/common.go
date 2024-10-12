@@ -18,15 +18,34 @@ type Response struct {
 	ReturnObj  interface{} `json:"returnObj,omitempty"`
 }
 
+// BasePageRequest 表示基本分页请求参数。
+// swagger:model
 type BasePageRequest struct {
+	// Page 是页码。
+	// example: 1
+	// required: true
 	Page int `json:"page,omitempty"`
+
+	// Size 是每页条数。
+	// example: 10
+	// required: true
 	Size int `json:"size,omitempty"`
 }
 
+// PageVo 分页响应结构
+// @Description 分页响应结构
 type PageVo struct {
-	TotalCount int64       `json:"totalCount,omitempty"`
-	TotalPage  int         `json:"totalPage,omitempty"`
-	Data       interface{} `json:"data"`
+	// 总条数
+	// @json:"totalCount,omitempty"
+	TotalCount int64 `json:"totalCount,omitempty"`
+
+	// 总页数
+	// @json:"totalPage,omitempty"
+	TotalPage int `json:"totalPage,omitempty"`
+
+	// 数据
+	// @json:"data"
+	Data interface{} `json:"data"`
 }
 
 func errorResponse(c *gin.Context, httpStatus int, code ErrorCode) {
