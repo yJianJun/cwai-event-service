@@ -9,11 +9,11 @@ import (
 
 // 事件
 type Event struct {
-	ID          uint          `json:"id" gorm:"primary_key"`                           // id
-	EventType   string        `json:"eventType" binding:"required"`                    // 事件类型
-	Level       string        `json:"level"`                                           // 事件等级
-	Timestamp   common.MyTime `json:"timestamp" binding:"required"`                    // 时间戳
-	EventDetail EventDetail   `json:"eventDetail" gorm:"type:json" binding:"required"` // 事件详情
+	ID          uint          `json:"id" gorm:"primary_key"`
+	EventType   string        `json:"eventType" binding:"required" gorm:"type:varchar(25);comment:事件类型"`
+	Level       string        `json:"level" gorm:"type:varchar(25);comment:事件等级"`
+	Timestamp   common.MyTime `json:"timestamp" binding:"required" gorm:"type:datetime;default:null;comment:时间戳"`
+	EventDetail EventDetail   `json:"eventDetail" gorm:"type:json;comment:事件详情" binding:"required"`
 }
 
 // 事件详情

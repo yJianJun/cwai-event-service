@@ -81,10 +81,15 @@ func (mo *ServerConfig) Init() {
 	viper.SetDefault("ccaeServer.tokenTimeOut", "1800")
 	viper.SetDefault("ccaeAPIs.tokenUrl", "/rest/plat/smapp/v1/oauth/token")
 	viper.SetDefault("ccaeAPIs.qureyTopoUrl", "/api/monitor/v1/query-topo")
-	viper.SetDefault("mysqlConfig.user", "roor")
+	viper.SetDefault("mysqlConfig.user", "root")
 	viper.SetDefault("mysqlConfig.password", "930927")
 	viper.SetDefault("mysqlConfig.address", "127.0.0.1:3306")
 	viper.SetDefault("mysqlConfig.db", "ctccl")
+	viper.SetDefault("elasticConfig.enable", true)
+	viper.SetDefault("elasticConfig.url", "http://127.0.0.1:9200")
+	viper.SetDefault("elasticConfig.sniff", false)
+	viper.SetDefault("elasticConfig.healthCheckInterval", 5)
+	viper.SetDefault("elasticConfig.logPre", "ES-")
 }
 
 func (mo *ServerConfig) BindFlags(cmd *cobra.Command) {
