@@ -40,12 +40,14 @@ const (
 	SuccessCreate              = "数据创建成功"
 )
 
+// GetAllEventFromDB godoc
 // @Summary 获取事件列表
-// @Schemes
 // @Description 查询所有事件
 // @Tags ctccl
-// @Produce json
+// @Accept  json
+// @Produce  json
 // @Success 200 {array} model.Event
+// @Failure 500 {object} gin.H{"error": "description"}
 // @Router /query [get]
 func GetAllEventFromDB(c *gin.Context) {
 	var events []model.Event
@@ -66,6 +68,17 @@ func handleDBError(c *gin.Context, err error, logMsg, errorMsg string) {
 	c.JSON(http.StatusInternalServerError, gin.H{"message": errorMsg})
 }
 
+// CreateEventFromDB 创建一个新的事件
+// @Summary 创建一个新的事件
+// @Description 从数据库中创建一个新的事件
+// @Tags ctccl
+// @Accept  json
+// @Produce  json
+// @Param   event body model.Event true "Event数据"
+// @Success 201 {object} gin.H {"message": "SuccessCreate"}
+// @Failure 400 {object} gin.H {"message": "错误信息"}
+// @Failure 500 {object} gin.H {"message": "错误信息"}
+// @Router /save [post]
 func CreateEventFromDB(c *gin.Context) {
 	newEvent := model.Event{}
 
@@ -140,13 +153,22 @@ func storeEventInES(ctx context.Context, event model.Event) error {
 	return err
 }
 
+// @Summary 按 ID 查找事件
+// @Description 从数据库中通过 ID 获取特定事件
+// @Tags ctccl
+// @Accept  json
+// @Produce  json
+// @Param   id     path    int     true        "Event ID"
+// @Success 200 {object} model.Event    "Success"
+// @Failure 400 {object} ErrorResponse "Bad Request"
+// @Failure 404 {object} ErrorResponse "Not Found"
+// @Router /query/{id} [get]
 func FindEventByIdFromDB(c *gin.Context) {
 	id, err := parseIDParam(c)
 	if err != nil {
 		respondWithError(c, http.StatusBadRequest, badRequestMsg)
 		return
 	}
-
 	event, err := fetchEventByID(id)
 	if err != nil {
 		klog.Errorf("Failed to find event with ID %d: %v", id, err)
@@ -201,39 +223,40 @@ func getEventByIdFromES(c *gin.Context, id string) (*model.Event, error) {
 	return &event, nil
 }
 
+// UpdateEventFromDB godoc
 // @Summary	修改事件
-// @Schemes
 // @Description	根据id修改事件
-// @Tags			ctccl
-// @Param			input	body	model.Event	true	"编辑参数"
-// @Accept			json
-// @Produce		json
-// @Router			/update/:id [put]
+// @Tags ctccl
+// @Accept  json
+// @Produce  json
+// @Param id path int true "Event ID"
+// @Param event body model.Event true "编辑参数"
+// @Success 200 {object} gin.H{"message": "RecordUpdateSuccessMessage"}
+// @Failure 400 {object} gin.H{"message": "Invalid input"}
+// @Failure 404 {object} gin.H{"message": "Event not found"}
+// @Failure 500 {object} gin.H{"message": "Internal server error"}
+// @Router /update/{id} [put]
 func UpdateEventFromDB(c *gin.Context) {
 	id, err := getAndValidateID(c)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
 	}
-
 	event, err := fetchEventByID(id)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"message": err.Error()})
 		return
 	}
-
 	input, err := bindAndValidateJSON(c)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": JSONBindFailureMessage + err.Error()})
 		return
 	}
-
 	err = updateEventRecord(&event, &input)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
 	}
-
 	c.JSON(http.StatusOK, gin.H{"message": RecordUpdateSuccessMessage})
 }
 
@@ -329,25 +352,33 @@ func updateEventInES(id uint64, input model.Event) error {
 	return err
 }
 
+// DeleteEventFromDB godoc
+// @Summary 删除事件
+// @Description 通过ID从数据库删除事件
+// @Tags Events
+// @Accept json
+// @Produce json
+// @Param id path string true "事件ID"
+// @Success 200 {object} map[string]string "数据删除成功"
+// @Failure 400 {object} map[string]string "Invalid ID parameter"
+// @Failure 404 {object} map[string]string "Record not found!"
+// @Failure 500 {object} map[string]string "数据删除失败"
+// @Router /delete/{id} [delete]
 func DeleteEventFromDB(c *gin.Context) {
 	id := c.Param("id")
-
 	if !isValidID(id) {
 		c.JSON(http.StatusBadRequest, gin.H{model.Message: "Invalid ID parameter"})
 		return
 	}
-
 	event, err := findEventByID(id)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{model.Message: "Record not found!"})
 		return
 	}
-
 	if err := deleteEvent(event); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{model.Message: "数据删除失败"})
 		return
 	}
-
 	c.JSON(http.StatusOK, gin.H{model.Message: "数据删除成功"})
 }
 
