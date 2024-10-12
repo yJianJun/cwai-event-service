@@ -94,32 +94,42 @@ func FindEventByIdFromDB(c *gin.Context) {
 }
 
 func FindEventByIdFromES(c *gin.Context) {
-	// 获取并验证参数
 	idParam := c.Param("id")
-	var event model.Event
-	result, err := model.ESclient.Get().
-		Index("events").
-		Type("_doc").
-		Id(idParam).
-		Do(context.Background())
+
+	// 获取事件
+	event, err := getEventByIdFromES(c, idParam)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{model.Message: "Record not found!"})
+		c.JSON(http.StatusNotFound, gin.H{"message": "Record not found!"})
 		return
 	}
-	source := result.Source
-	data, _ := source.MarshalJSON()
-	json.Unmarshal(data, &event) //把result结果解析到event中
+
 	c.JSON(http.StatusOK, gin.H{"data": event})
 }
 
-// @Summary	修改事件
-// @Schemes
-// @Description	根据id修改事件
-// @Tags			ctccl
-// @Param			input	body	model.Event	true	"编辑参数"
-// @Accept			json
-// @Produce		json
-// @Router			/update/:id [put]
+func getEventByIdFromES(c *gin.Context, id string) (*model.Event, error) {
+	result, err := model.ESclient.Get().
+		Index("events").
+		Type("_doc").
+		Id(id).
+		Do(c.Request.Context())
+	if err != nil {
+		return nil, err
+	}
+
+	source := result.Source
+	data, err := source.MarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+
+	var event model.Event
+	if err := json.Unmarshal(data, &event); err != nil {
+		return nil, err
+	}
+
+	return &event, nil
+}
+
 const (
 	InvalidIDMessage           = "无效的ID参数"
 	RecordNotFoundMessage      = "记录未找到"
@@ -130,6 +140,14 @@ const (
 	RecordUpdateSuccessMessage = "数据更新成功"
 )
 
+// @Summary	修改事件
+// @Schemes
+// @Description	根据id修改事件
+// @Tags			ctccl
+// @Param			input	body	model.Event	true	"编辑参数"
+// @Accept			json
+// @Produce		json
+// @Router			/update/:id [put]
 func UpdateEventFromDB(c *gin.Context) {
 	id, err := getAndValidateID(c)
 	if err != nil {
