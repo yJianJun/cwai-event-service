@@ -150,38 +150,74 @@ func UpdateEventFromDB(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{model.Message: "数据更新成功"})
 }
 
+const (
+	InvalidIDMessage      = "Invalid ID parameter"
+	RecordNotFoundMessage = "Record not found!"
+	BadRequestMessage     = "Invalid input"
+	UpdateFailedMessage   = "Failed to update record"
+	UpdateSuccessMessage  = "数据更新成功"
+)
+
 func UpdateEventFromES(c *gin.Context) {
-	idParam := c.Param("id")
-	id, err := strconv.ParseUint(idParam, 10, 64)
+	id, err := parseIDParam(c)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{model.Message: "Invalid ID parameter"})
+		respondWithError(c, http.StatusBadRequest, InvalidIDMessage)
 		return
 	}
-	// 获取 ID 对应的事件
+
+	_, err = fetchEventByID(id)
+	if err != nil {
+		respondWithError(c, http.StatusNotFound, RecordNotFoundMessage)
+		return
+	}
+
+	input, err := bindAndValidateInput(c)
+	if err != nil {
+		respondWithError(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	if err := updateEventInES(id, input); err != nil {
+		respondWithError(c, http.StatusInternalServerError, UpdateFailedMessage)
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": UpdateSuccessMessage})
+}
+
+func parseIDParam(c *gin.Context) (uint64, error) {
+	idParam := c.Param("id")
+	return strconv.ParseUint(idParam, 10, 64)
+}
+
+func fetchEventByID(id uint64) (model.Event, error) {
 	var event model.Event
 	if err := model.DB.Where("id = ?", id).First(&event).Error; err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{model.Message: "Record not found!"})
-		return
+		return event, err
 	}
+	return event, nil
+}
 
-	// 绑定并验证 JSON 输入
+func bindAndValidateInput(c *gin.Context) (model.Event, error) {
 	var input model.Event
 	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{model.Message: err.Error()})
-		return
+		return input, err
 	}
+	return input, nil
+}
 
-	// 更新事件记录
-	if _, err := model.ESclient.Update().
+func updateEventInES(id uint64, input model.Event) error {
+	idParam := strconv.FormatUint(id, 10)
+	_, err := model.ESclient.Update().
 		Index("events").
-		Type("_doc").
-		Id(idParam). //要修改的数据id
-		Doc(input). //要修改的数据结构体
-		Do(context.Background()); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{model.Message: "Failed to update record"})
-		return
-	}
-	c.JSON(http.StatusOK, gin.H{model.Message: "数据更新成功"})
+		Id(idParam).
+		Doc(input).
+		Do(context.Background())
+	return err
+}
+
+func respondWithError(c *gin.Context, code int, message string) {
+	c.JSON(code, gin.H{"message": message})
 }
 
 func DeleteEventFromDB(c *gin.Context) {
