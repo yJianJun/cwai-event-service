@@ -15,6 +15,8 @@ import (
 const (
 	GROUP_V1 = "/openapi/v4/cwai"
 	CTCCL    = "/ctccl"
+	db       = "/mysql"
+	es       = "/es"
 )
 
 func InitRoute() *gin.Engine {
@@ -34,12 +36,21 @@ func InitRoute() *gin.Engine {
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 
 	groupCTCCL := router.Group(CTCCL)
+	DbHandler := groupCTCCL.Group(db)
 	{
-		groupCTCCL.GET("/query", ctccl.GetAllEvent)
-		groupCTCCL.POST("/save", ctccl.CreateEvent)
-		groupCTCCL.GET("/query/:id", ctccl.FindEventById)
-		groupCTCCL.PUT("/update/:id", ctccl.UpdateEvent)
-		groupCTCCL.DELETE("/delete/:id", ctccl.DeleteEvent)
+		DbHandler.GET("/query", ctccl.GetAllEventFromDB)
+		DbHandler.POST("/save", ctccl.CreateEventFromDB)
+		DbHandler.GET("/query/:id", ctccl.FindEventByIdFromDB)
+		DbHandler.PUT("/update/:id", ctccl.UpdateEventFromDB)
+		DbHandler.DELETE("/delete/:id", ctccl.DeleteEventFromDB)
+	}
+	EsHandler := groupCTCCL.Group(es)
+	{
+		EsHandler.POST("/page", ctccl.PageEventFromES)
+		EsHandler.POST("/save", ctccl.CreateEventFromES)
+		EsHandler.GET("/query/:id", ctccl.FindEventByIdFromES)
+		EsHandler.PUT("/update/:id", ctccl.UpdateEventFromES)
+		EsHandler.DELETE("/delete/:id", ctccl.DeleteEventFromES)
 	}
 	return router
 }

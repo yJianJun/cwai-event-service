@@ -26,6 +26,12 @@ type EventDetail struct {
 	BandWidth    int    `json:"bandwidth"`                     // 带宽Gb/s
 }
 
+type EventPage struct {
+	BasePageRequest
+	Time    common.MyTime `json:"time" binding:"required"`    // 本端ib/roce设备nodegid
+	Keyword string        `json:"keyword" binding:"required"` // 对端ib/roce设备nodegid
+}
+
 // Scan 将数据库中的值转换为EventDetail类型
 func (o *EventDetail) Scan(value interface{}) error {
 	b, ok := value.([]byte)

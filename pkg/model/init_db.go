@@ -1,6 +1,7 @@
 package model
 
 import (
+	"context"
 	"fmt"
 	"github.com/olivere/elastic"
 	"gorm.io/driver/mysql"
@@ -39,7 +40,72 @@ func InitES(conf *ServerConfig) error {
 			return fmt.Errorf("failed to init elasticsearch: %w", err)
 		}
 		ESclient = client
+		err = CreateIndexMapping(ESclient)
+		if err != nil {
+			return fmt.Errorf("failed to create index mapping: %w", err)
+		}
 		return nil
+	}
+	return nil
+}
+
+func CreateIndexMapping(client *elastic.Client) error {
+	exists, err := client.IndexExists("events").Do(context.Background())
+	if err != nil {
+		return err
+	}
+	if !exists {
+		// 配置映射
+		mapping := `{
+  "mappings": {
+    "_doc": {
+      "properties": {
+        "event_detail": {
+          "properties": {
+            "localguid": {
+              "type": "text",
+              "analyzer": "ik_max_word",
+              "search_analyzer": "ik_max_word"
+            },
+            "remoteguid": {
+              "type": "text",
+              "analyzer": "ik_max_word",
+              "search_analyzer": "ik_max_word"
+            },
+            "errcode": {
+              "type": "long"
+            },
+            "timeduration": {
+              "type": "long"
+            },
+            "datasize": {
+              "type": "long"
+            },
+            "bandwidth": {
+              "type": "integer"
+            }
+          }
+        },
+        "time": {
+          "type": "date",
+          "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+        },
+        "level": {
+          "type": "keyword"
+        },
+        "event_type": {
+          "type": "keyword",
+          "index": false
+        }
+      }
+    }
+  }
+}`
+		//注意：增加的写法-创建索引配置映射
+		_, err := client.CreateIndex("events").Body(mapping).Do(context.Background())
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }

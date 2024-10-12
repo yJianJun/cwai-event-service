@@ -18,11 +18,15 @@ type Response struct {
 	ReturnObj  interface{} `json:"returnObj,omitempty"`
 }
 
-type ListObj struct {
-	CurrentCount int         `json:"currentCount,omitempty"`
-	TotalCount   int         `json:"totalCount,omitempty"`
-	TotalPage    int         `json:"totalPage,omitempty"`
-	Result       interface{} `json:"result"`
+type BasePageRequest struct {
+	Page int `json:"page,omitempty"`
+	Size int `json:"size,omitempty"`
+}
+
+type PageVo struct {
+	TotalCount int64       `json:"totalCount,omitempty"`
+	TotalPage  int         `json:"totalPage,omitempty"`
+	Data       interface{} `json:"data"`
 }
 
 func errorResponse(c *gin.Context, httpStatus int, code ErrorCode) {
