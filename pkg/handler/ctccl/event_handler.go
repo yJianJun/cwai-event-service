@@ -8,6 +8,7 @@ import (
 	"github.com/goccy/go-json"
 	"github.com/olivere/elastic"
 	"k8s.io/klog/v2"
+	"log"
 	"net/http"
 	"reflect"
 	"strconv"
@@ -58,26 +59,50 @@ func CreateEventFromDB(c *gin.Context) {
 
 func CreateEventFromES(c *gin.Context) {
 	newEvent := model.Event{}
+
 	// 绑定并验证JSON
 	if err := c.ShouldBindJSON(&newEvent); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{model.Message: err.Error()})
+		handleBadRequest(c, err.Error())
 		return
 	}
-	//把商品存入es
-	_, err := model.ESclient.Index().
-		Index("events"). //设置索引
-		Type("_doc"). //设置类型
-		BodyJson(newEvent). //设置商品数据(结构体格式)
-		Do(context.Background())
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{model.Message: "数据创建失败"})
+
+	if !isESClientInitialized() {
+		handleInternalServerError(c, "Elasticsearch client未初始化")
 		return
 	}
+
+	if err := storeEventInES(c.Request.Context(), newEvent); err != nil {
+		handleInternalServerError(c, "数据创建失败")
+		log.Printf("Elasticsearch indexing error: %v", err)
+		return
+	}
+
 	// 成功返回
-	c.JSON(http.StatusCreated, gin.H{model.Message: "数据创建成功"})
+	c.JSON(http.StatusCreated, gin.H{errMessage: "数据创建成功"})
+}
+
+func handleBadRequest(c *gin.Context, msg string) {
+	c.JSON(http.StatusBadRequest, gin.H{errMessage: msg})
+}
+
+func handleInternalServerError(c *gin.Context, msg string) {
+	c.JSON(http.StatusInternalServerError, gin.H{errMessage: msg})
+}
+
+func isESClientInitialized() bool {
+	return model.ESclient != nil
+}
+
+func storeEventInES(ctx context.Context, event model.Event) error {
+	_, err := model.ESclient.Index().
+		Index("events").
+		BodyJson(event).
+		Do(ctx)
+	return err
 }
 
 const (
+	errMessage    = "message"
 	badRequestMsg = "Invalid or zero ID parameter"
 	notFoundMsg   = "Record not found!"
 )
