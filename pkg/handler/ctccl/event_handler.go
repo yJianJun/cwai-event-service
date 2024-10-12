@@ -11,6 +11,14 @@ import (
 	"strconv"
 )
 
+const (
+	invalidIDMsg        = "Invalid ID parameter"
+	recordNotFoundMsg   = "Record not found!"
+	esClientNotInitMsg  = "Elasticsearch client not initialized"
+	dataDeletionFailed  = "数据删除失败"
+	dataDeletionSuccess = "数据删除成功"
+)
+
 // @Summary	获取事件列表
 // @Schemes
 // @Description	查询所有事件
@@ -55,8 +63,8 @@ func CreateEventFromES(c *gin.Context) {
 	}
 	//把商品存入es
 	_, err := model.ESclient.Index().
-		Index("events").    //设置索引
-		Type("_doc").       //设置类型
+		Index("events"). //设置索引
+		Type("_doc"). //设置类型
 		BodyJson(newEvent). //设置商品数据(结构体格式)
 		Do(context.Background())
 	if err != nil {
@@ -168,7 +176,7 @@ func UpdateEventFromES(c *gin.Context) {
 		Index("events").
 		Type("_doc").
 		Id(idParam). //要修改的数据id
-		Doc(input).  //要修改的数据结构体
+		Doc(input). //要修改的数据结构体
 		Do(context.Background()); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{model.Message: "Failed to update record"})
 		return
@@ -199,28 +207,48 @@ func DeleteEventFromDB(c *gin.Context) {
 }
 
 func DeleteEventFromES(c *gin.Context) {
-	var event model.Event
 	id := c.Param("id")
 
-	if _, err := strconv.ParseUint(id, 10, 64); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{model.Message: "Invalid ID parameter"})
+	parsedID, err := parseID(id)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{model.Message: invalidIDMsg})
 		return
 	}
 
-	if err := model.DB.Where("id = ?", id).First(&event).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{model.Message: "Record not found!"})
+	if !recordExists(parsedID) {
+		c.JSON(http.StatusNotFound, gin.H{model.Message: recordNotFoundMsg})
 		return
 	}
 
-	if _, err := model.ESclient.Delete().
+	if model.ESclient == nil {
+		c.JSON(http.StatusInternalServerError, gin.H{model.Message: esClientNotInitMsg})
+		return
+	}
+
+	if err := deleteFromES(id, c); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{model.Message: dataDeletionFailed})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{model.Message: dataDeletionSuccess})
+}
+
+func parseID(id string) (uint64, error) {
+	return strconv.ParseUint(id, 10, 64)
+}
+
+func recordExists(parsedID uint64) bool {
+	var event model.Event
+	return model.DB.Where("id = ?", parsedID).First(&event).Error == nil
+}
+
+func deleteFromES(id string, c *gin.Context) error {
+	_, err := model.ESclient.Delete().
 		Index("events").
 		Type("_doc").
 		Id(id).
-		Do(context.Background()); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{model.Message: "数据删除失败"})
-		return
-	}
-	c.JSON(http.StatusOK, gin.H{model.Message: "数据删除成功"})
+		Do(c.Request.Context())
+	return err
 }
 
 func PageEventFromES(c *gin.Context) {
