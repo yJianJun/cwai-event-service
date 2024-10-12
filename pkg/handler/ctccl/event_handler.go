@@ -185,25 +185,40 @@ func UpdateEventFromES(c *gin.Context) {
 }
 
 func DeleteEventFromDB(c *gin.Context) {
-	var event model.Event
 	id := c.Param("id")
 
-	if _, err := strconv.ParseUint(id, 10, 64); err != nil {
+	if !isValidID(id) {
 		c.JSON(http.StatusBadRequest, gin.H{model.Message: "Invalid ID parameter"})
 		return
 	}
 
-	if err := model.DB.Where("id = ?", id).First(&event).Error; err != nil {
+	event, err := findEventByID(id)
+	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{model.Message: "Record not found!"})
 		return
 	}
 
-	if err := model.DB.Delete(&event).Error; err != nil {
+	if err := deleteEvent(event); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{model.Message: "数据删除失败"})
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{model.Message: "数据删除成功"})
+}
+
+func isValidID(id string) bool {
+	_, err := strconv.ParseUint(id, 10, 64)
+	return err == nil
+}
+
+func findEventByID(id string) (*model.Event, error) {
+	var event model.Event
+	err := model.DB.Where("id = ?", id).First(&event).Error
+	return &event, err
+}
+
+func deleteEvent(event *model.Event) error {
+	return model.DB.Delete(event).Error
 }
 
 func DeleteEventFromES(c *gin.Context) {
