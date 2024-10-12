@@ -3,6 +3,7 @@ package ctccl
 import (
 	"context"
 	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/model"
+	"errors"
 	"github.com/gin-gonic/gin"
 	"github.com/goccy/go-json"
 	"github.com/olivere/elastic"
@@ -119,43 +120,82 @@ func FindEventByIdFromES(c *gin.Context) {
 // @Accept			json
 // @Produce		json
 // @Router			/update/:id [put]
+const (
+	InvalidIDMessage           = "无效的ID参数"
+	RecordNotFoundMessage      = "记录未找到"
+	JSONBindFailureMessage     = "JSON绑定失败: "
+	TxStartFailureMessage      = "无法开始数据库事务"
+	RecordUpdateFailureMessage = "记录更新失败"
+	TxCommitFailureMessage     = "事务提交失败"
+	RecordUpdateSuccessMessage = "数据更新成功"
+)
+
 func UpdateEventFromDB(c *gin.Context) {
-	// 获取并验证参数
+	id, err := getAndValidateID(c)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		return
+	}
+
+	event, err := fetchEventByID(id)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"message": err.Error()})
+		return
+	}
+
+	input, err := bindAndValidateJSON(c)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": JSONBindFailureMessage + err.Error()})
+		return
+	}
+
+	err = updateEventRecord(&event, &input)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": RecordUpdateSuccessMessage})
+}
+
+func getAndValidateID(c *gin.Context) (uint64, error) {
 	idParam := c.Param("id")
 	id, err := strconv.ParseUint(idParam, 10, 64)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{model.Message: "Invalid ID parameter"})
-		return
+		return 0, errors.New(InvalidIDMessage)
 	}
-	// 获取 ID 对应的事件
-	var event model.Event
-	if err := model.DB.Where("id = ?", id).First(&event).Error; err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{model.Message: "Record not found!"})
-		return
-	}
+	return id, nil
+}
 
-	// 绑定并验证 JSON 输入
+func bindAndValidateJSON(c *gin.Context) (model.Event, error) {
 	var input model.Event
 	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{model.Message: err.Error()})
-		return
+		return input, err
+	}
+	return input, nil
+}
+
+func updateEventRecord(event *model.Event, input *model.Event) error {
+	tx := model.DB.Begin()
+	if err := tx.Error; err != nil {
+		return errors.New(TxStartFailureMessage)
 	}
 
-	// 更新事件记录
-	if err := model.DB.Model(&event).Updates(input).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{model.Message: "Failed to update record"})
-		return
+	if err := tx.Model(event).Updates(input).Error; err != nil {
+		tx.Rollback()
+		return errors.New(RecordUpdateFailureMessage)
 	}
 
-	c.JSON(http.StatusOK, gin.H{model.Message: "数据更新成功"})
+	if err := tx.Commit().Error; err != nil {
+		return errors.New(TxCommitFailureMessage)
+	}
+	return nil
 }
 
 const (
-	InvalidIDMessage      = "Invalid ID parameter"
-	RecordNotFoundMessage = "Record not found!"
-	BadRequestMessage     = "Invalid input"
-	UpdateFailedMessage   = "Failed to update record"
-	UpdateSuccessMessage  = "数据更新成功"
+	BadRequestMessage    = "Invalid input"
+	UpdateFailedMessage  = "Failed to update record"
+	UpdateSuccessMessage = "数据更新成功"
 )
 
 func UpdateEventFromES(c *gin.Context) {
