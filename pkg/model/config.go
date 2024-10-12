@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"io/ioutil"
 	"os"
+	"time"
 
 	"github.com/spf13/cobra"
 
@@ -34,13 +35,30 @@ type CCAEAPIs struct {
 }
 
 type ServerConfig struct {
-	Protocol    string     `mapstructure:"protocol"`
-	Host        string     `mapstructure:"host"`
-	Port        string     `mapstructure:"port"`
-	ShutTimeOut int        `mapstructure:"shutTimeOut"`
-	CCAEServer  CCAEServer `mapstructure:"ccaeServer"`
-	CCAEAPIs    CCAEAPIs   `mapstructure:"ccaeAPIs"`
+	Protocol      string        `mapstructure:"protocol"`
+	Host          string        `mapstructure:"host"`
+	Port          string        `mapstructure:"port"`
+	ShutTimeOut   int           `mapstructure:"shutTimeOut"`
+	CCAEServer    CCAEServer    `mapstructure:"ccaeServer"`
+	CCAEAPIs      CCAEAPIs      `mapstructure:"ccaeAPIs"`
+	MysqlConfig   MysqlConfig   `mapstructure:"mysqlConfig"`
+	ElasticConfig ElasticConfig `mapstructure:"elasticConfig"`
 	//	LoggerInfo  LoggerInfo `mapstructure:"logger"`
+}
+
+type MysqlConfig struct {
+	User     string `mapstructure:"user"`
+	Password string `mapstructure:"password"`
+	Address  string `mapstructure:"address"`
+	Db       string `mapstructure:"db"`
+}
+
+type ElasticConfig struct {
+	Enable              bool          `mapstructure:"enable"`
+	Url                 string        `mapstructure:"url"`
+	Sniff               bool          `mapstructure:"sniff"`
+	HealthCheckInterval time.Duration `mapstructure:"healthCheckInterval"`
+	LogPre              string        `mapstructure:"logPre"`
 }
 
 func NewConfig() *ServerConfig {
@@ -63,6 +81,10 @@ func (mo *ServerConfig) Init() {
 	viper.SetDefault("ccaeServer.tokenTimeOut", "1800")
 	viper.SetDefault("ccaeAPIs.tokenUrl", "/rest/plat/smapp/v1/oauth/token")
 	viper.SetDefault("ccaeAPIs.qureyTopoUrl", "/api/monitor/v1/query-topo")
+	viper.SetDefault("mysqlConfig.user", "roor")
+	viper.SetDefault("mysqlConfig.password", "930927")
+	viper.SetDefault("mysqlConfig.address", "127.0.0.1:3306")
+	viper.SetDefault("mysqlConfig.db", "ctccl")
 }
 
 func (mo *ServerConfig) BindFlags(cmd *cobra.Command) {

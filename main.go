@@ -3,7 +3,6 @@ package main
 
 import (
 	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/app"
-	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/model"
 	"fmt"
 	"log"
 	"math/rand"
@@ -29,7 +28,6 @@ func main() {
 
 	defer glog.Flush()
 	var err error
-	model.DB, err = model.ConnectDatabase()
 	if err != nil {
 		log.Fatalf("Could not connect to the database: %v", err)
 	}
