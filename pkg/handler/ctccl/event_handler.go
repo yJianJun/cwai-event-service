@@ -224,32 +224,55 @@ func DeleteEventFromES(c *gin.Context) {
 }
 
 func PageEventFromES(c *gin.Context) {
-	page := model.EventPage{}
-	// 绑定并验证JSON
-	if err := c.ShouldBindJSON(&page); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{model.Message: err.Error()})
+	var pageRequest model.EventPage
+	if err := c.ShouldBindJSON(&pageRequest); err != nil {
+		handleError(c, http.StatusBadRequest, err)
 		return
 	}
-	query := elastic.NewMatchQuery("Title", "手机")
-	searchResult, err := model.ESclient.Search().
-		Index("events").                                   // search in index "goods"
-		Query(query).                                      // specify the query
-		Sort("Id", true).                                  // true 表示升序   false 降序
-		From((page.Page - 1) * page.Size).Size(page.Size). // 分页查询
-		Do(context.Background())                           // execute
+
+	searchResult, err := searchEvents(pageRequest)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{model.Message: "Failed to retrieve data from database"})
+		handleError(c, http.StatusInternalServerError, err)
 		return
 	}
+
+	events := parseSearchResults(searchResult)
+	totalCount := searchResult.TotalHits()
+	totalPage := calculateTotalPages(totalCount, pageRequest.Size)
+	pageVo := model.PageVo{
+		TotalCount: totalCount,
+		TotalPage:  int(totalPage),
+		Data:       events,
+	}
+
+	c.JSON(http.StatusOK, pageVo)
+}
+
+func handleError(c *gin.Context, statusCode int, err error) {
+	c.JSON(statusCode, gin.H{"message": err.Error()})
+}
+
+func searchEvents(pageRequest model.EventPage) (*elastic.SearchResult, error) {
+	query := elastic.NewMatchQuery("Title", pageRequest.Keyword)
+	return model.ESclient.Search().
+		Index("events").
+		Query(query).
+		Sort("Id", true).
+		From((pageRequest.Page - 1) * pageRequest.Size).
+		Size(pageRequest.Size).
+		Do(context.Background())
+}
+
+func parseSearchResults(searchResult *elastic.SearchResult) []model.Event {
 	events := make([]model.Event, 0)
 	for _, elem := range searchResult.Each(reflect.TypeOf(model.Event{})) {
-		events = append(events, elem.(model.Event))
+		if event, ok := elem.(model.Event); ok {
+			events = append(events, event)
+		}
 	}
-	pageVo := model.PageVo{
-		TotalCount: searchResult.TotalHits(),
-		//TotalPage:  searchResult.,
-		Data: events,
-	}
-	// 返回所有事件数据
-	c.JSON(http.StatusOK, pageVo)
+	return events
+}
+
+func calculateTotalPages(totalCount int64, pageSize int) int64 {
+	return (totalCount + int64(pageSize) - 1) / int64(pageSize)
 }
