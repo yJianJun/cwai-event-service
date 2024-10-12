@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/goccy/go-json"
 	"github.com/olivere/elastic"
+	"k8s.io/klog/v2"
 	"net/http"
 	"reflect"
 	"strconv"
@@ -76,21 +77,33 @@ func CreateEventFromES(c *gin.Context) {
 	c.JSON(http.StatusCreated, gin.H{model.Message: "数据创建成功"})
 }
 
+const (
+	badRequestMsg = "Invalid or zero ID parameter"
+	notFoundMsg   = "Record not found!"
+)
+
 func FindEventByIdFromDB(c *gin.Context) {
-	// 获取并验证参数
-	idParam := c.Param("id")
-	id, err := strconv.ParseUint(idParam, 10, 64)
+	id, err := parseIDParam(c)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{model.Message: "Invalid ID parameter"})
+		respondWithError(c, http.StatusBadRequest, badRequestMsg)
 		return
 	}
 
-	var event model.Event
-	if err := model.DB.Where("id = ?", id).First(&event).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{model.Message: "Record not found!"})
+	event, err := fetchEventByID(id)
+	if err != nil {
+		klog.Errorf("Failed to find event with ID %d: %v", id, err)
+		respondWithError(c, http.StatusNotFound, notFoundMsg)
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"data": event})
+	respondWithJSON(c, http.StatusOK, event)
+}
+
+func respondWithError(c *gin.Context, statusCode int, message string) {
+	c.JSON(statusCode, gin.H{model.Message: message})
+}
+
+func respondWithJSON(c *gin.Context, statusCode int, data interface{}) {
+	c.JSON(statusCode, gin.H{"data": data})
 }
 
 func FindEventByIdFromES(c *gin.Context) {
@@ -272,10 +285,6 @@ func updateEventInES(id uint64, input model.Event) error {
 		Doc(input).
 		Do(context.Background())
 	return err
-}
-
-func respondWithError(c *gin.Context, code int, message string) {
-	c.JSON(code, gin.H{"message": message})
 }
 
 func DeleteEventFromDB(c *gin.Context) {
