@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/common"
 	"encoding/json"
 	"errors"
 	"time"
@@ -22,20 +23,20 @@ func QueryNetTopo(c *gin.Context) {
 	//parse request
 	if err := c.ShouldBind(&req); err != nil {
 		klog.Errorf("parse body failed: %s", err)
-		model.BadRequestMessage(c, model.WatcherInvalidParam, err.Error(), err)
+		common.BadRequestMessage(c, common.WatcherInvalidParam, err.Error(), err)
 		return
 	}
 	klog.Infof("request info: %v", req)
 
 	//build client
 	if client.CCAEClient == nil {
-		model.InternalError(c, model.WatcherInternalError, errors.New("Init ccae client error!"))
+		common.InternalError(c, common.WatcherInternalError, errors.New("Init ccae client error!"))
 		return
 	}
 	if client.CCAEClient.TokenTimeOutAt.IsZero() || time.Now().After(client.CCAEClient.TokenTimeOutAt) {
 		err := GetNewToken(client.CCAEClient)
 		if err != nil {
-			model.InternalError(c, model.WatcherInternalError, errors.New("Get ccae new token error!"))
+			common.InternalError(c, common.WatcherInternalError, errors.New("Get ccae new token error!"))
 			return
 		}
 	}
@@ -43,7 +44,7 @@ func QueryNetTopo(c *gin.Context) {
 	//build reqeust
 	topoData, err := TopoRequest(client.CCAEClient, &req)
 	if err != nil {
-		model.BadRequestMessage(c, model.WatcherInvalidParam, err.Error(), err)
+		common.BadRequestMessage(c, common.WatcherInvalidParam, err.Error(), err)
 		return
 	}
 
@@ -59,7 +60,7 @@ func QueryNetTopo(c *gin.Context) {
 		}
 	}
 
-	model.Success(c, topoData)
+	common.Success(c, topoData)
 }
 
 // TopoRequest 向指定客户端发送网络拓扑请求，并返回拓扑数据或错误。

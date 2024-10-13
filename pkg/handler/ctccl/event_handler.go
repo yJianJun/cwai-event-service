@@ -2,6 +2,7 @@ package ctccl
 
 import (
 	"context"
+	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/common"
 	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/model"
 	"errors"
 	"fmt"
@@ -13,31 +14,6 @@ import (
 	"net/http"
 	"reflect"
 	"strconv"
-)
-
-const (
-	invalidIDMsg               = "ID参数无效"
-	recordNotFoundMsg          = "未找到记录！"
-	esClientNotInitMsg         = "Elasticsearch 客户端未初始化"
-	dataDeletionFailed         = "数据删除失败"
-	dataDeletionSuccess        = "数据删除成功"
-	errorMsg                   = "无法从数据库检索数据"
-	logMsg                     = "无法从数据库检索数据: %v"
-	errMessage                 = "message"
-	badRequestMsg              = "ID 参数无效或为零"
-	notFoundMsg                = "未找到记录！"
-	InvalidIDMessage           = "无效的ID参数"
-	RecordNotFoundMessage      = "记录未找到"
-	JSONBindFailureMessage     = "JSON绑定失败: "
-	TxStartFailureMessage      = "无法开始数据库事务"
-	RecordUpdateFailureMessage = "记录更新失败"
-	TxCommitFailureMessage     = "事务提交失败"
-	RecordUpdateSuccessMessage = "数据更新成功"
-	UpdateFailedMessage        = "更新记录失败"
-	UpdateSuccessMessage       = "数据更新成功"
-	ErrBindJSON                = "无法解析 JSON 数据"
-	ErrDBCreate                = "数据库创建失败"
-	SuccessCreate              = "数据创建成功"
 )
 
 // GetAllEventFromDB godoc
@@ -53,7 +29,7 @@ func GetAllEventFromDB(c *gin.Context) {
 	var events []model.Event
 	// 尝试从数据库中找到所有事件
 	if err := model.DB.Find(&events).Error; err != nil {
-		handleDBError(c, err, logMsg, errorMsg)
+		handleDBError(c, err, common.ErrorMsg)
 		return
 	}
 	// 返回所有事件数据
@@ -61,9 +37,9 @@ func GetAllEventFromDB(c *gin.Context) {
 }
 
 // 处理数据库错误
-func handleDBError(c *gin.Context, err error, logMsg, errorMsg string) {
+func handleDBError(c *gin.Context, err error, errorMsg string) {
 	// 错误日志记录
-	log.Printf(logMsg, err)
+	log.Println(err)
 	// 返回错误信息
 	c.JSON(http.StatusInternalServerError, gin.H{"message": errorMsg})
 }
@@ -92,19 +68,19 @@ func CreateEventFromDB(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{"message": SuccessCreate})
+	c.JSON(http.StatusCreated, gin.H{"message": common.SuccessCreate})
 }
 
 func bindJSON(c *gin.Context, newEvent *model.Event) error {
 	if err := c.ShouldBindJSON(&newEvent); err != nil {
-		return fmt.Errorf("%s: %v", ErrBindJSON, err)
+		return fmt.Errorf("%s: %v", common.ErrBindJSON, err)
 	}
 	return nil
 }
 
 func createInDB(newEvent *model.Event) error {
 	if err := model.DB.Create(&newEvent).Error; err != nil {
-		return fmt.Errorf("%s: %v", ErrDBCreate, err)
+		return fmt.Errorf("%s: %v", common.ErrorCreate, err)
 	}
 	return nil
 }
@@ -130,15 +106,15 @@ func CreateEventFromES(c *gin.Context) {
 	}
 
 	// 成功返回
-	c.JSON(http.StatusCreated, gin.H{errMessage: "数据创建成功"})
+	c.JSON(http.StatusCreated, gin.H{common.Message: "数据创建成功"})
 }
 
 func handleBadRequest(c *gin.Context, msg string) {
-	c.JSON(http.StatusBadRequest, gin.H{errMessage: msg})
+	c.JSON(http.StatusBadRequest, gin.H{common.Message: msg})
 }
 
 func handleInternalServerError(c *gin.Context, msg string) {
-	c.JSON(http.StatusInternalServerError, gin.H{errMessage: msg})
+	c.JSON(http.StatusInternalServerError, gin.H{common.Message: msg})
 }
 
 func isESClientInitialized() bool {
@@ -166,20 +142,20 @@ func storeEventInES(ctx context.Context, event model.Event) error {
 func FindEventByIdFromDB(c *gin.Context) {
 	id, err := parseIDParam(c)
 	if err != nil {
-		respondWithError(c, http.StatusBadRequest, badRequestMsg)
+		respondWithError(c, http.StatusBadRequest, common.InvalidIDMessage)
 		return
 	}
 	event, err := fetchEventByID(id)
 	if err != nil {
 		klog.Errorf("Failed to find event with ID %d: %v", id, err)
-		respondWithError(c, http.StatusNotFound, notFoundMsg)
+		respondWithError(c, http.StatusNotFound, common.RecordNotFoundMessage)
 		return
 	}
 	respondWithJSON(c, http.StatusOK, event)
 }
 
 func respondWithError(c *gin.Context, statusCode int, message string) {
-	c.JSON(statusCode, gin.H{model.Message: message})
+	c.JSON(statusCode, gin.H{common.Message: message})
 }
 
 func respondWithJSON(c *gin.Context, statusCode int, data interface{}) {
@@ -249,7 +225,7 @@ func UpdateEventFromDB(c *gin.Context) {
 	}
 	input, err := bindAndValidateJSON(c)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": JSONBindFailureMessage + err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"message": common.JSONBindFailureMessage + err.Error()})
 		return
 	}
 	err = updateEventRecord(&event, &input)
@@ -257,14 +233,14 @@ func UpdateEventFromDB(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"message": RecordUpdateSuccessMessage})
+	c.JSON(http.StatusOK, gin.H{"message": common.UpdateSuccessMessage})
 }
 
 func getAndValidateID(c *gin.Context) (uint64, error) {
 	idParam := c.Param("id")
 	id, err := strconv.ParseUint(idParam, 10, 64)
 	if err != nil {
-		return 0, errors.New(InvalidIDMessage)
+		return 0, errors.New(common.InvalidIDMessage)
 	}
 	return id, nil
 }
@@ -280,16 +256,16 @@ func bindAndValidateJSON(c *gin.Context) (model.Event, error) {
 func updateEventRecord(event *model.Event, input *model.Event) error {
 	tx := model.DB.Begin()
 	if err := tx.Error; err != nil {
-		return errors.New(TxStartFailureMessage)
+		return errors.New(common.TxStartFailureMessage)
 	}
 
 	if err := tx.Model(event).Updates(input).Error; err != nil {
 		tx.Rollback()
-		return errors.New(RecordUpdateFailureMessage)
+		return errors.New(common.UpdateFailedMessage)
 	}
 
 	if err := tx.Commit().Error; err != nil {
-		return errors.New(TxCommitFailureMessage)
+		return errors.New(common.TxCommitFailureMessage)
 	}
 	return nil
 }
@@ -297,13 +273,13 @@ func updateEventRecord(event *model.Event, input *model.Event) error {
 func UpdateEventFromES(c *gin.Context) {
 	id, err := parseIDParam(c)
 	if err != nil {
-		respondWithError(c, http.StatusBadRequest, InvalidIDMessage)
+		respondWithError(c, http.StatusBadRequest, common.InvalidIDMessage)
 		return
 	}
 
 	_, err = fetchEventByID(id)
 	if err != nil {
-		respondWithError(c, http.StatusNotFound, RecordNotFoundMessage)
+		respondWithError(c, http.StatusNotFound, common.RecordNotFoundMessage)
 		return
 	}
 
@@ -314,11 +290,11 @@ func UpdateEventFromES(c *gin.Context) {
 	}
 
 	if err := updateEventInES(id, input); err != nil {
-		respondWithError(c, http.StatusInternalServerError, UpdateFailedMessage)
+		respondWithError(c, http.StatusInternalServerError, common.UpdateFailedMessage)
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": UpdateSuccessMessage})
+	c.JSON(http.StatusOK, gin.H{"message": common.UpdateSuccessMessage})
 }
 
 func parseIDParam(c *gin.Context) (uint64, error) {
@@ -367,19 +343,19 @@ func updateEventInES(id uint64, input model.Event) error {
 func DeleteEventFromDB(c *gin.Context) {
 	id := c.Param("id")
 	if !isValidID(id) {
-		c.JSON(http.StatusBadRequest, gin.H{model.Message: "Invalid ID parameter"})
+		c.JSON(http.StatusBadRequest, gin.H{common.Message: "Invalid ID parameter"})
 		return
 	}
 	event, err := findEventByID(id)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{model.Message: "Record not found!"})
+		c.JSON(http.StatusNotFound, gin.H{common.Message: "Record not found!"})
 		return
 	}
 	if err := deleteEvent(event); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{model.Message: "数据删除失败"})
+		c.JSON(http.StatusInternalServerError, gin.H{common.Message: "数据删除失败"})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{model.Message: "数据删除成功"})
+	c.JSON(http.StatusOK, gin.H{common.Message: "数据删除成功"})
 }
 
 func isValidID(id string) bool {
@@ -402,26 +378,26 @@ func DeleteEventFromES(c *gin.Context) {
 
 	parsedID, err := parseID(id)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{model.Message: invalidIDMsg})
+		c.JSON(http.StatusBadRequest, gin.H{common.Message: common.InvalidIDMessage})
 		return
 	}
 
 	if !recordExists(parsedID) {
-		c.JSON(http.StatusNotFound, gin.H{model.Message: recordNotFoundMsg})
+		c.JSON(http.StatusNotFound, gin.H{common.Message: common.RecordNotFoundMessage})
 		return
 	}
 
 	if model.ESclient == nil {
-		c.JSON(http.StatusInternalServerError, gin.H{model.Message: esClientNotInitMsg})
+		c.JSON(http.StatusInternalServerError, gin.H{common.Message: common.EsClientNotInitMsg})
 		return
 	}
 
 	if err := deleteFromES(id, c); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{model.Message: dataDeletionFailed})
+		c.JSON(http.StatusInternalServerError, gin.H{common.Message: common.DataDeletionFailed})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{model.Message: dataDeletionSuccess})
+	c.JSON(http.StatusOK, gin.H{common.Message: common.DataDeletionSuccess})
 }
 
 func parseID(id string) (uint64, error) {
@@ -458,7 +434,7 @@ func PageEventFromES(c *gin.Context) {
 	events := parseSearchResults(searchResult)
 	totalCount := searchResult.TotalHits()
 	totalPage := calculateTotalPages(totalCount, pageRequest.Size)
-	pageVo := model.PageVo{
+	pageVo := common.PageVo{
 		TotalCount: totalCount,
 		TotalPage:  int(totalPage),
 		Data:       events,

@@ -68,7 +68,7 @@ type EventDetail struct {
 type EventPage struct {
 	// 初始分页请求参数基类
 	// in: body
-	BasePageRequest
+	common.BasePageRequest
 	// 事件发生的时间
 	// required: true
 	// example: 2023-10-01T12:00:00Z
