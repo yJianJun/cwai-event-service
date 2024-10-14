@@ -22,9 +22,74 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/delete/{id}": {
+            "delete": {
+                "description": "通过ID从数据库删除事件",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Events"
+                ],
+                "summary": "删除事件",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "事件ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "数据删除成功",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid ID parameter",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Record not found!",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "数据删除失败",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/query": {
             "get": {
                 "description": "查询所有事件",
+                "consumes": [
+                    "application/json"
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -41,11 +106,113 @@ const docTemplate = `{
                                 "$ref": "#/definitions/model.Event"
                             }
                         }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
                     }
                 }
             }
         },
-        "/update/:id": {
+        "/query/{id}": {
+            "get": {
+                "description": "从数据库中通过 ID 获取特定事件",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ctccl"
+                ],
+                "summary": "按 ID 查找事件",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Event ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "$ref": "#/definitions/model.Event"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/save": {
+            "post": {
+                "description": "从数据库中创建一个新的事件",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ctccl"
+                ],
+                "summary": "创建一个新的事件",
+                "parameters": [
+                    {
+                        "description": "Event数据",
+                        "name": "event",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.Event"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/update/{id}": {
             "put": {
                 "description": "根据id修改事件",
                 "consumes": [
@@ -60,8 +227,15 @@ const docTemplate = `{
                 "summary": "修改事件",
                 "parameters": [
                     {
+                        "type": "integer",
+                        "description": "Event ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
                         "description": "编辑参数",
-                        "name": "input",
+                        "name": "event",
                         "in": "body",
                         "required": true,
                         "schema": {
@@ -69,12 +243,42 @@ const docTemplate = `{
                         }
                     }
                 ],
-                "responses": {}
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
             }
         }
     },
     "definitions": {
         "model.Event": {
+            "description": "代表一个事件",
             "type": "object",
             "required": [
                 "eventDetail",
@@ -83,7 +287,7 @@ const docTemplate = `{
             ],
             "properties": {
                 "eventDetail": {
-                    "description": "事件详情",
+                    "description": "EventDetail 事件详情\n@description 事件的详细信息",
                     "allOf": [
                         {
                             "$ref": "#/definitions/model.EventDetail"
@@ -91,24 +295,25 @@ const docTemplate = `{
                     ]
                 },
                 "eventType": {
-                    "description": "事件类型",
+                    "description": "EventType 事件类型\n@description 事件类型\n@example \"Error\"",
                     "type": "string"
                 },
                 "id": {
-                    "description": "id",
+                    "description": "ID 事件的唯一标识符\n@description 事件的唯一标识符\n@example 1",
                     "type": "integer"
                 },
                 "level": {
-                    "description": "事件等级",
+                    "description": "Level 事件等级\n@description 事件等级\n@example \"High\"",
                     "type": "string"
                 },
                 "timestamp": {
-                    "description": "时间戳",
+                    "description": "Timestamp 时间戳\n@description 事件发生的时间戳\n@example \"2023-09-01T12:00:00Z\"",
                     "type": "string"
                 }
             }
         },
         "model.EventDetail": {
+            "description": "事件详情结构体",
             "type": "object",
             "required": [
                 "localGuid",
@@ -116,28 +321,34 @@ const docTemplate = `{
             ],
             "properties": {
                 "bandwidth": {
-                    "description": "带宽Gb/s",
-                    "type": "integer"
+                    "description": "BandWidth 带宽Gb/s\nRequired: false",
+                    "type": "integer",
+                    "example": 10
                 },
                 "dataSize": {
-                    "description": "数据量（B）",
-                    "type": "integer"
+                    "description": "DataSize 数据量（B）\nRequired: false",
+                    "type": "integer",
+                    "example": 1048576
                 },
                 "errorCode": {
-                    "description": "异常代码",
-                    "type": "integer"
+                    "description": "ErrorCode 异常代码\nRequired: false",
+                    "type": "integer",
+                    "example": 100
                 },
                 "localGuid": {
-                    "description": "本端ib/roce设备nodegid",
-                    "type": "string"
+                    "description": "LocalGuid 本端ib/roce设备nodegid\nRequired: true",
+                    "type": "string",
+                    "example": "local-guid-example"
                 },
                 "remoteGuid": {
-                    "description": "对端ib/roce设备nodegid",
-                    "type": "string"
+                    "description": "RemoteGuid 对端ib/roce设备nodegid\nRequired: true",
+                    "type": "string",
+                    "example": "remote-guid-example"
                 },
                 "timeDuration": {
-                    "description": "时间间隔(ms)",
-                    "type": "integer"
+                    "description": "TimeDuration 时间间隔(ms)\nRequired: false",
+                    "type": "integer",
+                    "example": 500
                 }
             }
         }

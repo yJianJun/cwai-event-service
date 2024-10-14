@@ -15,7 +15,7 @@ import (
 const (
 	GROUP_V1 = "/openapi/v4/cwai"
 	CTCCL    = "/ctccl"
-	db       = "/mysql"
+	db       = "/db"
 	es       = "/es"
 )
 
@@ -32,11 +32,11 @@ func InitRoute() *gin.Engine {
 	groupv1 := router.Group(GROUP_V1)
 	// Register all routers
 	groupv1.POST("/server/topo", handlerv1.QueryNetTopo)
-	docs.SwaggerInfo.BasePath = "/api/v1"
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 
 	groupCTCCL := router.Group(CTCCL)
 	DbHandler := groupCTCCL.Group(db)
+	docs.SwaggerInfo.BasePath = "/ctccl/db"
 	{
 		DbHandler.GET("/query", ctccl.GetAllEventFromDB)
 		DbHandler.POST("/save", ctccl.CreateEventFromDB)

@@ -23,7 +23,7 @@ import (
 // @Accept  json
 // @Produce  json
 // @Success 200 {array} model.Event
-// @Failure 500 {object} gin.H{"error": "description"}
+// @Failure 500 {object} map[string]string
 // @Router /query [get]
 func GetAllEventFromDB(c *gin.Context) {
 	var events []model.Event
@@ -51,9 +51,9 @@ func handleDBError(c *gin.Context, err error, errorMsg string) {
 // @Accept  json
 // @Produce  json
 // @Param   event body model.Event true "Event数据"
-// @Success 201 {object} gin.H {"message": "SuccessCreate"}
-// @Failure 400 {object} gin.H {"message": "错误信息"}
-// @Failure 500 {object} gin.H {"message": "错误信息"}
+// @Success 201 {object} map[string]interface{}
+// @Failure 400 {object} map[string]interface{}
+// @Failure 500 {object} map[string]interface{}
 // @Router /save [post]
 func CreateEventFromDB(c *gin.Context) {
 	newEvent := model.Event{}
@@ -136,8 +136,8 @@ func storeEventInES(ctx context.Context, event model.Event) error {
 // @Produce  json
 // @Param   id     path    int     true        "Event ID"
 // @Success 200 {object} model.Event    "Success"
-// @Failure 400 {object} ErrorResponse "Bad Request"
-// @Failure 404 {object} ErrorResponse "Not Found"
+// @Failure 400 {object} string "Bad Request"
+// @Failure 404 {object} string "Not Found"
 // @Router /query/{id} [get]
 func FindEventByIdFromDB(c *gin.Context) {
 	id, err := parseIDParam(c)
@@ -168,7 +168,7 @@ func FindEventByIdFromES(c *gin.Context) {
 	// 获取事件
 	event, err := getEventByIdFromES(c, idParam)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"message": "Record not found!"})
+		c.JSON(http.StatusNotFound, gin.H{common.Message: "Record not found!"})
 		return
 	}
 
@@ -207,10 +207,10 @@ func getEventByIdFromES(c *gin.Context, id string) (*model.Event, error) {
 // @Produce  json
 // @Param id path int true "Event ID"
 // @Param event body model.Event true "编辑参数"
-// @Success 200 {object} gin.H{"message": "RecordUpdateSuccessMessage"}
-// @Failure 400 {object} gin.H{"message": "Invalid input"}
-// @Failure 404 {object} gin.H{"message": "Event not found"}
-// @Failure 500 {object} gin.H{"message": "Internal server error"}
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]interface{}
+// @Failure 404 {object} map[string]interface{}
+// @Failure 500 {object} map[string]interface{}
 // @Router /update/{id} [put]
 func UpdateEventFromDB(c *gin.Context) {
 	id, err := getAndValidateID(c)

@@ -1,22 +1,37 @@
 basePath: /ctccl
 definitions:
   model.Event:
+    description: 代表一个事件
     properties:
       eventDetail:
         allOf:
         - $ref: '#/definitions/model.EventDetail'
-        description: 事件详情
+        description: |-
+          EventDetail 事件详情
+          @description 事件的详细信息
       eventType:
-        description: 事件类型
+        description: |-
+          EventType 事件类型
+          @description 事件类型
+          @example "Error"
         type: string
       id:
-        description: id
+        description: |-
+          ID 事件的唯一标识符
+          @description 事件的唯一标识符
+          @example 1
         type: integer
       level:
-        description: 事件等级
+        description: |-
+          Level 事件等级
+          @description 事件等级
+          @example "High"
         type: string
       timestamp:
-        description: 时间戳
+        description: |-
+          Timestamp 时间戳
+          @description 事件发生的时间戳
+          @example "2023-09-01T12:00:00Z"
         type: string
     required:
     - eventDetail
@@ -24,24 +39,43 @@ definitions:
     - timestamp
     type: object
   model.EventDetail:
+    description: 事件详情结构体
     properties:
       bandwidth:
-        description: 带宽Gb/s
+        description: |-
+          BandWidth 带宽Gb/s
+          Required: false
+        example: 10
         type: integer
       dataSize:
-        description: 数据量（B）
+        description: |-
+          DataSize 数据量（B）
+          Required: false
+        example: 1048576
         type: integer
       errorCode:
-        description: 异常代码
+        description: |-
+          ErrorCode 异常代码
+          Required: false
+        example: 100
         type: integer
       localGuid:
-        description: 本端ib/roce设备nodegid
+        description: |-
+          LocalGuid 本端ib/roce设备nodegid
+          Required: true
+        example: local-guid-example
         type: string
       remoteGuid:
-        description: 对端ib/roce设备nodegid
+        description: |-
+          RemoteGuid 对端ib/roce设备nodegid
+          Required: true
+        example: remote-guid-example
         type: string
       timeDuration:
-        description: 时间间隔(ms)
+        description: |-
+          TimeDuration 时间间隔(ms)
+          Required: false
+        example: 500
         type: integer
     required:
     - localGuid
@@ -58,8 +92,51 @@ info:
   title: CTCCL事件监听
   version: "1.0"
 paths:
+  /delete/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: 通过ID从数据库删除事件
+      parameters:
+      - description: 事件ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 数据删除成功
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Invalid ID parameter
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Record not found!
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: 数据删除失败
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: 删除事件
+      tags:
+      - Events
   /query:
     get:
+      consumes:
+      - application/json
       description: 查询所有事件
       produces:
       - application/json
@@ -70,24 +147,117 @@ paths:
             items:
               $ref: '#/definitions/model.Event'
             type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
       summary: 获取事件列表
       tags:
       - ctccl
-  /update/:id:
-    put:
+  /query/{id}:
+    get:
       consumes:
       - application/json
-      description: 根据id修改事件
+      description: 从数据库中通过 ID 获取特定事件
       parameters:
-      - description: 编辑参数
+      - description: Event ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: '#/definitions/model.Event'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+      summary: 按 ID 查找事件
+      tags:
+      - ctccl
+  /save:
+    post:
+      consumes:
+      - application/json
+      description: 从数据库中创建一个新的事件
+      parameters:
+      - description: Event数据
         in: body
-        name: input
+        name: event
         required: true
         schema:
           $ref: '#/definitions/model.Event'
       produces:
       - application/json
-      responses: {}
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: 创建一个新的事件
+      tags:
+      - ctccl
+  /update/{id}:
+    put:
+      consumes:
+      - application/json
+      description: 根据id修改事件
+      parameters:
+      - description: Event ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 编辑参数
+        in: body
+        name: event
+        required: true
+        schema:
+          $ref: '#/definitions/model.Event'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
       summary: 修改事件
       tags:
       - ctccl
