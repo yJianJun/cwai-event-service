@@ -9,8 +9,10 @@ const docTemplate = `{
     "info": {
         "description": "{{escape .Description}}",
         "title": "{{.Title}}",
+        "termsOfService": "http://example.com/terms/",
         "contact": {
             "name": "yejianjun",
+            "url": "http://www.example.com/support",
             "email": "yejianjun@ideal.sh.cn"
         },
         "license": {
@@ -22,7 +24,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/delete/{id}": {
+        "/db/delete/{id}": {
             "delete": {
                 "description": "通过ID从数据库删除事件",
                 "consumes": [
@@ -32,7 +34,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Events"
+                    "ctccl"
                 ],
                 "summary": "删除事件",
                 "parameters": [
@@ -84,7 +86,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/query": {
+        "/db/query": {
             "get": {
                 "description": "查询所有事件",
                 "consumes": [
@@ -119,7 +121,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/query/{id}": {
+        "/db/query/{id}": {
             "get": {
                 "description": "从数据库中通过 ID 获取特定事件",
                 "consumes": [
@@ -143,9 +145,12 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "Success",
+                        "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.Event"
+                            "type": "object",
+                            "additionalProperties": {
+                                "$ref": "#/definitions/model.Event"
+                            }
                         }
                     },
                     "400": {
@@ -163,7 +168,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/save": {
+        "/db/save": {
             "post": {
                 "description": "从数据库中创建一个新的事件",
                 "consumes": [
@@ -212,7 +217,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/update/{id}": {
+        "/db/update/{id}": {
             "put": {
                 "description": "根据id修改事件",
                 "consumes": [
@@ -274,9 +279,225 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/es/delete/{id}": {
+            "delete": {
+                "description": "根据给定的ID删除ES中的事件",
+                "tags": [
+                    "ctccl"
+                ],
+                "summary": "删除ES中的事件",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "事件ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "删除成功的消息",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "无效的ID消息",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "未找到记录的消息",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "内部服务器错误消息",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/es/page": {
+            "post": {
+                "description": "根据请求参数从ElasticSearch中分页获取事件",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ctccl"
+                ],
+                "summary": "分页获取事件",
+                "parameters": [
+                    {
+                        "description": "分页请求参数",
+                        "name": "pageRequest",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.EventPage"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/common.PageVo"
+                        }
+                    }
+                }
+            }
+        },
+        "/es/query/{id}": {
+            "get": {
+                "description": "通过ID从Elasticsearch中查找事件",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ctccl"
+                ],
+                "summary": "查找事件",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "事件ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "$ref": "#/definitions/model.Event"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/es/save": {
+            "post": {
+                "description": "从请求中解析JSON并在Elasticsearch中存储一个新的事件",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ctccl"
+                ],
+                "summary": "创建新的事件",
+                "parameters": [
+                    {
+                        "description": "事件详情",
+                        "name": "event",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.Event"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "{\"message\": \"数据创建成功\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "{\"error\": \"invalid request\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "{\"error\": \"internal server error\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/es/update/{id}": {
+            "put": {
+                "description": "更新来自Elasticsearch的事件",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ctccl"
+                ],
+                "summary": "Update an event from Elasticsearch",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Event ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Event data",
+                        "name": "event",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.Event"
+                        }
+                    }
+                ],
+                "responses": {}
+            }
         }
     },
     "definitions": {
+        "common.PageVo": {
+            "description": "分页响应结构",
+            "type": "object",
+            "properties": {
+                "data": {
+                    "description": "数据\n@json:\"data\""
+                },
+                "totalCount": {
+                    "description": "总条数\n@json:\"totalCount,omitempty\"",
+                    "type": "integer"
+                },
+                "totalPage": {
+                    "description": "总页数\n@json:\"totalPage,omitempty\"",
+                    "type": "integer"
+                }
+            }
+        },
         "model.Event": {
             "description": "代表一个事件",
             "type": "object",
@@ -351,6 +572,39 @@ const docTemplate = `{
                     "example": 500
                 }
             }
+        },
+        "model.EventPage": {
+            "description": "事件分页请求参数",
+            "type": "object",
+            "required": [
+                "keyword",
+                "time"
+            ],
+            "properties": {
+                "keyword": {
+                    "description": "关键词用于事件筛选\nrequired: true\nexample: \"连接错误\"",
+                    "type": "string"
+                },
+                "page": {
+                    "description": "Page 是页码。\nexample: 1\nrequired: true",
+                    "type": "integer"
+                },
+                "size": {
+                    "description": "Size 是每页条数。\nexample: 10\nrequired: true",
+                    "type": "integer"
+                },
+                "time": {
+                    "description": "事件发生的时间\nrequired: true\nexample: 2023-10-01T12:00:00Z",
+                    "type": "string"
+                }
+            }
+        }
+    },
+    "securityDefinitions": {
+        "ApiKeyAuth": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
         }
     }
 }`
@@ -358,7 +612,7 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
-	Host:             "",
+	Host:             "localhost:8080",
 	BasePath:         "/ctccl",
 	Schemes:          []string{},
 	Title:            "CTCCL事件监听",

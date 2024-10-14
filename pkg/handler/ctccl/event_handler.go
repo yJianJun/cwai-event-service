@@ -24,7 +24,7 @@ import (
 // @Produce  json
 // @Success 200 {array} model.Event
 // @Failure 500 {object} map[string]string
-// @Router /query [get]
+// @Router /db/query [get]
 func GetAllEventFromDB(c *gin.Context) {
 	var events []model.Event
 	// 尝试从数据库中找到所有事件
@@ -54,7 +54,7 @@ func handleDBError(c *gin.Context, err error, errorMsg string) {
 // @Success 201 {object} map[string]interface{}
 // @Failure 400 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
-// @Router /save [post]
+// @Router /db/save [post]
 func CreateEventFromDB(c *gin.Context) {
 	newEvent := model.Event{}
 
@@ -85,26 +85,33 @@ func createInDB(newEvent *model.Event) error {
 	return nil
 }
 
+// CreateEventFromES godoc
+// @Summary 创建新的事件
+// @Description 从请求中解析JSON并在Elasticsearch中存储一个新的事件
+// @Tags ctccl
+// @Accept json
+// @Produce json
+// @Param event body model.Event true "事件详情"
+// @Success 201 {object} string "{"message": "数据创建成功"}"
+// @Failure 400 {object} string "{"error": "invalid request"}"
+// @Failure 500 {object} string "{"error": "internal server error"}"
+// @Router /es/save [post]
 func CreateEventFromES(c *gin.Context) {
 	newEvent := model.Event{}
-
 	// 绑定并验证JSON
 	if err := c.ShouldBindJSON(&newEvent); err != nil {
 		handleBadRequest(c, err.Error())
 		return
 	}
-
 	if !isESClientInitialized() {
 		handleInternalServerError(c, "Elasticsearch client未初始化")
 		return
 	}
-
 	if err := storeEventInES(c.Request.Context(), newEvent); err != nil {
 		handleInternalServerError(c, "数据创建失败")
 		log.Printf("Elasticsearch indexing error: %v", err)
 		return
 	}
-
 	// 成功返回
 	c.JSON(http.StatusCreated, gin.H{common.Message: "数据创建成功"})
 }
@@ -135,10 +142,10 @@ func storeEventInES(ctx context.Context, event model.Event) error {
 // @Accept  json
 // @Produce  json
 // @Param   id     path    int     true        "Event ID"
-// @Success 200 {object} model.Event    "Success"
+// @Success 200 {object} map[string]model.Event
 // @Failure 400 {object} string "Bad Request"
 // @Failure 404 {object} string "Not Found"
-// @Router /query/{id} [get]
+// @Router /db/query/{id} [get]
 func FindEventByIdFromDB(c *gin.Context) {
 	id, err := parseIDParam(c)
 	if err != nil {
@@ -162,16 +169,24 @@ func respondWithJSON(c *gin.Context, statusCode int, data interface{}) {
 	c.JSON(statusCode, gin.H{"data": data})
 }
 
+// FindEventByIdFromES godoc
+// @Summary 查找事件
+// @Description 通过ID从Elasticsearch中查找事件
+// @Tags ctccl
+// @Accept json
+// @Produce json
+// @Param id path string true "事件ID"
+// @Success 200 {object} map[string]model.Event
+// @Failure 404 {object} string
+// @Router /es/query/{id} [get]
 func FindEventByIdFromES(c *gin.Context) {
 	idParam := c.Param("id")
-
 	// 获取事件
 	event, err := getEventByIdFromES(c, idParam)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{common.Message: "Record not found!"})
 		return
 	}
-
 	c.JSON(http.StatusOK, gin.H{"data": event})
 }
 
@@ -211,7 +226,7 @@ func getEventByIdFromES(c *gin.Context, id string) (*model.Event, error) {
 // @Failure 400 {object} map[string]interface{}
 // @Failure 404 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
-// @Router /update/{id} [put]
+// @Router /db/update/{id} [put]
 func UpdateEventFromDB(c *gin.Context) {
 	id, err := getAndValidateID(c)
 	if err != nil {
@@ -270,30 +285,35 @@ func updateEventRecord(event *model.Event, input *model.Event) error {
 	return nil
 }
 
+// UpdateEventFromES godoc
+// @Summary Update an event from Elasticsearch
+// @Description 更新来自Elasticsearch的事件
+// @Tags ctccl
+// @Accept  json
+// @Produce  json
+// @Param id path int true "Event ID"
+// @Param event body model.Event true "Event data"
+// @Router /es/update/{id} [put]
 func UpdateEventFromES(c *gin.Context) {
 	id, err := parseIDParam(c)
 	if err != nil {
 		respondWithError(c, http.StatusBadRequest, common.InvalidIDMessage)
 		return
 	}
-
 	_, err = fetchEventByID(id)
 	if err != nil {
 		respondWithError(c, http.StatusNotFound, common.RecordNotFoundMessage)
 		return
 	}
-
 	input, err := bindAndValidateInput(c)
 	if err != nil {
 		respondWithError(c, http.StatusBadRequest, err.Error())
 		return
 	}
-
 	if err := updateEventInES(id, input); err != nil {
 		respondWithError(c, http.StatusInternalServerError, common.UpdateFailedMessage)
 		return
 	}
-
 	c.JSON(http.StatusOK, gin.H{"message": common.UpdateSuccessMessage})
 }
 
@@ -331,7 +351,7 @@ func updateEventInES(id uint64, input model.Event) error {
 // DeleteEventFromDB godoc
 // @Summary 删除事件
 // @Description 通过ID从数据库删除事件
-// @Tags Events
+// @Tags ctccl
 // @Accept json
 // @Produce json
 // @Param id path string true "事件ID"
@@ -339,7 +359,7 @@ func updateEventInES(id uint64, input model.Event) error {
 // @Failure 400 {object} map[string]string "Invalid ID parameter"
 // @Failure 404 {object} map[string]string "Record not found!"
 // @Failure 500 {object} map[string]string "数据删除失败"
-// @Router /delete/{id} [delete]
+// @Router /db/delete/{id} [delete]
 func DeleteEventFromDB(c *gin.Context) {
 	id := c.Param("id")
 	if !isValidID(id) {
@@ -373,30 +393,35 @@ func deleteEvent(event *model.Event) error {
 	return model.DB.Delete(event).Error
 }
 
+// DeleteEventFromES godoc
+// @Summary 删除ES中的事件
+// @Description 根据给定的ID删除ES中的事件
+// @Tags ctccl
+// @Param id path string true "事件ID"
+// @Success 200 {object} string "删除成功的消息"
+// @Failure 400 {object} string "无效的ID消息"
+// @Failure 404 {object} string "未找到记录的消息"
+// @Failure 500 {object} string "内部服务器错误消息"
+// @Router /es/delete/{id} [delete]
 func DeleteEventFromES(c *gin.Context) {
 	id := c.Param("id")
-
 	parsedID, err := parseID(id)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{common.Message: common.InvalidIDMessage})
 		return
 	}
-
 	if !recordExists(parsedID) {
 		c.JSON(http.StatusNotFound, gin.H{common.Message: common.RecordNotFoundMessage})
 		return
 	}
-
 	if model.ESclient == nil {
 		c.JSON(http.StatusInternalServerError, gin.H{common.Message: common.EsClientNotInitMsg})
 		return
 	}
-
 	if err := deleteFromES(id, c); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{common.Message: common.DataDeletionFailed})
 		return
 	}
-
 	c.JSON(http.StatusOK, gin.H{common.Message: common.DataDeletionSuccess})
 }
 
@@ -418,6 +443,15 @@ func deleteFromES(id string, c *gin.Context) error {
 	return err
 }
 
+// PageEventFromES godoc
+// @Summary      分页获取事件
+// @Description  根据请求参数从ElasticSearch中分页获取事件
+// @Tags         ctccl
+// @Accept       json
+// @Produce      json
+// @Param        pageRequest body model.EventPage true "分页请求参数"
+// @Success      200 {object} common.PageVo
+// @Router       /es/page [post]
 func PageEventFromES(c *gin.Context) {
 	var pageRequest model.EventPage
 	if err := c.ShouldBindJSON(&pageRequest); err != nil {

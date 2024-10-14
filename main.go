@@ -11,7 +11,7 @@
 // @license.url http://www.apache.org/licenses/LICENSE-2.0.html
 
 // @host localhost:8080
-// @BasePath		/ctccl/db
+// @BasePath		/ctccl
 
 // @securityDefinitions.apikey ApiKeyAuth
 // @in header

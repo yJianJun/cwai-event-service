@@ -1,5 +1,23 @@
 basePath: /ctccl
 definitions:
+  common.PageVo:
+    description: 分页响应结构
+    properties:
+      data:
+        description: |-
+          数据
+          @json:"data"
+      totalCount:
+        description: |-
+          总条数
+          @json:"totalCount,omitempty"
+        type: integer
+      totalPage:
+        description: |-
+          总页数
+          @json:"totalPage,omitempty"
+        type: integer
+    type: object
   model.Event:
     description: 代表一个事件
     properties:
@@ -81,18 +99,52 @@ definitions:
     - localGuid
     - remoteGuid
     type: object
+  model.EventPage:
+    description: 事件分页请求参数
+    properties:
+      keyword:
+        description: |-
+          关键词用于事件筛选
+          required: true
+          example: "连接错误"
+        type: string
+      page:
+        description: |-
+          Page 是页码。
+          example: 1
+          required: true
+        type: integer
+      size:
+        description: |-
+          Size 是每页条数。
+          example: 10
+          required: true
+        type: integer
+      time:
+        description: |-
+          事件发生的时间
+          required: true
+          example: 2023-10-01T12:00:00Z
+        type: string
+    required:
+    - keyword
+    - time
+    type: object
+host: localhost:8080
 info:
   contact:
     email: yejianjun@ideal.sh.cn
     name: yejianjun
+    url: http://www.example.com/support
   description: 监听CTCCL上报事件服务
   license:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://example.com/terms/
   title: CTCCL事件监听
   version: "1.0"
 paths:
-  /delete/{id}:
+  /db/delete/{id}:
     delete:
       consumes:
       - application/json
@@ -132,8 +184,8 @@ paths:
             type: object
       summary: 删除事件
       tags:
-      - Events
-  /query:
+      - ctccl
+  /db/query:
     get:
       consumes:
       - application/json
@@ -156,7 +208,7 @@ paths:
       summary: 获取事件列表
       tags:
       - ctccl
-  /query/{id}:
+  /db/query/{id}:
     get:
       consumes:
       - application/json
@@ -171,9 +223,11 @@ paths:
       - application/json
       responses:
         "200":
-          description: Success
+          description: OK
           schema:
-            $ref: '#/definitions/model.Event'
+            additionalProperties:
+              $ref: '#/definitions/model.Event'
+            type: object
         "400":
           description: Bad Request
           schema:
@@ -185,7 +239,7 @@ paths:
       summary: 按 ID 查找事件
       tags:
       - ctccl
-  /save:
+  /db/save:
     post:
       consumes:
       - application/json
@@ -218,7 +272,7 @@ paths:
       summary: 创建一个新的事件
       tags:
       - ctccl
-  /update/{id}:
+  /db/update/{id}:
     put:
       consumes:
       - application/json
@@ -261,4 +315,140 @@ paths:
       summary: 修改事件
       tags:
       - ctccl
+  /es/delete/{id}:
+    delete:
+      description: 根据给定的ID删除ES中的事件
+      parameters:
+      - description: 事件ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: 删除成功的消息
+          schema:
+            type: string
+        "400":
+          description: 无效的ID消息
+          schema:
+            type: string
+        "404":
+          description: 未找到记录的消息
+          schema:
+            type: string
+        "500":
+          description: 内部服务器错误消息
+          schema:
+            type: string
+      summary: 删除ES中的事件
+      tags:
+      - ctccl
+  /es/page:
+    post:
+      consumes:
+      - application/json
+      description: 根据请求参数从ElasticSearch中分页获取事件
+      parameters:
+      - description: 分页请求参数
+        in: body
+        name: pageRequest
+        required: true
+        schema:
+          $ref: '#/definitions/model.EventPage'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/common.PageVo'
+      summary: 分页获取事件
+      tags:
+      - ctccl
+  /es/query/{id}:
+    get:
+      consumes:
+      - application/json
+      description: 通过ID从Elasticsearch中查找事件
+      parameters:
+      - description: 事件ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              $ref: '#/definitions/model.Event'
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            type: string
+      summary: 查找事件
+      tags:
+      - ctccl
+  /es/save:
+    post:
+      consumes:
+      - application/json
+      description: 从请求中解析JSON并在Elasticsearch中存储一个新的事件
+      parameters:
+      - description: 事件详情
+        in: body
+        name: event
+        required: true
+        schema:
+          $ref: '#/definitions/model.Event'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: '{"message": "数据创建成功"}'
+          schema:
+            type: string
+        "400":
+          description: '{"error": "invalid request"}'
+          schema:
+            type: string
+        "500":
+          description: '{"error": "internal server error"}'
+          schema:
+            type: string
+      summary: 创建新的事件
+      tags:
+      - ctccl
+  /es/update/{id}:
+    put:
+      consumes:
+      - application/json
+      description: 更新来自Elasticsearch的事件
+      parameters:
+      - description: Event ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Event data
+        in: body
+        name: event
+        required: true
+        schema:
+          $ref: '#/definitions/model.Event'
+      produces:
+      - application/json
+      responses: {}
+      summary: Update an event from Elasticsearch
+      tags:
+      - ctccl
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"

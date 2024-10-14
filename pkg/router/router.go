@@ -36,7 +36,7 @@ func InitRoute() *gin.Engine {
 
 	groupCTCCL := router.Group(CTCCL)
 	DbHandler := groupCTCCL.Group(db)
-	docs.SwaggerInfo.BasePath = "/ctccl/db"
+	docs.SwaggerInfo.BasePath = "/ctccl"
 	{
 		DbHandler.GET("/query", ctccl.GetAllEventFromDB)
 		DbHandler.POST("/save", ctccl.CreateEventFromDB)
