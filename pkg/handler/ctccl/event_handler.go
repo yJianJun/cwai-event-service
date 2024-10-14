@@ -4,6 +4,7 @@ import (
 	"context"
 	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/common"
 	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/model"
+	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/util"
 	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
@@ -14,6 +15,7 @@ import (
 	"net/http"
 	"reflect"
 	"strconv"
+	"time"
 )
 
 // GetAllEventFromDB godoc
@@ -482,7 +484,17 @@ func handleError(c *gin.Context, statusCode int, err error) {
 }
 
 func searchEvents(pageRequest model.EventPage) (*elastic.SearchResult, error) {
-	query := elastic.NewMatchQuery("Title", pageRequest.Keyword)
+	now, _ := time.ParseInLocation("2006-01-02 15:04:05", pageRequest.Time.String(), time.Local)
+	query := elastic.NewFilterAggregation().Filter(
+		elastic.NewBoolQuery().Should(
+			elastic.NewRangeQuery("time").Lte(now).Gte(util.GetPastMonthToday(now, 1))).Should(
+			elastic.NewWildcardQuery("level", "*"+pageRequest.Keyword+"*")).Should(
+			elastic.NewMatchPhraseQuery("event_detail.localguid", pageRequest.Keyword)).Should(
+			elastic.NewMatchPhraseQuery("event_detail.remoteguid", pageRequest.Keyword)).Should(
+			elastic.NewWildcardQuery("event_detail.bandwidth", "*"+pageRequest.Keyword+"*")).Should(
+			elastic.NewWildcardQuery("event_detail.datasize", "*"+pageRequest.Keyword+"*")).Should(
+			elastic.NewWildcardQuery("event_detail.errcode", "*"+pageRequest.Keyword+"*")).Should(
+			elastic.NewWildcardQuery("event_detail.timeduration", "*"+pageRequest.Keyword+"*")))
 	return model.ESclient.Search().
 		Index("events").
 		Query(query).
@@ -493,13 +505,17 @@ func searchEvents(pageRequest model.EventPage) (*elastic.SearchResult, error) {
 }
 
 func parseSearchResults(searchResult *elastic.SearchResult) []model.Event {
-	events := make([]model.Event, 0)
-	for _, elem := range searchResult.Each(reflect.TypeOf(model.Event{})) {
-		if event, ok := elem.(model.Event); ok {
-			events = append(events, event)
+	fmt.Printf("查询消耗时间 %d ms, 结果总数: %d\n", searchResult.TookInMillis, searchResult.TotalHits())
+	if searchResult.TotalHits() > 0 {
+		events := make([]model.Event, 0)
+		for _, elem := range searchResult.Each(reflect.TypeOf(model.Event{})) {
+			if event, ok := elem.(model.Event); ok {
+				events = append(events, event)
+			}
 		}
+		return events
 	}
-	return events
+	return []model.Event{}
 }
 
 func calculateTotalPages(totalCount int64, pageSize int) int64 {

@@ -19,7 +19,7 @@ Total : 1594 files,  526907 codes, 71622 comments, 57077 blanks, all 655606 line
 | [cmd/server/server.go](/cmd/server/server.go) | Go | 19 | 1 | 7 | 27 |
 | [conf/config.yaml](/conf/config.yaml) | YAML | 10 | 0 | 4 | 14 |
 | [deploy/deploy.yaml](/deploy/deploy.yaml) | YAML | 85 | 0 | 3 | 88 |
-| [doc/api.md](/doc/api.md) | Markdown | 312 | 0 | 44 | 356 |
+| [doc/api.md](/docs/api.md) | Markdown | 312 | 0 | 44 | 356 |
 | [go.mod](/go.mod) | Go Module File | 56 | 0 | 4 | 60 |
 | [go.sum](/go.sum) | Go Checksum File | 586 | 0 | 1 | 587 |
 | [pkg/client/client.go](/pkg/client/client.go) | Go | 285 | 63 | 39 | 387 |

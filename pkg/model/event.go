@@ -27,7 +27,7 @@ type Event struct {
 
 	// Timestamp 时间戳
 	// @description 事件发生的时间戳
-	// @example "2023-09-01T12:00:00Z"
+	// @example "2006-01-02 15:04:05"
 	Timestamp common.MyTime `json:"timestamp" binding:"required" gorm:"type:datetime;default:null;comment:时间戳"`
 
 	// EventDetail 事件详情
@@ -71,7 +71,7 @@ type EventPage struct {
 	common.BasePageRequest
 	// 事件发生的时间
 	// required: true
-	// example: 2023-10-01T12:00:00Z
+	// example: 2006-01-02 15:04:05
 	Time common.MyTime `json:"time" binding:"required"`
 	// 关键词用于事件筛选
 	// required: true
