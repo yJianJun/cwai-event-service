@@ -3,6 +3,7 @@ package router
 
 import (
 	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/docs"
+	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/common"
 	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/handler/ctccl"
 	handlerv1 "ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/handler/v1"
 	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/router/router_middleware"
@@ -28,6 +29,7 @@ func InitRoute() *gin.Engine {
 	if middlewares != nil {
 		router.Use(middlewares...)
 	}
+	router.Use(common.Cors())
 
 	groupv1 := router.Group(GROUP_V1)
 	// Register all routers

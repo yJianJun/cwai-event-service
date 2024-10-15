@@ -15,7 +15,7 @@
         },
         "version": "1.0"
     },
-    "host": "localhost:8080",
+    "host": "localhost:8081",
     "basePath": "/ctccl",
     "paths": {
         "/db/delete/{id}": {
@@ -496,22 +496,29 @@
             "description": "代表一个事件",
             "type": "object",
             "required": [
-                "eventDetail",
                 "eventType",
+                "localGuid",
+                "remoteGuid",
                 "timestamp"
             ],
             "properties": {
-                "eventDetail": {
-                    "description": "EventDetail 事件详情\n@description 事件的详细信息",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/model.EventDetail"
-                        }
-                    ]
+                "bandwidth": {
+                    "description": "BandWidth 带宽Gb/s\nRequired: false",
+                    "type": "integer"
+                },
+                "dataSize": {
+                    "description": "DataSize 数据量（B）\nRequired: false",
+                    "type": "integer"
+                },
+                "errorCode": {
+                    "description": "ErrorCode 异常代码\nRequired: false",
+                    "type": "integer",
+                    "example": 1012
                 },
                 "eventType": {
-                    "description": "EventType 事件类型\n@description 事件类型\n@example \"Error\"",
-                    "type": "string"
+                    "description": "EventType 事件类型\n@description 事件类型\n@example \"ctccl-inter-node-bandwidth\"",
+                    "type": "string",
+                    "example": "ctccl-inter-node-bandwidth"
                 },
                 "id": {
                     "description": "ID 事件的唯一标识符\n@description 事件的唯一标识符\n@example 1",
@@ -521,49 +528,23 @@
                     "description": "Level 事件等级\n@description 事件等级\n@example \"High\"",
                     "type": "string"
                 },
-                "timestamp": {
-                    "description": "Timestamp 时间戳\n@description 事件发生的时间戳\n@example \"2023-09-01T12:00:00Z\"",
-                    "type": "string"
-                }
-            }
-        },
-        "model.EventDetail": {
-            "description": "事件详情结构体",
-            "type": "object",
-            "required": [
-                "localGuid",
-                "remoteGuid"
-            ],
-            "properties": {
-                "bandwidth": {
-                    "description": "BandWidth 带宽Gb/s\nRequired: false",
-                    "type": "integer",
-                    "example": 10
-                },
-                "dataSize": {
-                    "description": "DataSize 数据量（B）\nRequired: false",
-                    "type": "integer",
-                    "example": 1048576
-                },
-                "errorCode": {
-                    "description": "ErrorCode 异常代码\nRequired: false",
-                    "type": "integer",
-                    "example": 100
-                },
                 "localGuid": {
                     "description": "LocalGuid 本端ib/roce设备nodegid\nRequired: true",
                     "type": "string",
-                    "example": "local-guid-example"
+                    "example": "0x98039b03009a2b3a"
                 },
                 "remoteGuid": {
                     "description": "RemoteGuid 对端ib/roce设备nodegid\nRequired: true",
                     "type": "string",
-                    "example": "remote-guid-example"
+                    "example": "0xc49b150003a1420c"
                 },
                 "timeDuration": {
                     "description": "TimeDuration 时间间隔(ms)\nRequired: false",
-                    "type": "integer",
-                    "example": 500
+                    "type": "integer"
+                },
+                "timestamp": {
+                    "description": "Timestamp 时间戳\n@description 事件发生的时间戳\n@example \"2006-01-02 15:04:05\"",
+                    "type": "string"
                 }
             }
         },
@@ -571,8 +552,8 @@
             "description": "事件分页请求参数",
             "type": "object",
             "required": [
-                "keyword",
-                "time"
+                "page",
+                "size"
             ],
             "properties": {
                 "keyword": {
@@ -588,7 +569,7 @@
                     "type": "integer"
                 },
                 "time": {
-                    "description": "事件发生的时间\nrequired: true\nexample: 2023-10-01T12:00:00Z",
+                    "description": "事件发生的时间\nrequired: true\nexample: 2006-01-02 15:04:05",
                     "type": "string"
                 }
             }

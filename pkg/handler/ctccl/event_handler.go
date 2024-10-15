@@ -10,7 +10,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/goccy/go-json"
 	"github.com/olivere/elastic"
-	"k8s.io/klog/v2"
 	"log"
 	"net/http"
 	"reflect"
@@ -28,11 +27,13 @@ import (
 // @Failure 500 {object} map[string]string
 // @Router /db/query [get]
 func GetAllEventFromDB(c *gin.Context) {
+	defer func() {
+		log.Println(recover())
+	}()
 	var events []model.Event
 	// 尝试从数据库中找到所有事件
 	if err := model.DB.Find(&events).Error; err != nil {
-		handleDBError(c, err, common.ErrorMsg)
-		return
+		panic(err)
 	}
 	// 返回所有事件数据
 	c.JSON(http.StatusOK, gin.H{"data": events})
@@ -58,16 +59,17 @@ func handleDBError(c *gin.Context, err error, errorMsg string) {
 // @Failure 500 {object} map[string]interface{}
 // @Router /db/save [post]
 func CreateEventFromDB(c *gin.Context) {
+	defer func() {
+		fmt.Println(recover())
+	}()
 	newEvent := model.Event{}
 
 	if bindErr := bindJSON(c, &newEvent); bindErr != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": bindErr.Error()})
-		return
+		panic(bindErr)
 	}
 
 	if dbErr := createInDB(&newEvent); dbErr != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": dbErr.Error()})
-		return
+		panic(dbErr)
 	}
 
 	c.JSON(http.StatusCreated, gin.H{"message": common.SuccessCreate})
@@ -99,20 +101,20 @@ func createInDB(newEvent *model.Event) error {
 // @Failure 500 {object} string "{"error": "internal server error"}"
 // @Router /es/save [post]
 func CreateEventFromES(c *gin.Context) {
+	defer func() {
+		log.Println(recover())
+	}()
 	newEvent := model.Event{}
 	// 绑定并验证JSON
 	if err := c.ShouldBindJSON(&newEvent); err != nil {
-		handleBadRequest(c, err.Error())
-		return
+		panic(err)
 	}
 	if !isESClientInitialized() {
 		handleInternalServerError(c, "Elasticsearch client未初始化")
 		return
 	}
 	if err := storeEventInES(c.Request.Context(), newEvent); err != nil {
-		handleInternalServerError(c, "数据创建失败")
-		log.Printf("Elasticsearch indexing error: %v", err)
-		return
+		panic(err)
 	}
 	// 成功返回
 	c.JSON(http.StatusCreated, gin.H{common.Message: "数据创建成功"})
@@ -133,6 +135,7 @@ func isESClientInitialized() bool {
 func storeEventInES(ctx context.Context, event model.Event) error {
 	_, err := model.ESclient.Index().
 		Index("events").
+		Type("_doc").
 		BodyJson(event).
 		Do(ctx)
 	return err
@@ -149,16 +152,16 @@ func storeEventInES(ctx context.Context, event model.Event) error {
 // @Failure 404 {object} string "Not Found"
 // @Router /db/query/{id} [get]
 func FindEventByIdFromDB(c *gin.Context) {
+	defer func() {
+		log.Println(recover())
+	}()
 	id, err := parseIDParam(c)
 	if err != nil {
-		respondWithError(c, http.StatusBadRequest, common.InvalidIDMessage)
-		return
+		panic(err)
 	}
 	event, err := fetchEventByID(id)
 	if err != nil {
-		klog.Errorf("Failed to find event with ID %d: %v", id, err)
-		respondWithError(c, http.StatusNotFound, common.RecordNotFoundMessage)
-		return
+		panic(err)
 	}
 	respondWithJSON(c, http.StatusOK, event)
 }
@@ -182,35 +185,40 @@ func respondWithJSON(c *gin.Context, statusCode int, data interface{}) {
 // @Failure 404 {object} string
 // @Router /es/query/{id} [get]
 func FindEventByIdFromES(c *gin.Context) {
+	defer func() {
+		log.Println(recover())
+	}()
 	idParam := c.Param("id")
 	// 获取事件
 	event, err := getEventByIdFromES(c, idParam)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{common.Message: "Record not found!"})
-		return
+		panic(err)
 	}
 	c.JSON(http.StatusOK, gin.H{"data": event})
 }
 
 func getEventByIdFromES(c *gin.Context, id string) (*model.Event, error) {
+	defer func() {
+		log.Println(recover())
+	}()
 	result, err := model.ESclient.Get().
 		Index("events").
 		Type("_doc").
 		Id(id).
 		Do(c.Request.Context())
 	if err != nil {
-		return nil, err
+		panic(err)
 	}
 
 	source := result.Source
 	data, err := source.MarshalJSON()
 	if err != nil {
-		return nil, err
+		panic(err)
 	}
 
 	var event model.Event
 	if err := json.Unmarshal(data, &event); err != nil {
-		return nil, err
+		panic(err)
 	}
 
 	return &event, nil
@@ -230,25 +238,24 @@ func getEventByIdFromES(c *gin.Context, id string) (*model.Event, error) {
 // @Failure 500 {object} map[string]interface{}
 // @Router /db/update/{id} [put]
 func UpdateEventFromDB(c *gin.Context) {
+	defer func() {
+		log.Println(recover())
+	}()
 	id, err := getAndValidateID(c)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
-		return
+		panic(err)
 	}
 	event, err := fetchEventByID(id)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"message": err.Error()})
-		return
+		panic(err)
 	}
 	input, err := bindAndValidateJSON(c)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": common.JSONBindFailureMessage + err.Error()})
-		return
+		panic(err)
 	}
 	err = updateEventRecord(&event, &input)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
-		return
+		panic(err)
 	}
 	c.JSON(http.StatusOK, gin.H{"message": common.UpdateSuccessMessage})
 }
@@ -297,24 +304,23 @@ func updateEventRecord(event *model.Event, input *model.Event) error {
 // @Param event body model.Event true "Event data"
 // @Router /es/update/{id} [put]
 func UpdateEventFromES(c *gin.Context) {
+	defer func() {
+		log.Println(recover())
+	}()
 	id, err := parseIDParam(c)
 	if err != nil {
-		respondWithError(c, http.StatusBadRequest, common.InvalidIDMessage)
-		return
+		panic(err)
 	}
 	_, err = fetchEventByID(id)
 	if err != nil {
-		respondWithError(c, http.StatusNotFound, common.RecordNotFoundMessage)
-		return
+		panic(err)
 	}
 	input, err := bindAndValidateInput(c)
 	if err != nil {
-		respondWithError(c, http.StatusBadRequest, err.Error())
-		return
+		panic(err)
 	}
 	if err := updateEventInES(id, input); err != nil {
-		respondWithError(c, http.StatusInternalServerError, common.UpdateFailedMessage)
-		return
+		panic(err)
 	}
 	c.JSON(http.StatusOK, gin.H{"message": common.UpdateSuccessMessage})
 }
@@ -344,6 +350,7 @@ func updateEventInES(id uint64, input model.Event) error {
 	idParam := strconv.FormatUint(id, 10)
 	_, err := model.ESclient.Update().
 		Index("events").
+		Type("_doc").
 		Id(idParam).
 		Doc(input).
 		Do(context.Background())
@@ -363,6 +370,9 @@ func updateEventInES(id uint64, input model.Event) error {
 // @Failure 500 {object} map[string]string "数据删除失败"
 // @Router /db/delete/{id} [delete]
 func DeleteEventFromDB(c *gin.Context) {
+	defer func() {
+		log.Println(recover())
+	}()
 	id := c.Param("id")
 	if !isValidID(id) {
 		c.JSON(http.StatusBadRequest, gin.H{common.Message: "Invalid ID parameter"})
@@ -370,12 +380,10 @@ func DeleteEventFromDB(c *gin.Context) {
 	}
 	event, err := findEventByID(id)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{common.Message: "Record not found!"})
-		return
+		panic(err)
 	}
 	if err := deleteEvent(event); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{common.Message: "数据删除失败"})
-		return
+		panic(err)
 	}
 	c.JSON(http.StatusOK, gin.H{common.Message: "数据删除成功"})
 }
@@ -406,11 +414,13 @@ func deleteEvent(event *model.Event) error {
 // @Failure 500 {object} string "内部服务器错误消息"
 // @Router /es/delete/{id} [delete]
 func DeleteEventFromES(c *gin.Context) {
+	defer func() {
+		log.Println(recover())
+	}()
 	id := c.Param("id")
 	parsedID, err := parseID(id)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{common.Message: common.InvalidIDMessage})
-		return
+		panic(err)
 	}
 	if !recordExists(parsedID) {
 		c.JSON(http.StatusNotFound, gin.H{common.Message: common.RecordNotFoundMessage})
@@ -421,8 +431,7 @@ func DeleteEventFromES(c *gin.Context) {
 		return
 	}
 	if err := deleteFromES(id, c); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{common.Message: common.DataDeletionFailed})
-		return
+		panic(err)
 	}
 	c.JSON(http.StatusOK, gin.H{common.Message: common.DataDeletionSuccess})
 }
@@ -455,16 +464,18 @@ func deleteFromES(id string, c *gin.Context) error {
 // @Success      200 {object} common.PageVo
 // @Router       /es/page [post]
 func PageEventFromES(c *gin.Context) {
+	defer func() {
+		err := recover()
+		log.Println(err)
+	}()
 	var pageRequest model.EventPage
 	if err := c.ShouldBindJSON(&pageRequest); err != nil {
-		handleError(c, http.StatusBadRequest, err)
-		return
+		panic(err)
 	}
 
 	searchResult, err := searchEvents(pageRequest)
 	if err != nil {
-		handleError(c, http.StatusInternalServerError, err)
-		return
+		panic(err)
 	}
 
 	events := parseSearchResults(searchResult)
@@ -479,24 +490,23 @@ func PageEventFromES(c *gin.Context) {
 	c.JSON(http.StatusOK, pageVo)
 }
 
-func handleError(c *gin.Context, statusCode int, err error) {
-	c.JSON(statusCode, gin.H{"message": err.Error()})
-}
-
 func searchEvents(pageRequest model.EventPage) (*elastic.SearchResult, error) {
 	now, _ := time.ParseInLocation("2006-01-02 15:04:05", pageRequest.Time.String(), time.Local)
-	query := elastic.NewFilterAggregation().Filter(
+	query := elastic.NewBoolQuery().Filter(
 		elastic.NewBoolQuery().Should(
 			elastic.NewRangeQuery("time").Lte(now).Gte(util.GetPastMonthToday(now, 1))).Should(
 			elastic.NewWildcardQuery("level", "*"+pageRequest.Keyword+"*")).Should(
-			elastic.NewMatchPhraseQuery("event_detail.localguid", pageRequest.Keyword)).Should(
-			elastic.NewMatchPhraseQuery("event_detail.remoteguid", pageRequest.Keyword)).Should(
-			elastic.NewWildcardQuery("event_detail.bandwidth", "*"+pageRequest.Keyword+"*")).Should(
-			elastic.NewWildcardQuery("event_detail.datasize", "*"+pageRequest.Keyword+"*")).Should(
-			elastic.NewWildcardQuery("event_detail.errcode", "*"+pageRequest.Keyword+"*")).Should(
-			elastic.NewWildcardQuery("event_detail.timeduration", "*"+pageRequest.Keyword+"*")))
+			elastic.NewMatchPhraseQuery("localguid", pageRequest.Keyword)).Should(
+			elastic.NewMatchPhraseQuery("remoteguid", pageRequest.Keyword)).Should(
+			elastic.NewWildcardQuery("bandwidth", "*"+pageRequest.Keyword+"*")).Should(
+			elastic.NewWildcardQuery("datasize", "*"+pageRequest.Keyword+"*")).Should(
+			elastic.NewWildcardQuery("errcode", "*"+pageRequest.Keyword+"*")).Should(
+			elastic.NewWildcardQuery("timeduration", "*"+pageRequest.Keyword+"*")))
+	source, _ := query.Source()
+	log.Printf("es查询Query:%v", source)
 	return model.ESclient.Search().
 		Index("events").
+		Type("_doc").
 		Query(query).
 		Sort("Id", true).
 		From((pageRequest.Page - 1) * pageRequest.Size).
@@ -505,7 +515,7 @@ func searchEvents(pageRequest model.EventPage) (*elastic.SearchResult, error) {
 }
 
 func parseSearchResults(searchResult *elastic.SearchResult) []model.Event {
-	fmt.Printf("查询消耗时间 %d ms, 结果总数: %d\n", searchResult.TookInMillis, searchResult.TotalHits())
+	fmt.Printf("查询消耗时间 %d ms, 结果总数: %d\n", searchResult.TookInMillis, searchResult.TotalHits()) //nolint:forbidigo
 	if searchResult.TotalHits() > 0 {
 		events := make([]model.Event, 0)
 		for _, elem := range searchResult.Each(reflect.TypeOf(model.Event{})) {

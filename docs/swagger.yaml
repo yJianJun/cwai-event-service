@@ -21,17 +21,28 @@ definitions:
   model.Event:
     description: 代表一个事件
     properties:
-      eventDetail:
-        allOf:
-        - $ref: '#/definitions/model.EventDetail'
+      bandwidth:
         description: |-
-          EventDetail 事件详情
-          @description 事件的详细信息
+          BandWidth 带宽Gb/s
+          Required: false
+        type: integer
+      dataSize:
+        description: |-
+          DataSize 数据量（B）
+          Required: false
+        type: integer
+      errorCode:
+        description: |-
+          ErrorCode 异常代码
+          Required: false
+        example: 1012
+        type: integer
       eventType:
         description: |-
           EventType 事件类型
           @description 事件类型
-          @example "Error"
+          @example "ctccl-inter-node-bandwidth"
+        example: ctccl-inter-node-bandwidth
         type: string
       id:
         description: |-
@@ -45,59 +56,34 @@ definitions:
           @description 事件等级
           @example "High"
         type: string
-      timestamp:
-        description: |-
-          Timestamp 时间戳
-          @description 事件发生的时间戳
-          @example "2023-09-01T12:00:00Z"
-        type: string
-    required:
-    - eventDetail
-    - eventType
-    - timestamp
-    type: object
-  model.EventDetail:
-    description: 事件详情结构体
-    properties:
-      bandwidth:
-        description: |-
-          BandWidth 带宽Gb/s
-          Required: false
-        example: 10
-        type: integer
-      dataSize:
-        description: |-
-          DataSize 数据量（B）
-          Required: false
-        example: 1048576
-        type: integer
-      errorCode:
-        description: |-
-          ErrorCode 异常代码
-          Required: false
-        example: 100
-        type: integer
       localGuid:
         description: |-
           LocalGuid 本端ib/roce设备nodegid
           Required: true
-        example: local-guid-example
+        example: "0x98039b03009a2b3a"
         type: string
       remoteGuid:
         description: |-
           RemoteGuid 对端ib/roce设备nodegid
           Required: true
-        example: remote-guid-example
+        example: "0xc49b150003a1420c"
         type: string
       timeDuration:
         description: |-
           TimeDuration 时间间隔(ms)
           Required: false
-        example: 500
         type: integer
+      timestamp:
+        description: |-
+          Timestamp 时间戳
+          @description 事件发生的时间戳
+          @example "2006-01-02 15:04:05"
+        type: string
     required:
+    - eventType
     - localGuid
     - remoteGuid
+    - timestamp
     type: object
   model.EventPage:
     description: 事件分页请求参数
@@ -124,13 +110,13 @@ definitions:
         description: |-
           事件发生的时间
           required: true
-          example: 2023-10-01T12:00:00Z
+          example: 2006-01-02 15:04:05
         type: string
     required:
-    - keyword
-    - time
+    - page
+    - size
     type: object
-host: localhost:8080
+host: localhost:8081
 info:
   contact:
     email: yejianjun@ideal.sh.cn

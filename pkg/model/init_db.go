@@ -57,34 +57,34 @@ func CreateIndexMapping(client *elastic.Client) error {
 	if !exists {
 		// 配置映射
 		mapping := `{
+  "settings": {
+    "number_of_shards": 1,
+    "number_of_replicas": 0
+  },
   "mappings": {
     "_doc": {
       "properties": {
-        "event_detail": {
-          "properties": {
-            "localguid": {
-              "type": "text",
-              "analyzer": "ik_max_word",
-              "search_analyzer": "ik_max_word"
-            },
-            "remoteguid": {
-              "type": "text",
-              "analyzer": "ik_max_word",
-              "search_analyzer": "ik_max_word"
-            },
-            "errcode": {
-              "type": "long"
-            },
-            "timeduration": {
-              "type": "long"
-            },
-            "datasize": {
-              "type": "long"
-            },
-            "bandwidth": {
-              "type": "integer"
-            }
-          }
+        "localguid": {
+          "type": "text",
+          "analyzer": "ik_max_word",
+          "search_analyzer": "ik_max_word"
+        },
+        "remoteguid": {
+          "type": "text",
+          "analyzer": "ik_max_word",
+          "search_analyzer": "ik_max_word"
+        },
+        "errcode": {
+          "type": "long"
+        },
+        "timeduration": {
+          "type": "long"
+        },
+        "datasize": {
+          "type": "long"
+        },
+        "bandwidth": {
+          "type": "integer"
         },
         "time": {
           "type": "date",
