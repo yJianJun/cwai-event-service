@@ -5,12 +5,12 @@ import (
 	"time"
 )
 
-func GetPastMonthToday(t time.Time, month int) time.Time {
+func GetPastMonthToday(t time.Time, month int) string {
 	// today
 	fmt.Printf("today: [%s]\n", t)
 	// 判断天数范围 小于等于28天的计算,覆盖大多数情况
 	if t.Day() <= 28 {
-		return t.AddDate(0, -month, 0)
+		return t.AddDate(0, -month, 0).Format("2006-01-02 15:04:05")
 	}
 	// 月份的天数数组
 	monthDay := [13]int{0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31}
@@ -23,7 +23,7 @@ func GetPastMonthToday(t time.Time, month int) time.Time {
 		targetDay++
 	}
 	if t.Day() > targetDay {
-		return target.AddDate(0, 0, targetDay-1)
+		return target.AddDate(0, 0, targetDay-1).Format("2006-01-02 15:04:05")
 	}
-	return target.AddDate(0, 0, t.Day()-1)
+	return target.AddDate(0, 0, t.Day()-1).Format("2006-01-02 15:04:05")
 }

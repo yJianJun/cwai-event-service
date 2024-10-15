@@ -491,17 +491,35 @@ func PageEventFromES(c *gin.Context) {
 }
 
 func searchEvents(pageRequest model.EventPage) (*elastic.SearchResult, error) {
-	now, _ := time.ParseInLocation("2006-01-02 15:04:05", pageRequest.Time.String(), time.Local)
-	query := elastic.NewBoolQuery().Filter(
-		elastic.NewBoolQuery().Should(
-			elastic.NewRangeQuery("time").Lte(now).Gte(util.GetPastMonthToday(now, 1))).Should(
-			elastic.NewWildcardQuery("level", "*"+pageRequest.Keyword+"*")).Should(
-			elastic.NewMatchPhraseQuery("localguid", pageRequest.Keyword)).Should(
-			elastic.NewMatchPhraseQuery("remoteguid", pageRequest.Keyword)).Should(
-			elastic.NewWildcardQuery("bandwidth", "*"+pageRequest.Keyword+"*")).Should(
-			elastic.NewWildcardQuery("datasize", "*"+pageRequest.Keyword+"*")).Should(
-			elastic.NewWildcardQuery("errcode", "*"+pageRequest.Keyword+"*")).Should(
-			elastic.NewWildcardQuery("timeduration", "*"+pageRequest.Keyword+"*")))
+	var timeQuery *elastic.RangeQuery
+
+	if !time.Time(pageRequest.Time).IsZero() {
+		var val, _ = pageRequest.Time.Value()
+		str := val.(string)
+		now, _ := time.Parse("2006-01-02 15:04:05", str)
+		timeQuery = elastic.NewRangeQuery("time").Lt(val).Gt(
+			util.GetPastMonthToday(now, 1)).IncludeUpper(false).IncludeLower(false)
+	}
+	var levelQuery, bandiWdthQuery, dataSizeQuery, errcodeQuery, timeDurationQuery *elastic.WildcardQuery
+	var localGuidQuery, remoteGuidQuery *elastic.MatchPhraseQuery
+	if pageRequest.Keyword != "" {
+		levelQuery = elastic.NewWildcardQuery("level", "*"+pageRequest.Keyword+"*")
+		localGuidQuery = elastic.NewMatchPhraseQuery("localguid", pageRequest.Keyword)
+		remoteGuidQuery = elastic.NewMatchPhraseQuery("remoteguid", pageRequest.Keyword)
+		bandiWdthQuery = elastic.NewWildcardQuery("bandwidth", "*"+pageRequest.Keyword+"*")
+		dataSizeQuery = elastic.NewWildcardQuery("datasize", "*"+pageRequest.Keyword+"*")
+		errcodeQuery = elastic.NewWildcardQuery("errcode", "*"+pageRequest.Keyword+"*")
+		timeDurationQuery = elastic.NewWildcardQuery("timeduration", "*"+pageRequest.Keyword+"*")
+	}
+	query := elastic.NewBoolQuery()
+
+	if timeQuery != nil {
+		query.Should(timeQuery)
+	}
+	if pageRequest.Keyword != "" {
+		query.Should(levelQuery).Should(bandiWdthQuery).Should(dataSizeQuery).Should(errcodeQuery).Should(timeDurationQuery)
+		query.Should(localGuidQuery).Should(remoteGuidQuery)
+	}
 	source, _ := query.Source()
 	log.Printf("es查询Query:%v", source)
 	return model.ESclient.Search().

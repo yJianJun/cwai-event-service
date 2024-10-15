@@ -12,6 +12,9 @@ import (
 type MyTime time.Time
 
 func (t *MyTime) UnmarshalJSON(data []byte) error {
+	if len(data) == 0 {
+		return nil
+	}
 	if string(data) == "null" {
 		return nil
 	}
