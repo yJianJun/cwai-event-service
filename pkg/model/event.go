@@ -2,15 +2,11 @@ package model
 
 import (
 	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/common"
-	"database/sql/driver"
-	"encoding/json"
-	"errors"
 )
 
 // Event 事件
 // @description 代表一个事件
 type Event struct {
-	EventDetail
 	// ID 事件的唯一标识符
 	// @description 事件的唯一标识符
 	// @example 1
@@ -31,11 +27,6 @@ type Event struct {
 	// @description 创建不用传，在删除、根据id查询、修改的时候需要传
 	// @example "yrEolJIBVsd01DrwhORI"
 	ID_ string `json:"-" gorm:"-"`
-}
-
-// EventDetail 事件详情
-// @Description 事件详情结构体
-type EventDetail struct {
 	// LocalGuid 本端ib/roce设备nodegid
 	// Required: true
 	// Example: 0x98039b03009a2b3a
@@ -76,24 +67,4 @@ type EventPage struct {
 	// required: true
 	// example: "连接错误"
 	Keyword string `json:"keyword,omitempty"`
-}
-
-// Scan 将数据库中的值转换为EventDetail类型
-func (o *EventDetail) Scan(value interface{}) error {
-	b, ok := value.([]byte)
-	if !ok {
-		return errors.New("failed to unmarshal EventDetail value")
-	}
-	var config EventDetail
-	err := json.Unmarshal(b, &config)
-	if err != nil {
-		return err
-	}
-	*o = config
-	return nil
-}
-
-// Value 将EventDetail类型转换为数据库可存储的值
-func (o EventDetail) Value() (driver.Value, error) {
-	return json.Marshal(o)
 }
