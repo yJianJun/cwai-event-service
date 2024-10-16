@@ -18,7 +18,7 @@ import (
 // CreateEventFromES godoc
 // @Summary 创建新的事件
 // @Description 从请求中解析JSON并在Elasticsearch中存储一个新的事件
-// @Tags ctccl
+// @Tags ctccl ES
 // @Accept json
 // @Produce json
 // @Param event body model.Event true "事件详情"
@@ -49,7 +49,7 @@ func CreateEventFromES(c *gin.Context) {
 // FindEventByIdFromES godoc
 // @Summary 查找事件
 // @Description 通过ID从Elasticsearch中查找事件
-// @Tags ctccl
+// @Tags ctccl ES
 // @Accept json
 // @Produce json
 // @Param id path string true "事件ID"
@@ -117,7 +117,7 @@ func isESClientInitialized() bool {
 // UpdateEventFromES godoc
 // @Summary Update an event from Elasticsearch
 // @Description 更新来自Elasticsearch的事件
-// @Tags ctccl
+// @Tags ctccl ES
 // @Accept  json
 // @Produce  json
 // @Param id path int true "Event ID"
@@ -157,7 +157,7 @@ func updateEventInES(_id string, input model.Event) error {
 // DeleteEventFromES godoc
 // @Summary 删除ES中的事件
 // @Description 根据给定的ID删除ES中的事件
-// @Tags ctccl
+// @Tags ctccl ES
 // @Param id path string true "事件ID"
 // @Success 200 {object} string "删除成功的消息"
 // @Failure 400 {object} string "无效的ID消息"
@@ -192,7 +192,7 @@ func deleteFromES(_id string, c *gin.Context) error {
 // PageEventFromES godoc
 // @Summary      分页获取事件
 // @Description  根据请求参数从ElasticSearch中分页获取事件
-// @Tags         ctccl
+// @Tags         ctccl ES
 // @Accept       json
 // @Produce      json
 // @Param        pageRequest body model.EventPage true "分页请求参数"

@@ -15,7 +15,7 @@ import (
 // GetAllEventFromDB godoc
 // @Summary 获取事件列表
 // @Description 查询所有事件
-// @Tags ctccl
+// @Tags ctccl DB
 // @Accept  json
 // @Produce  json
 // @Success 200 {array} model.Event
@@ -37,7 +37,7 @@ func GetAllEventFromDB(c *gin.Context) {
 // CreateEventFromDB 创建一个新的事件
 // @Summary 创建一个新的事件
 // @Description 从数据库中创建一个新的事件
-// @Tags ctccl
+// @Tags ctccl DB
 // @Accept  json
 // @Produce  json
 // @Param   event body model.Event true "Event数据"
@@ -82,7 +82,7 @@ func handleInternalServerError(c *gin.Context, msg string) {
 
 // @Summary 按 ID 查找事件
 // @Description 从数据库中通过 ID 获取特定事件
-// @Tags ctccl
+// @Tags ctccl DB
 // @Accept  json
 // @Produce  json
 // @Param   id     path    int     true        "Event ID"
@@ -112,7 +112,7 @@ func respondWithJSON(c *gin.Context, statusCode int, data interface{}) {
 // UpdateEventFromDB godoc
 // @Summary	修改事件
 // @Description	根据id修改事件
-// @Tags ctccl
+// @Tags ctccl DB
 // @Accept  json
 // @Produce  json
 // @Param id path int true "Event ID"
@@ -203,7 +203,7 @@ func bindAndValidateInput(c *gin.Context) (domain.EventUpdate, error) {
 // DeleteEventFromDB godoc
 // @Summary 删除事件
 // @Description 通过ID从数据库删除事件
-// @Tags ctccl
+// @Tags ctccl DB
 // @Accept json
 // @Produce json
 // @Param id path string true "事件ID"
