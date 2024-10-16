@@ -12,7 +12,6 @@ import (
 	"log"
 	"net/http"
 	"reflect"
-	"strconv"
 	"time"
 )
 
@@ -63,38 +62,43 @@ func FindEventByIdFromES(c *gin.Context) {
 	}()
 	idParam := c.Param("id")
 	// 获取事件
-	event, err := getEventByIdFromES(c, idParam)
-	if err != nil {
-		panic(err)
+	event := getEventByIdFromES(c, idParam)
+	if event == nil {
+		c.JSON(http.StatusNotFound, gin.H{common.Message: common.RecordNotFoundMessage})
+		return
 	}
 	c.JSON(http.StatusOK, gin.H{"data": event})
 }
 
-func getEventByIdFromES(c *gin.Context, id string) (*model.Event, error) {
+func getEventByIdFromES(c *gin.Context, id string) *model.Event {
 	defer func() {
 		log.Println(recover())
 	}()
-	result, err := model.ESclient.Get().
+
+	searchResult, err := model.ESclient.Search().
 		Index("events").
 		Type("_doc").
-		Id(id).
+		Query(elastic.NewTermQuery("id", id)).
+		Size(1).
 		Do(c.Request.Context())
 	if err != nil {
 		panic(err)
 	}
-
-	source := result.Source
-	data, err := source.MarshalJSON()
-	if err != nil {
-		panic(err)
+	if searchResult.TotalHits() > 0 {
+		hit := searchResult.Hits.Hits[0]
+		source := hit.Source
+		data, err := source.MarshalJSON()
+		if err != nil {
+			panic(err)
+		}
+		var event model.Event
+		if err := json.Unmarshal(data, &event); err != nil {
+			panic(err)
+		}
+		event.ID_ = hit.Id
+		return &event
 	}
-
-	var event model.Event
-	if err := json.Unmarshal(data, &event); err != nil {
-		panic(err)
-	}
-
-	return &event, nil
+	return nil
 }
 
 func storeEventInFromES(ctx context.Context, event model.Event) error {
@@ -123,30 +127,28 @@ func UpdateEventFromES(c *gin.Context) {
 	defer func() {
 		log.Println(recover())
 	}()
-	id, err := parseIDParam(c)
-	if err != nil {
-		panic(err)
-	}
-	_, err = getEventByIdFromES(c, strconv.FormatUint(id, 10))
-	if err != nil {
-		panic(err)
+	id := c.Param("id")
+	event := getEventByIdFromES(c, id)
+	if event == nil {
+		c.JSON(http.StatusNotFound, gin.H{common.Message: common.RecordNotFoundMessage})
+		return
 	}
 	input, err := bindAndValidateInput(c)
 	if err != nil {
 		panic(err)
 	}
-	if err := updateEventInES(id, input); err != nil {
+	util.CopyProperties(&event, &input)
+	if err := updateEventInES(event.ID_, *event); err != nil {
 		panic(err)
 	}
 	c.JSON(http.StatusOK, gin.H{"message": common.UpdateSuccessMessage})
 }
 
-func updateEventInES(id uint64, input model.Event) error {
-	idParam := strconv.FormatUint(id, 10)
+func updateEventInES(_id string, input model.Event) error {
 	_, err := model.ESclient.Update().
 		Index("events").
 		Type("_doc").
-		Id(idParam).
+		Id(_id).
 		Doc(input).
 		Do(context.Background())
 	return err
@@ -167,30 +169,22 @@ func DeleteEventFromES(c *gin.Context) {
 		log.Println(recover())
 	}()
 	id := c.Param("id")
-	parsedID, err := parseID(id)
-	if err != nil {
-		panic(err)
-	}
-	event, _ := getEventByIdFromES(c, strconv.FormatUint(parsedID, 10))
+	event := getEventByIdFromES(c, id)
 	if event == nil {
 		c.JSON(http.StatusNotFound, gin.H{common.Message: common.RecordNotFoundMessage})
 		return
 	}
-	if model.ESclient == nil {
-		c.JSON(http.StatusInternalServerError, gin.H{common.Message: common.EsClientNotInitMsg})
-		return
-	}
-	if err := deleteFromES(id, c); err != nil {
+	if err := deleteFromES(event.ID_, c); err != nil {
 		panic(err)
 	}
 	c.JSON(http.StatusOK, gin.H{common.Message: common.DataDeletionSuccess})
 }
 
-func deleteFromES(id string, c *gin.Context) error {
+func deleteFromES(_id string, c *gin.Context) error {
 	_, err := model.ESclient.Delete().
 		Index("events").
 		Type("_doc").
-		Id(id).
+		Id(_id).
 		Do(c.Request.Context())
 	return err
 }
