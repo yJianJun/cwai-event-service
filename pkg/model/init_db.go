@@ -57,49 +57,47 @@ func CreateIndexMapping(client *elastic.Client) error {
 	if !exists {
 		// 配置映射
 		mapping := `{
-  "settings": {
-    "number_of_shards": 1,
-    "number_of_replicas": 0
-  },
   "mappings": {
-    "_doc": {
-      "properties": {
-        "localguid": {
-          "type": "text",
-          "analyzer": "ik_max_word",
-          "search_analyzer": "ik_max_word"
-        },
-        "remoteguid": {
-          "type": "text",
-          "analyzer": "ik_max_word",
-          "search_analyzer": "ik_max_word"
-        },
-        "errcode": {
-          "type": "long"
-        },
-        "timeduration": {
-          "type": "long"
-        },
-        "datasize": {
-          "type": "long"
-        },
-        "bandwidth": {
-          "type": "integer"
-        },
-        "time": {
-          "type": "date",
-          "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
-        },
-        "level": {
-          "type": "keyword"
-        },
-        "event_type": {
-          "type": "keyword",
-          "index": false
+      "_doc": {
+        "properties": {
+          "bandwidth": {
+            "type": "long"
+          },
+          "data_size": {
+            "type": "long"
+          },
+          "error_code": {
+            "type": "long"
+          },
+          "event_type": {
+            "type": "keyword"
+          },
+          "id": {
+            "type": "long"
+          },
+          "level": {
+            "type": "keyword"
+          },
+          "local_guid": {
+            "type": "text",
+            "analyzer": "ik_max_word",
+            "search_analyzer": "ik_max_word"
+          },
+          "remote_guid": {
+            "type": "text",
+            "analyzer": "ik_max_word",
+            "search_analyzer": "ik_max_word"
+          },
+          "time_duration": {
+            "type": "long"
+          },
+          "timestamp": {
+            "type": "date",
+            "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+          }
         }
       }
     }
-  }
 }`
 		//注意：增加的写法-创建索引配置映射
 		_, err := client.CreateIndex("events").Body(mapping).Do(context.Background())

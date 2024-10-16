@@ -15,19 +15,16 @@ type Event struct {
 	// @description 事件的唯一标识符
 	// @example 1
 	ID uint `json:"id" gorm:"primaryKey"`
-
 	// EventType 事件类型
-	// @description 事件类型
+	// @description 事件类型，例如"ctccl-inter-node-bandwidth"
 	// @example "ctccl-inter-node-bandwidth"
-	EventType string `json:"eventType" binding:"required" example:"ctccl-inter-node-bandwidth" gorm:"type:varchar(50);notNull;comment:事件类型描述"`
-
+	EventType string `json:"event_type" binding:"required" example:"ctccl-inter-node-bandwidth" gorm:"type:varchar(20);notNull;comment:事件类型描述"`
 	// Level 事件等级
-	// @description 事件等级
+	// @description 事件等级，例如"High"
 	// @example "High"
 	Level string `json:"level" gorm:"type:varchar(10);comment:事件级别"`
-
 	// Timestamp 时间戳
-	// @description 事件发生的时间戳
+	// @description 事件发生的时间戳，格式为"2006-01-02 15:04:05"
 	// @example "2006-01-02 15:04:05"
 	Timestamp common.MyTime `json:"timestamp" binding:"required" gorm:"type:datetime;notNull;comment:时间戳"`
 }
@@ -37,26 +34,27 @@ type Event struct {
 type EventDetail struct {
 	// LocalGuid 本端ib/roce设备nodegid
 	// Required: true
-	LocalGuid string `json:"localGuid" binding:"required" example:"0x98039b03009a2b3a" gorm:"type:varchar(32);not null;comment:本端ib/roce设备nodegid"`
-
+	// Example: 0x98039b03009a2b3a
+	LocalGuid string `json:"local_guid" binding:"required" gorm:"type:varchar(32);not null;comment:本端ib/roce设备nodegid"`
 	// RemoteGuid 对端ib/roce设备nodegid
 	// Required: true
-	RemoteGuid string `json:"remoteGuid" binding:"required" example:"0xc49b150003a1420c" gorm:"type:varchar(32);not null;comment:对端ib/roce设备nodegid"`
-
+	// Example: 0xc49b150003a1420c
+	RemoteGuid string `json:"remote_guid" binding:"required" gorm:"type:varchar(32);not null;comment:对端ib/roce设备nodegid"`
 	// ErrorCode 异常代码
 	// Required: false
-	ErrorCode int64 `json:"errorCode" example:"1012" gorm:"type:bigint;comment:异常代码"`
-
+	// Example: 1012
+	ErrorCode int64 `json:"error_code" gorm:"type:bigint;comment:异常代码"`
 	// TimeDuration 时间间隔(ms)
 	// Required: false
-	TimeDuration int64 `json:"timeDuration" gorm:"type:bigint;comment:时间间隔(ms)"`
-
+	// Example: 5000
+	TimeDuration int64 `json:"time_duration" gorm:"type:bigint;comment:时间间隔(ms)"`
 	// DataSize 数据量（B）
 	// Required: false
-	DataSize int64 `json:"dataSize" gorm:"type:bigint;comment:数据量（B）"`
-
+	// Example: 1048576
+	DataSize int64 `json:"data_size" gorm:"type:bigint;comment:数据量（B）"`
 	// BandWidth 带宽Gb/s
 	// Required: false
+	// Example: 10
 	BandWidth int `json:"bandwidth" gorm:"comment:带宽Gb/s"`
 }
 

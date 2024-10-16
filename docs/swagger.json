@@ -496,27 +496,26 @@
             "description": "代表一个事件",
             "type": "object",
             "required": [
-                "eventType",
-                "localGuid",
-                "remoteGuid",
+                "event_type",
+                "local_guid",
+                "remote_guid",
                 "timestamp"
             ],
             "properties": {
                 "bandwidth": {
-                    "description": "BandWidth 带宽Gb/s\nRequired: false",
+                    "description": "BandWidth 带宽Gb/s\nRequired: false\nExample: 10",
                     "type": "integer"
                 },
-                "dataSize": {
-                    "description": "DataSize 数据量（B）\nRequired: false",
+                "data_size": {
+                    "description": "DataSize 数据量（B）\nRequired: false\nExample: 1048576",
                     "type": "integer"
                 },
-                "errorCode": {
-                    "description": "ErrorCode 异常代码\nRequired: false",
-                    "type": "integer",
-                    "example": 1012
+                "error_code": {
+                    "description": "ErrorCode 异常代码\nRequired: false\nExample: 1012",
+                    "type": "integer"
                 },
-                "eventType": {
-                    "description": "EventType 事件类型\n@description 事件类型\n@example \"ctccl-inter-node-bandwidth\"",
+                "event_type": {
+                    "description": "EventType 事件类型\n@description 事件类型，例如\"ctccl-inter-node-bandwidth\"\n@example \"ctccl-inter-node-bandwidth\"",
                     "type": "string",
                     "example": "ctccl-inter-node-bandwidth"
                 },
@@ -525,25 +524,23 @@
                     "type": "integer"
                 },
                 "level": {
-                    "description": "Level 事件等级\n@description 事件等级\n@example \"High\"",
+                    "description": "Level 事件等级\n@description 事件等级，例如\"High\"\n@example \"High\"",
                     "type": "string"
                 },
-                "localGuid": {
-                    "description": "LocalGuid 本端ib/roce设备nodegid\nRequired: true",
-                    "type": "string",
-                    "example": "0x98039b03009a2b3a"
+                "local_guid": {
+                    "description": "LocalGuid 本端ib/roce设备nodegid\nRequired: true\nExample: 0x98039b03009a2b3a",
+                    "type": "string"
                 },
-                "remoteGuid": {
-                    "description": "RemoteGuid 对端ib/roce设备nodegid\nRequired: true",
-                    "type": "string",
-                    "example": "0xc49b150003a1420c"
+                "remote_guid": {
+                    "description": "RemoteGuid 对端ib/roce设备nodegid\nRequired: true\nExample: 0xc49b150003a1420c",
+                    "type": "string"
                 },
-                "timeDuration": {
-                    "description": "TimeDuration 时间间隔(ms)\nRequired: false",
+                "time_duration": {
+                    "description": "TimeDuration 时间间隔(ms)\nRequired: false\nExample: 5000",
                     "type": "integer"
                 },
                 "timestamp": {
-                    "description": "Timestamp 时间戳\n@description 事件发生的时间戳\n@example \"2006-01-02 15:04:05\"",
+                    "description": "Timestamp 时间戳\n@description 事件发生的时间戳，格式为\"2006-01-02 15:04:05\"\n@example \"2006-01-02 15:04:05\"",
                     "type": "string"
                 }
             }

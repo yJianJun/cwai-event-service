@@ -25,22 +25,24 @@ definitions:
         description: |-
           BandWidth 带宽Gb/s
           Required: false
+          Example: 10
         type: integer
-      dataSize:
+      data_size:
         description: |-
           DataSize 数据量（B）
           Required: false
+          Example: 1048576
         type: integer
-      errorCode:
+      error_code:
         description: |-
           ErrorCode 异常代码
           Required: false
-        example: 1012
+          Example: 1012
         type: integer
-      eventType:
+      event_type:
         description: |-
           EventType 事件类型
-          @description 事件类型
+          @description 事件类型，例如"ctccl-inter-node-bandwidth"
           @example "ctccl-inter-node-bandwidth"
         example: ctccl-inter-node-bandwidth
         type: string
@@ -53,36 +55,37 @@ definitions:
       level:
         description: |-
           Level 事件等级
-          @description 事件等级
+          @description 事件等级，例如"High"
           @example "High"
         type: string
-      localGuid:
+      local_guid:
         description: |-
           LocalGuid 本端ib/roce设备nodegid
           Required: true
-        example: "0x98039b03009a2b3a"
+          Example: 0x98039b03009a2b3a
         type: string
-      remoteGuid:
+      remote_guid:
         description: |-
           RemoteGuid 对端ib/roce设备nodegid
           Required: true
-        example: "0xc49b150003a1420c"
+          Example: 0xc49b150003a1420c
         type: string
-      timeDuration:
+      time_duration:
         description: |-
           TimeDuration 时间间隔(ms)
           Required: false
+          Example: 5000
         type: integer
       timestamp:
         description: |-
           Timestamp 时间戳
-          @description 事件发生的时间戳
+          @description 事件发生的时间戳，格式为"2006-01-02 15:04:05"
           @example "2006-01-02 15:04:05"
         type: string
     required:
-    - eventType
-    - localGuid
-    - remoteGuid
+    - event_type
+    - local_guid
+    - remote_guid
     - timestamp
     type: object
   model.EventPage:
