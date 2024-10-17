@@ -18,6 +18,22 @@ definitions:
           @json:"totalPage,omitempty"
         type: integer
     type: object
+  common.Response:
+    properties:
+      code:
+        description: |-
+          响应代码
+          Example: 200
+        type: integer
+      data:
+        description: 响应数据
+      message:
+        description: |-
+          响应消息
+          Example: "请求成功"
+          omitempty: 可选字段
+        type: string
+    type: object
   model.Event:
     description: 代表一个事件
     properties:
@@ -315,9 +331,9 @@ paths:
         type: string
       responses:
         "200":
-          description: 删除成功的消息
+          description: OK
           schema:
-            type: string
+            $ref: '#/definitions/common.Response'
         "400":
           description: 无效的ID消息
           schema:
@@ -373,7 +389,7 @@ paths:
           description: OK
           schema:
             additionalProperties:
-              $ref: '#/definitions/model.Event'
+              $ref: '#/definitions/common.Response'
             type: object
         "404":
           description: Not Found
@@ -400,7 +416,7 @@ paths:
         "201":
           description: '{"message": "数据创建成功"}'
           schema:
-            type: string
+            $ref: '#/definitions/common.Response'
         "400":
           description: '{"error": "invalid request"}'
           schema:

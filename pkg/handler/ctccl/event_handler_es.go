@@ -22,7 +22,7 @@ import (
 // @Accept json
 // @Produce json
 // @Param event body model.Event true "事件详情"
-// @Success 201 {object} string "{"message": "数据创建成功"}"
+// @Success 201 {object} common.Response "{"message": "数据创建成功"}"
 // @Failure 400 {object} string "{"error": "invalid request"}"
 // @Failure 500 {object} string "{"error": "internal server error"}"
 // @Router /es/save [post]
@@ -56,7 +56,7 @@ func CreateEventFromES(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path string true "事件ID"
-// @Success 200 {object} map[string]model.Event
+// @Success 200 {object} map[string]common.Response
 // @Failure 404 {object} string
 // @Router /es/query/{id} [get]
 func FindEventByIdFromES(c *gin.Context) {
@@ -173,7 +173,7 @@ func updateEventInES(_id string, input model.Event) error {
 // @Description 根据给定的ID删除ES中的事件
 // @Tags ctccl ES
 // @Param id path string true "事件ID"
-// @Success 200 {object} string "删除成功的消息"
+// @Success 200 {object} common.Response
 // @Failure 400 {object} string "无效的ID消息"
 // @Failure 404 {object} string "未找到记录的消息"
 // @Failure 500 {object} string "内部服务器错误消息"

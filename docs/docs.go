@@ -298,9 +298,9 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "删除成功的消息",
+                        "description": "OK",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/common.Response"
                         }
                     },
                     "400": {
@@ -386,7 +386,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
-                                "$ref": "#/definitions/model.Event"
+                                "$ref": "#/definitions/common.Response"
                             }
                         }
                     },
@@ -427,7 +427,7 @@ const docTemplate = `{
                     "201": {
                         "description": "{\"message\": \"数据创建成功\"}",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/common.Response"
                         }
                     },
                     "400": {
@@ -495,6 +495,22 @@ const docTemplate = `{
                 "totalPage": {
                     "description": "总页数\n@json:\"totalPage,omitempty\"",
                     "type": "integer"
+                }
+            }
+        },
+        "common.Response": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "description": "响应代码\nExample: 200",
+                    "type": "integer"
+                },
+                "data": {
+                    "description": "响应数据"
+                },
+                "message": {
+                    "description": "响应消息\nExample: \"请求成功\"\nomitempty: 可选字段",
+                    "type": "string"
                 }
             }
         },
