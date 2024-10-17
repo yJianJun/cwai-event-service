@@ -59,19 +59,19 @@ func CreateEventFromDB(c *gin.Context) {
 		panic(dbErr)
 	}
 
-	c.JSON(http.StatusCreated, gin.H{"message": common.SuccessCreate})
+	c.JSON(http.StatusCreated, gin.H{"message": common.SuccessCreateMessage})
 }
 
 func bindJSON(c *gin.Context, newEvent *model.Event) error {
 	if err := c.ShouldBindJSON(&newEvent); err != nil {
-		return fmt.Errorf("%s: %v", common.ErrBindJSON, err)
+		return fmt.Errorf("%s: %v", common.ParamBindFailureMessage, err)
 	}
 	return nil
 }
 
 func createInDB(newEvent *model.Event) error {
 	if err := model.DB.Create(&newEvent).Error; err != nil {
-		return fmt.Errorf("%s: %v", common.ErrorCreate, err)
+		return fmt.Errorf("%s: %v", common.ErrorCreateMessage, err)
 	}
 	return nil
 }

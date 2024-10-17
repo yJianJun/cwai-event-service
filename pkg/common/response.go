@@ -6,10 +6,20 @@ import (
 	"net/http"
 )
 
+// Response 响应结构
+// @swagger:response Response
 type Response struct {
-	Code    int         `json:"code"`
-	Message string      `json:"message,omitempty"`
-	Data    interface{} `json:"data,omitempty"`
+	// 响应代码
+	// Example: 200
+	Code int `json:"code"`
+
+	// 响应消息
+	// Example: "请求成功"
+	// omitempty: 可选字段
+	Message string `json:"message,omitempty"`
+
+	// 响应数据
+	Data interface{} `json:"data,omitempty"`
 }
 
 func (res Response) getMessage() string {
