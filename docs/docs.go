@@ -499,6 +499,7 @@ const docTemplate = `{
             }
         },
         "common.Response": {
+            "description": "接口响应结构",
             "type": "object",
             "properties": {
                 "code": {

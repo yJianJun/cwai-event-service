@@ -19,6 +19,7 @@ definitions:
         type: integer
     type: object
   common.Response:
+    description: 接口响应结构
     properties:
       code:
         description: |-

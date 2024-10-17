@@ -7,7 +7,7 @@ import (
 )
 
 // Response 响应结构
-// @swagger:response Response
+// @Description 接口响应结构
 type Response struct {
 	// 响应代码
 	// Example: 200
