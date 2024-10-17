@@ -46,7 +46,7 @@ func CreateEventFromES(c *gin.Context) {
 		})
 	}
 	// 成功返回
-	c.JSON(http.StatusCreated, gin.H{common.Message: "数据创建成功"})
+	c.JSON(http.StatusCreated, common.Response{Code: http.StatusCreated, Message: common.SuccessCreateMessage})
 }
 
 // FindEventByIdFromES godoc
@@ -70,7 +70,7 @@ func FindEventByIdFromES(c *gin.Context) {
 		})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"data": event})
+	c.JSON(http.StatusOK, common.Response{Code: http.StatusOK, Data: event})
 }
 
 func getEventByIdFromES(c *gin.Context, id string) *model.Event {
@@ -155,7 +155,7 @@ func UpdateEventFromES(c *gin.Context) {
 			Msg:  common.UpdateFailedMessage,
 		})
 	}
-	c.JSON(http.StatusOK, gin.H{"message": common.UpdateSuccessMessage})
+	c.JSON(http.StatusOK, common.Response{Code: http.StatusAccepted, Message: common.UpdateSuccessMessage})
 }
 
 func updateEventInES(_id string, input model.Event) error {
@@ -194,7 +194,7 @@ func DeleteEventFromES(c *gin.Context) {
 			Msg:  common.DataDeletionFailedMessage,
 		})
 	}
-	c.JSON(http.StatusOK, gin.H{common.Message: common.DataDeletionSuccessMessage})
+	c.JSON(http.StatusOK, common.Response{Code: http.StatusAccepted, Message: common.DataDeletionSuccessMessage})
 }
 
 func deleteFromES(_id string, c *gin.Context) error {
