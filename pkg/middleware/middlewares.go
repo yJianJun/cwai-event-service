@@ -1,8 +1,12 @@
 package middleware
 
 import (
+	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/common"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"log"
+	"net/http"
+	"runtime/debug"
 	"strings"
 )
 
@@ -50,11 +54,35 @@ func ExceptionMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		defer func() {
 			if err := recover(); err != nil {
-				// 简单返回友好提示，具体可自定义发生错误后处理逻辑
-				c.JSON(500, gin.H{"msg": "服务器发生错误xxxx"})
+				// 修改错误信息解析
+				c.JSON(500, errorResponse(err))
 				c.Abort()
 			}
 		}()
 		c.Next()
+	}
+}
+func errorResponse(err interface{}) common.Response {
+	switch v := err.(type) {
+	case common.CommonError:
+		// 符合预期的错误，可以直接返回给客户端
+		return common.Response{
+			Code:    v.Code,
+			Message: v.Msg,
+		}
+	case error:
+		// 一律返回服务器错误，避免返回堆栈错误给客户端，实际还可以针对系统错误做其他处理
+		debug.PrintStack()
+		log.Printf("panic: %v\n", v.Error())
+		return common.Response{
+			Code:    http.StatusInternalServerError,
+			Message: v.Error(),
+		}
+	default:
+		debug.PrintStack()
+		return common.Response{
+			Code:    http.StatusInternalServerError,
+			Message: "服务器内部错误",
+		}
 	}
 }

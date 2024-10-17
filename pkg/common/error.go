@@ -8,29 +8,35 @@ import (
 	"net/http"
 )
 
-const (
-	StatusOk  int = 800
-	StatusErr int = 900
-)
-
 type ErrorCode string
 type ErrorCodeMap map[ErrorCode]string
 
+type CommonError struct {
+	Code int    `json:"code"`
+	Msg  string `json:"msg"`
+}
+
+func (err CommonError) Error() string {
+	return err.Msg
+}
+
+type ErrorInfoResp struct {
+	ExceptionId   string   `json:"exceptionId"`
+	ExceptionType string   `json:"exceptionType"`
+	ReasonArgs    []string `json:"reasonArgs"`
+	DetailArgs    []string `json:"detailArgs"`
+}
+
 // 错误码
 const (
+	StatusOk             int       = 800
+	StatusErr            int       = 900
 	NoErr                ErrorCode = "800"
 	WatcherUnAuthorized  ErrorCode = "Cwai.Watcher.UnAuthorized"
 	WatcherInvalidParam  ErrorCode = "Cwai.Watcher.InvalidParam"
 	WatcherForbidden     ErrorCode = "Cwai.Watcher.Forbidden"
 	WatcherInternalError ErrorCode = "Cwai.Watcher.InternalError"
 )
-
-var CodeMessage = ErrorCodeMap{
-	WatcherUnAuthorized:  "没有访问观察模块权限",
-	WatcherInvalidParam:  "请求字段错误",
-	WatcherForbidden:     "观察模块不可访问",
-	WatcherInternalError: "服务异常",
-}
 
 // 错误信息
 const (
@@ -51,11 +57,18 @@ const (
 	JSONBindFailureMessage        = "JSON绑定失败: "
 )
 
+var CodeMessage = ErrorCodeMap{
+	WatcherUnAuthorized:  "没有访问观察模块权限",
+	WatcherInvalidParam:  "请求字段错误",
+	WatcherForbidden:     "观察模块不可访问",
+	WatcherInternalError: "服务异常",
+}
+
 func BadRequestMessage(c *gin.Context, code ErrorCode, message string, err error) {
 	if err != nil {
 		c.Error(err)
 	}
-	errorResponseMessage(c, http.StatusOK, message, code)
+	errorResponseMessage(c, http.StatusOK, message)
 }
 
 func BadRequest(c *gin.Context, code ErrorCode, err error) {
@@ -93,25 +106,16 @@ func RPCResponse(c *gin.Context, res *http.Response) {
 	}
 }
 
-type ErrorInfoResp struct {
-	ExceptionId   string   `json:"exceptionId"`
-	ExceptionType string   `json:"exceptionType"`
-	ReasonArgs    []string `json:"reasonArgs"`
-	DetailArgs    []string `json:"detailArgs"`
-}
-
 func errorResponse(c *gin.Context, httpStatus int, code ErrorCode) {
 	c.AbortWithStatusJSON(httpStatus, Response{
-		StatusCode: StatusErr,
-		Error:      string(code),
-		Message:    CodeMessage[code],
+		Code:    StatusErr,
+		Message: CodeMessage[code],
 	})
 }
 
-func errorResponseMessage(c *gin.Context, httpStatus int, message string, code ErrorCode) {
+func errorResponseMessage(c *gin.Context, httpStatus int, message string) {
 	c.AbortWithStatusJSON(httpStatus, Response{
-		StatusCode: StatusErr,
-		Error:      string(code),
-		Message:    CodeMessage[code] + ": " + message,
+		Code:    StatusErr,
+		Message: message,
 	})
 }

@@ -7,10 +7,13 @@ import (
 )
 
 type Response struct {
-	StatusCode int         `json:"statusCode"`
-	Error      string      `json:"error,omitempty"`
-	Message    interface{} `json:"message,omitempty"`
-	ReturnObj  interface{} `json:"returnObj,omitempty"`
+	Code    int         `json:"code"`
+	Message string      `json:"message,omitempty"`
+	Data    interface{} `json:"data,omitempty"`
+}
+
+func (res Response) getMessage() string {
+	return res.Message
 }
 
 // PageVo 分页响应结构
@@ -31,9 +34,9 @@ type PageVo struct {
 
 func successResponse(c *gin.Context, message string, data interface{}) {
 	c.JSON(http.StatusOK, Response{
-		StatusCode: StatusOk,
-		Message:    message,
-		ReturnObj:  data,
+		Code:    StatusOk,
+		Message: message,
+		Data:    data,
 	})
 }
 
