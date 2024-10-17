@@ -173,7 +173,7 @@ paths:
             type: object
       summary: 删除事件
       tags:
-      - ctccl
+      - ctccl DB
   /db/query:
     get:
       consumes:
@@ -196,7 +196,7 @@ paths:
             type: object
       summary: 获取事件列表
       tags:
-      - ctccl
+      - ctccl DB
   /db/query/{id}:
     get:
       consumes:
@@ -227,7 +227,7 @@ paths:
             type: string
       summary: 按 ID 查找事件
       tags:
-      - ctccl
+      - ctccl DB
   /db/save:
     post:
       consumes:
@@ -260,7 +260,7 @@ paths:
             type: object
       summary: 创建一个新的事件
       tags:
-      - ctccl
+      - ctccl DB
   /db/update/{id}:
     put:
       consumes:
@@ -303,7 +303,7 @@ paths:
             type: object
       summary: 修改事件
       tags:
-      - ctccl
+      - ctccl DB
   /es/delete/{id}:
     delete:
       description: 根据给定的ID删除ES中的事件
@@ -332,7 +332,7 @@ paths:
             type: string
       summary: 删除ES中的事件
       tags:
-      - ctccl
+      - ctccl ES
   /es/page:
     post:
       consumes:
@@ -354,7 +354,7 @@ paths:
             $ref: '#/definitions/common.PageVo'
       summary: 分页获取事件
       tags:
-      - ctccl
+      - ctccl ES
   /es/query/{id}:
     get:
       consumes:
@@ -381,7 +381,7 @@ paths:
             type: string
       summary: 查找事件
       tags:
-      - ctccl
+      - ctccl ES
   /es/save:
     post:
       consumes:
@@ -411,7 +411,7 @@ paths:
             type: string
       summary: 创建新的事件
       tags:
-      - ctccl
+      - ctccl ES
   /es/update/{id}:
     put:
       consumes:
@@ -434,7 +434,7 @@ paths:
       responses: {}
       summary: Update an event from Elasticsearch
       tags:
-      - ctccl
+      - ctccl ES
 securityDefinitions:
   ApiKeyAuth:
     in: header

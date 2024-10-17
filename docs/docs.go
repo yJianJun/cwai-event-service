@@ -34,7 +34,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "ctccl"
+                    "ctccl DB"
                 ],
                 "summary": "删除事件",
                 "parameters": [
@@ -96,7 +96,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "ctccl"
+                    "ctccl DB"
                 ],
                 "summary": "获取事件列表",
                 "responses": {
@@ -131,7 +131,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "ctccl"
+                    "ctccl DB"
                 ],
                 "summary": "按 ID 查找事件",
                 "parameters": [
@@ -178,7 +178,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "ctccl"
+                    "ctccl DB"
                 ],
                 "summary": "创建一个新的事件",
                 "parameters": [
@@ -227,7 +227,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "ctccl"
+                    "ctccl DB"
                 ],
                 "summary": "修改事件",
                 "parameters": [
@@ -284,7 +284,7 @@ const docTemplate = `{
             "delete": {
                 "description": "根据给定的ID删除ES中的事件",
                 "tags": [
-                    "ctccl"
+                    "ctccl ES"
                 ],
                 "summary": "删除ES中的事件",
                 "parameters": [
@@ -334,7 +334,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "ctccl"
+                    "ctccl ES"
                 ],
                 "summary": "分页获取事件",
                 "parameters": [
@@ -368,7 +368,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "ctccl"
+                    "ctccl ES"
                 ],
                 "summary": "查找事件",
                 "parameters": [
@@ -409,7 +409,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "ctccl"
+                    "ctccl ES"
                 ],
                 "summary": "创建新的事件",
                 "parameters": [
@@ -455,7 +455,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "ctccl"
+                    "ctccl ES"
                 ],
                 "summary": "Update an event from Elasticsearch",
                 "parameters": [

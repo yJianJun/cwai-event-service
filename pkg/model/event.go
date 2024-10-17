@@ -14,7 +14,7 @@ type Event struct {
 	// EventType 事件类型
 	// @description 事件类型，例如"ctccl-inter-node-bandwidth"
 	// @example "ctccl-inter-node-bandwidth"
-	EventType string `json:"event_type" binding:"required" example:"ctccl-inter-node-bandwidth" gorm:"type:varchar(20);notNull;comment:事件类型描述"`
+	EventType string `json:"event_type" binding:"required" example:"ctccl-inter-node-bandwidth" gorm:"type:varchar(30);notNull;comment:事件类型描述"`
 	// Level 事件等级
 	// @description 事件等级，例如"High"
 	// @example "High"

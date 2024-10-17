@@ -4,6 +4,7 @@ import (
 	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/common"
 	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/domain"
 	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/model" //nolint:goimports,goimports
+	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/util"
 	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
@@ -138,7 +139,8 @@ func UpdateEventFromDB(c *gin.Context) {
 	if err != nil {
 		panic(err)
 	}
-	err = updateEventRecord(&event, &input)
+	util.CopyProperties(&event, &input)
+	err = updateEventRecord(&event)
 	if err != nil {
 		panic(err)
 	}
@@ -154,21 +156,21 @@ func getAndValidateID(c *gin.Context) (uint64, error) {
 	return id, nil
 }
 
-func bindAndValidateJSON(c *gin.Context) (model.Event, error) {
-	var input model.Event
+func bindAndValidateJSON(c *gin.Context) (domain.EventUpdate, error) {
+	var input domain.EventUpdate
 	if err := c.ShouldBindJSON(&input); err != nil {
 		return input, err
 	}
 	return input, nil
 }
 
-func updateEventRecord(event *model.Event, input *model.Event) error {
+func updateEventRecord(event *model.Event) error {
 	tx := model.DB.Begin()
 	if err := tx.Error; err != nil {
 		return errors.New(common.TxStartFailureMessage)
 	}
 
-	if err := tx.Model(event).Updates(input).Error; err != nil {
+	if err := tx.Model(event).Updates(event).Error; err != nil {
 		tx.Rollback()
 		return errors.New(common.UpdateFailedMessage)
 	}
