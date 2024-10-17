@@ -1,4 +1,4 @@
-package common
+package domain
 
 import (
 	"database/sql/driver"

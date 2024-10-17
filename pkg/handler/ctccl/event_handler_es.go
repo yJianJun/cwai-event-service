@@ -3,7 +3,6 @@ package ctccl
 import (
 	"context"
 	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/common"
-	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/domain"
 	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/model"
 	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/util"
 	"encoding/json"
@@ -217,7 +216,7 @@ func PageEventFromES(c *gin.Context) {
 	events := parseSearchResults(searchResult)
 	totalCount := searchResult.TotalHits()
 	totalPage := calculateTotalPages(totalCount, pageRequest.Size)
-	pageVo := domain.PageVo{
+	pageVo := common.PageVo{
 		TotalCount: totalCount,
 		TotalPage:  int(totalPage),
 		Data:       events,

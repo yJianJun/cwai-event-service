@@ -2,7 +2,6 @@ package ctccl
 
 import (
 	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/common"
-	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/domain"
 	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/model" //nolint:goimports,goimports
 	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/util"
 	"errors"
@@ -156,8 +155,8 @@ func getAndValidateID(c *gin.Context) (uint64, error) {
 	return id, nil
 }
 
-func bindAndValidateJSON(c *gin.Context) (domain.EventUpdate, error) {
-	var input domain.EventUpdate
+func bindAndValidateJSON(c *gin.Context) (common.EventUpdate, error) {
+	var input common.EventUpdate
 	if err := c.ShouldBindJSON(&input); err != nil {
 		return input, err
 	}
@@ -194,8 +193,8 @@ func fetchEventByID(id uint64) (model.Event, error) {
 	return event, nil
 }
 
-func bindAndValidateInput(c *gin.Context) (domain.EventUpdate, error) {
-	var input domain.EventUpdate
+func bindAndValidateInput(c *gin.Context) (common.EventUpdate, error) {
+	var input common.EventUpdate
 	if err := c.ShouldBindJSON(&input); err != nil {
 		return input, err
 	}

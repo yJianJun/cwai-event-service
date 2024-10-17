@@ -3,8 +3,8 @@ package client
 import (
 	"bytes"
 	"crypto/tls"
+	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/common"
 	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/config"
-	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/domain"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -260,7 +260,7 @@ func (cli *Client) handleRequest(req *http.Request) ([]byte, error) {
 		// 	errorInfo.HTTPCode = resp.StatusCode
 		// 	return nil, &errorInfo
 		// }
-		var errorInfo domain.ErrorInfoResp
+		var errorInfo common.ErrorInfoResp
 		err := json.Unmarshal(content, &errorInfo)
 		if err != nil {
 			return nil, fmt.Errorf("%s", string(content))

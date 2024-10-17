@@ -1,20 +1,7 @@
 package domain
 
-type NetTopoReq struct {
-	IdType        string     `json:"idType,omitempty"`
-	Category      string     `json:"category,omitempty"`
-	RelationLayer int        `json:"relationLayer,omitempty"`
-	Resources     []Resource `json:"resources"`
-}
-
 type Resource struct {
 	ID string `json:"id"`
-}
-
-type NetTopoResp struct {
-	RetCode int         `json:"retCode"`
-	RetMsg  string      `json:"retMsg"`
-	Data    NetTopoData `json:"data"`
 }
 
 type NetTopoData struct {

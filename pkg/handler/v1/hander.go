@@ -16,27 +16,27 @@ import (
 // QueryNetTopo 处理查询网络拓扑的请求。它验证请求，根据需要获取令牌，并获取拓扑数据。
 func QueryNetTopo(c *gin.Context) {
 	var (
-		req      domain.NetTopoReq
+		req      common.NetTopoReq
 		topoData *domain.NetTopoData
 	)
 
 	//parse request
 	if err := c.ShouldBind(&req); err != nil {
 		klog.Errorf("parse body failed: %s", err)
-		domain.BadRequestMessage(c, common.WatcherInvalidParam, err.Error(), err)
+		common.BadRequestMessage(c, common.WatcherInvalidParam, err.Error(), err)
 		return
 	}
 	klog.Infof("request info: %v", req)
 
 	//build client
 	if client.CCAEClient == nil {
-		domain.InternalError(c, common.WatcherInternalError, errors.New("Init ccae client error!"))
+		common.InternalError(c, common.WatcherInternalError, errors.New("Init ccae client error!"))
 		return
 	}
 	if client.CCAEClient.TokenTimeOutAt.IsZero() || time.Now().After(client.CCAEClient.TokenTimeOutAt) {
 		err := GetNewToken(client.CCAEClient)
 		if err != nil {
-			domain.InternalError(c, common.WatcherInternalError, errors.New("Get ccae new token error!"))
+			common.InternalError(c, common.WatcherInternalError, errors.New("Get ccae new token error!"))
 			return
 		}
 	}
@@ -44,7 +44,7 @@ func QueryNetTopo(c *gin.Context) {
 	//build reqeust
 	topoData, err := TopoRequest(client.CCAEClient, &req)
 	if err != nil {
-		domain.BadRequestMessage(c, common.WatcherInvalidParam, err.Error(), err)
+		common.BadRequestMessage(c, common.WatcherInvalidParam, err.Error(), err)
 		return
 	}
 
@@ -60,18 +60,18 @@ func QueryNetTopo(c *gin.Context) {
 		}
 	}
 
-	domain.Success(c, topoData)
+	common.Success(c, topoData)
 }
 
 // TopoRequest 向指定客户端发送网络拓扑请求，并返回拓扑数据或错误。
-func TopoRequest(client *client.Client, req *domain.NetTopoReq) (*domain.NetTopoData, error) {
+func TopoRequest(client *client.Client, req *common.NetTopoReq) (*domain.NetTopoData, error) {
 	resp, err := client.Post(client.TopoPath, 0, nil, req)
 	if err != nil {
 		klog.Errorf("Topo request to ccae failed: %v", err)
 		return nil, err
 	}
 
-	topoInfo := domain.NetTopoResp{}
+	topoInfo := common.NetTopoResp{}
 	err = json.Unmarshal(resp, &topoInfo)
 	if err != nil {
 		klog.Errorf("unmarshal topo response failed: %v", err)

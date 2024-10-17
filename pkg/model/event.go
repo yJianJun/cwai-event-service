@@ -23,7 +23,7 @@ type Event struct {
 	// Timestamp 时间戳
 	// @description 事件发生的时间戳，格式为"2006-01-02 15:04:05"
 	// @example "2006-01-02 15:04:05"
-	Timestamp common.MyTime `json:"timestamp" binding:"required" gorm:"type:datetime;notNull;comment:时间戳"`
+	Timestamp domain.MyTime `json:"timestamp" binding:"required" gorm:"type:datetime;notNull;comment:时间戳"`
 	// ID_ ElasticSearch默认生成id
 	// @description 创建不用传，在删除、根据id查询、修改的时候需要传
 	// @example "yrEolJIBVsd01DrwhORI"
@@ -59,11 +59,11 @@ type Event struct {
 type EventPage struct {
 	// 初始分页请求参数基类
 	// in: body
-	domain.BasePageRequest
+	common.BasePageRequest
 	// 事件发生的时间
 	// required: true
 	// example: 2006-01-02 15:04:05
-	Time common.MyTime `json:"time,omitempty"`
+	Time domain.MyTime `json:"time,omitempty"`
 	// 关键词用于事件筛选
 	// required: true
 	// example: "连接错误"
