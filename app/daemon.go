@@ -24,7 +24,7 @@ func NewDaemon(cfg *config.ServerConfig) *Daemon {
 	//init ccae client config
 	client.NewClient(cfg)
 	model.ConnectDatabase(cfg)
-	model.InitES(cfg)
+	model.InitElasticSearch(cfg)
 
 	srv := &http.Server{
 		Addr:    address,
