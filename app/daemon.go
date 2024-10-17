@@ -2,21 +2,22 @@ package app
 
 import (
 	"context"
+	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/config"
 	"net/http"
 	"time"
 
-	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/client"
+	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/http"
 	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/model"
 	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/router"
 	"github.com/golang/glog"
 )
 
 type Daemon struct {
-	Config *model.ServerConfig
+	Config *config.ServerConfig
 	Server *http.Server
 }
 
-func NewDaemon(cfg *model.ServerConfig) *Daemon {
+func NewDaemon(cfg *config.ServerConfig) *Daemon {
 	address := cfg.Host + ":" + cfg.Port
 	routers := router.InitRoute()
 

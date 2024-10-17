@@ -1,6 +1,7 @@
 package app
 
 import (
+	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/config"
 	"fmt"
 	"os/signal"
 	"syscall"
@@ -10,8 +11,6 @@ import (
 	"k8s.io/klog"
 
 	"os"
-
-	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/model"
 	// "os/signal"
 	// "syscall"
 )
@@ -23,7 +22,7 @@ var (
 
 func NewServerCommand() *cobra.Command {
 	glog.Info("run NewServerCommand.")
-	opts := model.NewConfig()
+	opts := config.NewConfig()
 	cmd := &cobra.Command{
 		Use:           "daemon [OPTIONS]",
 		Short:         "The daemon  server",
@@ -51,7 +50,7 @@ func NewServerCommand() *cobra.Command {
 	return cmd
 }
 
-func runDaemon(opts *model.ServerConfig) error {
+func runDaemon(opts *config.ServerConfig) error {
 	glog.Info("run runDaemon.")
 
 	var (

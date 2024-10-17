@@ -1,4 +1,4 @@
-package model
+package domain
 
 type NetTopoReq struct {
 	IdType        string     `json:"idType,omitempty"`

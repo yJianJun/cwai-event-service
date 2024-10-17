@@ -56,3 +56,23 @@ type EventDetailUpdate struct {
 	// Example: 10
 	BandWidth int `json:"bandwidth" `
 }
+
+// BasePageRequest 表示基本分页请求参数。
+// swagger:model
+type BasePageRequest struct {
+	// Page 是页码。
+	// example: 1
+	// required: true
+	Page int `json:"page" binding:"required"`
+
+	// Size 是每页条数。
+	// example: 10
+	// required: true
+	Size int `json:"size" binding:"required"`
+}
+
+type SessionsReq struct {
+	GrantType string `json:"grantType"`
+	UserName  string `json:"userName"`
+	Value     string `json:"value"`
+}

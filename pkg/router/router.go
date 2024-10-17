@@ -3,9 +3,9 @@ package router
 
 import (
 	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/docs"
-	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/common"
 	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/handler/ctccl"
 	handlerv1 "ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/handler/v1"
+	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/middleware"
 	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/router/router_middleware"
 	"github.com/gin-gonic/gin"
 	"github.com/golang/glog"
@@ -29,7 +29,8 @@ func InitRoute() *gin.Engine {
 	if middlewares != nil {
 		router.Use(middlewares...)
 	}
-	router.Use(common.Cors())
+	router.Use(middleware.Cors())
+	router.Use(middleware.ExceptionMiddleware())
 
 	groupv1 := router.Group(GROUP_V1)
 	// Register all routers

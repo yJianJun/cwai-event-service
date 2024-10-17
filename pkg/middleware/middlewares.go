@@ -1,4 +1,4 @@
-package common
+package middleware
 
 import (
 	"fmt"
@@ -43,5 +43,18 @@ func Cors() gin.HandlerFunc {
 		}
 		// 处理请求
 		c.Next() //  处理请求
+	}
+}
+
+func ExceptionMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		defer func() {
+			if err := recover(); err != nil {
+				// 简单返回友好提示，具体可自定义发生错误后处理逻辑
+				c.JSON(500, gin.H{"msg": "服务器发生错误xxxx"})
+				c.Abort()
+			}
+		}()
+		c.Next()
 	}
 }

@@ -3,6 +3,8 @@ package client
 import (
 	"bytes"
 	"crypto/tls"
+	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/config"
+	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/domain"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -13,7 +15,6 @@ import (
 	"strconv"
 	"time"
 
-	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/model"
 	"go.uber.org/zap"
 	klog "k8s.io/klog/v2"
 )
@@ -66,13 +67,6 @@ type HTTPError struct {
 	Status string `json:"status"`
 }
 
-type ErrorInfoResp struct {
-	ExceptionId   string   `json:"exceptionId"`
-	ExceptionType string   `json:"exceptionType"`
-	ReasonArgs    []string `json:"reasonArgs"`
-	DetailArgs    []string `json:"detailArgs"`
-}
-
 func (e *HTTPError) Error() string {
 	detail := e.Err
 	if len(detail) == 0 {
@@ -101,7 +95,7 @@ type Client struct {
 var CCAEClient *Client
 
 // NewClient 返回一个新的客户端
-func NewClient(conf *model.ServerConfig) *Client {
+func NewClient(conf *config.ServerConfig) *Client {
 	protocolHostPort := fmt.Sprintf("%s://%s:%s", conf.CCAEServer.Protocol, conf.CCAEServer.Host, conf.CCAEServer.Port)
 	CCAEClient = &Client{
 		ProtocolHostPort:  protocolHostPort,
@@ -266,7 +260,7 @@ func (cli *Client) handleRequest(req *http.Request) ([]byte, error) {
 		// 	errorInfo.HTTPCode = resp.StatusCode
 		// 	return nil, &errorInfo
 		// }
-		var errorInfo ErrorInfoResp
+		var errorInfo domain.ErrorInfoResp
 		err := json.Unmarshal(content, &errorInfo)
 		if err != nil {
 			return nil, fmt.Errorf("%s", string(content))

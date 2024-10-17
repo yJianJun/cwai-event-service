@@ -2,6 +2,7 @@ package model
 
 import (
 	"context"
+	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/config"
 	"fmt"
 	"github.com/olivere/elastic"
 	"gorm.io/driver/mysql"
@@ -11,7 +12,7 @@ import (
 var DB *gorm.DB
 var ESclient *elastic.Client // ES客户端
 
-func ConnectDatabase(conf *ServerConfig) error {
+func ConnectDatabase(conf *config.ServerConfig) error {
 	dsn := conf.MysqlConfig.User + ":" + conf.MysqlConfig.Password + "@tcp(" + conf.MysqlConfig.Address + ")/" + conf.MysqlConfig.Db + "?charset=utf8&parseTime=True&loc=Local"
 	database, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
@@ -25,7 +26,7 @@ func ConnectDatabase(conf *ServerConfig) error {
 	return nil
 }
 
-func InitES(conf *ServerConfig) error {
+func InitES(conf *config.ServerConfig) error {
 	// 配置
 	elasticConfig := conf.ElasticConfig
 	if elasticConfig.Enable {

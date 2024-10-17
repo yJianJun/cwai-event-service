@@ -2,6 +2,7 @@ package model
 
 import (
 	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/common"
+	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/domain"
 )
 
 // Event 事件
@@ -58,7 +59,7 @@ type Event struct {
 type EventPage struct {
 	// 初始分页请求参数基类
 	// in: body
-	common.BasePageRequest
+	domain.BasePageRequest
 	// 事件发生的时间
 	// required: true
 	// example: 2006-01-02 15:04:05

@@ -1,4 +1,4 @@
-package model
+package domain
 
 type UserInfo struct {
 	GrantType string `json:"grantType"`

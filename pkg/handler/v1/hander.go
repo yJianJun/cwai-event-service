@@ -2,6 +2,7 @@ package v1
 
 import (
 	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/common"
+	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/domain"
 	"encoding/json"
 	"errors"
 	"time"
@@ -9,34 +10,33 @@ import (
 	"github.com/gin-gonic/gin"
 	klog "k8s.io/klog/v2"
 
-	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/client"
-	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/model"
+	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/http"
 )
 
 // QueryNetTopo 处理查询网络拓扑的请求。它验证请求，根据需要获取令牌，并获取拓扑数据。
 func QueryNetTopo(c *gin.Context) {
 	var (
-		req      model.NetTopoReq
-		topoData *model.NetTopoData
+		req      domain.NetTopoReq
+		topoData *domain.NetTopoData
 	)
 
 	//parse request
 	if err := c.ShouldBind(&req); err != nil {
 		klog.Errorf("parse body failed: %s", err)
-		common.BadRequestMessage(c, common.WatcherInvalidParam, err.Error(), err)
+		domain.BadRequestMessage(c, common.WatcherInvalidParam, err.Error(), err)
 		return
 	}
 	klog.Infof("request info: %v", req)
 
 	//build client
 	if client.CCAEClient == nil {
-		common.InternalError(c, common.WatcherInternalError, errors.New("Init ccae client error!"))
+		domain.InternalError(c, common.WatcherInternalError, errors.New("Init ccae client error!"))
 		return
 	}
 	if client.CCAEClient.TokenTimeOutAt.IsZero() || time.Now().After(client.CCAEClient.TokenTimeOutAt) {
 		err := GetNewToken(client.CCAEClient)
 		if err != nil {
-			common.InternalError(c, common.WatcherInternalError, errors.New("Get ccae new token error!"))
+			domain.InternalError(c, common.WatcherInternalError, errors.New("Get ccae new token error!"))
 			return
 		}
 	}
@@ -44,7 +44,7 @@ func QueryNetTopo(c *gin.Context) {
 	//build reqeust
 	topoData, err := TopoRequest(client.CCAEClient, &req)
 	if err != nil {
-		common.BadRequestMessage(c, common.WatcherInvalidParam, err.Error(), err)
+		domain.BadRequestMessage(c, common.WatcherInvalidParam, err.Error(), err)
 		return
 	}
 
@@ -60,18 +60,18 @@ func QueryNetTopo(c *gin.Context) {
 		}
 	}
 
-	common.Success(c, topoData)
+	domain.Success(c, topoData)
 }
 
 // TopoRequest 向指定客户端发送网络拓扑请求，并返回拓扑数据或错误。
-func TopoRequest(client *client.Client, req *model.NetTopoReq) (*model.NetTopoData, error) {
+func TopoRequest(client *client.Client, req *domain.NetTopoReq) (*domain.NetTopoData, error) {
 	resp, err := client.Post(client.TopoPath, 0, nil, req)
 	if err != nil {
 		klog.Errorf("Topo request to ccae failed: %v", err)
 		return nil, err
 	}
 
-	topoInfo := model.NetTopoResp{}
+	topoInfo := domain.NetTopoResp{}
 	err = json.Unmarshal(resp, &topoInfo)
 	if err != nil {
 		klog.Errorf("unmarshal topo response failed: %v", err)
@@ -88,7 +88,7 @@ func TopoRequest(client *client.Client, req *model.NetTopoReq) (*model.NetTopoDa
 
 // GetNewToken 请求新的身份验证令牌并使用新令牌及其超时更新客户端。
 func GetNewToken(client *client.Client) error {
-	resp, err := client.Put(client.LoginPath, 0, client.Header, model.UserInfo{
+	resp, err := client.Put(client.LoginPath, 0, client.Header, domain.UserInfo{
 		GrantType: "password",
 		UserName:  client.UserName,
 		Value:     client.UserPassword,
@@ -97,7 +97,7 @@ func GetNewToken(client *client.Client) error {
 		klog.Error(err)
 		return err
 	}
-	tokenInfo := model.TokenInfo{}
+	tokenInfo := domain.TokenInfo{}
 	err = json.Unmarshal(resp, &tokenInfo)
 	if err != nil {
 		klog.Errorf("unmarshal resource group response failed: %v", err)
