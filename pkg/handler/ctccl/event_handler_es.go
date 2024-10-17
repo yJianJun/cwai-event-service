@@ -27,20 +27,23 @@ import (
 // @Failure 500 {object} string "{"error": "internal server error"}"
 // @Router /es/save [post]
 func CreateEventFromES(c *gin.Context) {
-	defer func() {
-		log.Println(recover())
-	}()
 	newEvent := model.Event{}
 	// 绑定并验证JSON
 	if err := c.ShouldBindJSON(&newEvent); err != nil {
-		panic(err)
+		panic(common.CommonError{
+			Code: http.StatusBadRequest,
+			Msg:  common.ParamBindFailureMessage,
+		})
 	}
 	if !isESClientInitialized() {
 		handleInternalServerError(c, "Elasticsearch client未初始化")
 		return
 	}
 	if err := storeEventInFromES(c.Request.Context(), newEvent); err != nil {
-		panic(err)
+		panic(common.CommonError{
+			Code: http.StatusUnprocessableEntity,
+			Msg:  common.ErrorCreateMessage,
+		})
 	}
 	// 成功返回
 	c.JSON(http.StatusCreated, gin.H{common.Message: "数据创建成功"})
@@ -57,24 +60,20 @@ func CreateEventFromES(c *gin.Context) {
 // @Failure 404 {object} string
 // @Router /es/query/{id} [get]
 func FindEventByIdFromES(c *gin.Context) {
-	defer func() {
-		log.Println(recover())
-	}()
 	idParam := c.Param("id")
 	// 获取事件
 	event := getEventByIdFromES(c, idParam)
 	if event == nil {
-		c.JSON(http.StatusNotFound, gin.H{common.Message: common.RecordNotFoundMessage})
+		c.JSON(http.StatusOK, common.Response{
+			Code:    http.StatusNotFound,
+			Message: common.RecordNotFoundMessage,
+		})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"data": event})
 }
 
 func getEventByIdFromES(c *gin.Context, id string) *model.Event {
-	defer func() {
-		log.Println(recover())
-	}()
-
 	searchResult, err := model.ESclient.Search().
 		Index("events").
 		Type("_doc").
@@ -82,18 +81,27 @@ func getEventByIdFromES(c *gin.Context, id string) *model.Event {
 		Size(1).
 		Do(c.Request.Context())
 	if err != nil {
-		panic(err)
+		panic(common.CommonError{
+			Code: http.StatusNotFound,
+			Msg:  common.SearchDataFailureMessage,
+		})
 	}
 	if searchResult.TotalHits() > 0 {
 		hit := searchResult.Hits.Hits[0]
 		source := hit.Source
 		data, err := source.MarshalJSON()
 		if err != nil {
-			panic(err)
+			panic(common.CommonError{
+				Code: http.StatusUnprocessableEntity,
+				Msg:  common.DataSerializationFailedMessage,
+			})
 		}
 		var event model.Event
 		if err := json.Unmarshal(data, &event); err != nil {
-			panic(err)
+			panic(common.CommonError{
+				Code: http.StatusUnprocessableEntity,
+				Msg:  common.DataDeserializationFailedMessage,
+			})
 		}
 		event.ID_ = hit.Id
 		return &event
@@ -124,22 +132,28 @@ func isESClientInitialized() bool {
 // @Param event body model.Event true "Event data"
 // @Router /es/update/{id} [put]
 func UpdateEventFromES(c *gin.Context) {
-	defer func() {
-		log.Println(recover())
-	}()
 	id := c.Param("id")
 	event := getEventByIdFromES(c, id)
 	if event == nil {
-		c.JSON(http.StatusNotFound, gin.H{common.Message: common.RecordNotFoundMessage})
+		c.JSON(http.StatusOK, common.Response{
+			Code:    http.StatusNotFound,
+			Message: common.RecordNotFoundMessage,
+		})
 		return
 	}
 	input, err := bindAndValidateInput(c)
 	if err != nil {
-		panic(err)
+		panic(common.CommonError{
+			Code: http.StatusUnprocessableEntity,
+			Msg:  common.DataDeserializationFailedMessage,
+		})
 	}
 	util.CopyProperties(&event, &input)
 	if err := updateEventInES(event.ID_, *event); err != nil {
-		panic(err)
+		panic(common.CommonError{
+			Code: http.StatusUnprocessableEntity,
+			Msg:  common.UpdateFailedMessage,
+		})
 	}
 	c.JSON(http.StatusOK, gin.H{"message": common.UpdateSuccessMessage})
 }
@@ -165,19 +179,22 @@ func updateEventInES(_id string, input model.Event) error {
 // @Failure 500 {object} string "内部服务器错误消息"
 // @Router /es/delete/{id} [delete]
 func DeleteEventFromES(c *gin.Context) {
-	defer func() {
-		log.Println(recover())
-	}()
 	id := c.Param("id")
 	event := getEventByIdFromES(c, id)
 	if event == nil {
-		c.JSON(http.StatusNotFound, gin.H{common.Message: common.RecordNotFoundMessage})
+		c.JSON(http.StatusOK, common.Response{
+			Code:    http.StatusNotFound,
+			Message: common.RecordNotFoundMessage,
+		})
 		return
 	}
 	if err := deleteFromES(event.ID_, c); err != nil {
-		panic(err)
+		panic(common.CommonError{
+			Code: http.StatusUnprocessableEntity,
+			Msg:  common.DataDeletionFailedMessage,
+		})
 	}
-	c.JSON(http.StatusOK, gin.H{common.Message: common.DataDeletionSuccess})
+	c.JSON(http.StatusOK, gin.H{common.Message: common.DataDeletionSuccessMessage})
 }
 
 func deleteFromES(_id string, c *gin.Context) error {
@@ -199,18 +216,20 @@ func deleteFromES(_id string, c *gin.Context) error {
 // @Success      200 {object} common.PageVo
 // @Router       /es/page [post]
 func PageEventFromES(c *gin.Context) {
-	defer func() {
-		err := recover()
-		log.Println(err)
-	}()
 	var pageRequest model.EventPage
 	if err := c.ShouldBindJSON(&pageRequest); err != nil {
-		panic(err)
+		panic(common.CommonError{
+			Code: http.StatusBadRequest,
+			Msg:  common.ParamBindFailureMessage,
+		})
 	}
 
 	searchResult, err := searchEventsFromES(pageRequest)
 	if err != nil {
-		panic(err)
+		panic(common.CommonError{
+			Code: http.StatusNotFound,
+			Msg:  common.SearchDataFailureMessage,
+		})
 	}
 
 	events := parseSearchResults(searchResult)

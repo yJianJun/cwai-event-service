@@ -40,21 +40,22 @@ const (
 
 // 错误信息
 const (
-	Message                string = "message"
-	EsClientNotInitMsg            = "Elasticsearch 客户端未初始化"
-	DataDeletionFailed            = "数据删除失败"
-	DataDeletionSuccess           = "数据删除成功"
-	ErrorCreate                   = "数据创建失败"
-	SuccessCreate                 = "数据创建成功"
-	UpdateFailedMessage           = "数据更新失败"
-	UpdateSuccessMessage          = "数据更新成功"
-	RecordNotFoundMessage         = "记录未找到"
-	ErrorMsg                      = "无法从数据库检索数据"
-	TxStartFailureMessage         = "无法开始数据库事务"
-	TxCommitFailureMessage        = "事务提交失败"
-	InvalidIDMessage              = "无效的ID参数"
-	ErrBindJSON                   = "无法解析 JSON 数据"
-	JSONBindFailureMessage        = "JSON绑定失败: "
+	Message                          string = "message"
+	EsClientNotInitMessage                  = "Elasticsearch 客户端未初始化"
+	DataDeletionFailedMessage               = "数据删除失败"
+	DataDeletionSuccessMessage              = "数据删除成功"
+	ErrorCreateMessage                      = "数据创建失败"
+	SuccessCreateMessage                    = "数据创建成功"
+	UpdateFailedMessage                     = "数据更新失败"
+	UpdateSuccessMessage                    = "数据更新成功"
+	RecordNotFoundMessage                   = "记录未找到"
+	SearchDataFailureMessage                = "无法从数据库检索数据"
+	TxStartFailureMessage                   = "无法开始数据库事务"
+	TxCommitFailureMessage                  = "事务提交失败"
+	InvalidIDMessage                        = "无效的ID参数"
+	DataSerializationFailedMessage          = "数据序列化失败"
+	DataDeserializationFailedMessage        = "数据反序列化失败"
+	ParamBindFailureMessage                 = "参数绑定失败"
 )
 
 var CodeMessage = ErrorCodeMap{
