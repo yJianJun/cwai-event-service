@@ -1,13 +1,15 @@
 package middleware
 
 import (
+	"bytes"
 	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/common"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"log"
+	"io/ioutil"
 	"net/http"
 	"runtime/debug"
 	"strings"
+	"time"
 )
 
 func Cors() gin.HandlerFunc {
@@ -73,7 +75,7 @@ func errorResponse(err interface{}) common.Response {
 	case error:
 		// 一律返回服务器错误，避免返回堆栈错误给客户端，实际还可以针对系统错误做其他处理
 		debug.PrintStack()
-		log.Printf("panic: %v\n", v.Error())
+		common.Error(map[string]interface{}{"err": v.Error()}, "系统未知异常")
 		return common.Response{
 			Code:    http.StatusInternalServerError,
 			Message: v.Error(),
@@ -82,7 +84,35 @@ func errorResponse(err interface{}) common.Response {
 		debug.PrintStack()
 		return common.Response{
 			Code:    http.StatusInternalServerError,
-			Message: "服务器内部错误",
+			Message: "系统未知异常",
 		}
+	}
+}
+
+func LoggerToFile() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		// 开始时间
+		start := time.Now()
+		// 请求报文
+		var requestBody []byte
+		if ctx.Request.Body != nil {
+			var err error
+			requestBody, err = ctx.GetRawData()
+			if err != nil {
+				common.Warn(map[string]interface{}{"err": err.Error()}, "get http request body error")
+			}
+			ctx.Request.Body = ioutil.NopCloser(bytes.NewBuffer(requestBody))
+		}
+		// 处理请求
+		ctx.Next()
+		// 结束时间
+		end := time.Now()
+		common.Info(map[string]interface{}{
+			"statusCode": ctx.Writer.Status(),
+			"cost":       float64(end.Sub(start).Nanoseconds()/1e4) / 100.0,
+			"clientIp":   ctx.ClientIP(),
+			"method":     ctx.Request.Method,
+			"uri":        ctx.Request.RequestURI,
+		})
 	}
 }

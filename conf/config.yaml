@@ -24,6 +24,9 @@ elasticConfig:
     healthcheckInterval: 5
     # 日志前缀
     logPre: ES-
+log: # 日志配置
+    # 日志路径
+    dir: "./log"
 
 
 

@@ -31,6 +31,7 @@ func InitRoute() *gin.Engine {
 	}
 	router.Use(middleware.Cors())
 	router.Use(middleware.ExceptionMiddleware())
+	router.Use(middleware.LoggerToFile())
 
 	groupv1 := router.Group(GROUP_V1)
 	// Register all routers

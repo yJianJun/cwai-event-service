@@ -43,7 +43,7 @@ type ServerConfig struct {
 	CCAEAPIs      CCAEAPIs      `mapstructure:"ccaeAPIs"`
 	MysqlConfig   MysqlConfig   `mapstructure:"mysqlConfig"`
 	ElasticConfig ElasticConfig `mapstructure:"elasticConfig"`
-	//	LoggerInfo  LoggerInfo `mapstructure:"logger"`
+	Log           LogConf       `yaml:"log"`
 }
 
 type MysqlConfig struct {
@@ -61,10 +61,16 @@ type ElasticConfig struct {
 	LogPre              string        `mapstructure:"logPre"`
 }
 
+type LogConf struct {
+	Dir string `yaml:"dir"`
+}
+
+var Config *ServerConfig
+
 func NewConfig() *ServerConfig {
-	config := &ServerConfig{}
-	config.Init()
-	return config
+	Config = &ServerConfig{}
+	Config.Init()
+	return Config
 }
 
 // Init 初始化默认参数
@@ -90,6 +96,7 @@ func (mo *ServerConfig) Init() {
 	viper.SetDefault("elasticConfig.sniff", false)
 	viper.SetDefault("elasticConfig.healthCheckInterval", 5)
 	viper.SetDefault("elasticConfig.logPre", "ES-")
+	viper.SetDefault("log.dir", "./log")
 }
 
 func (mo *ServerConfig) BindFlags(cmd *cobra.Command) {
