@@ -1,19 +1,21 @@
-ccaeServer:
-    protocol: https
-    host: ccae.manager.ctyun.cn
-    port: 26335
-    userName: lndxsy502cs
-    userPassword: Lnsydx502cs@2024
-    tokenTimeOut: 1800
-ccaeAPIs:
-    tokenUrl: /rest/plat/smapp/v1/oauth/token
-    qureyTopoUrl: /api/monitor/v1/query-topo
-mysqlConfig:
+ccae:
+    server:
+        protocol: https
+        host: ccae.manager.ctyun.cn
+        port: 26335
+        userName: lndxsy502cs
+        userPassword: Lnsydx502cs@2024
+        tokenTimeOut: 1800
+        shutdownTimeout: 1800
+    api:
+        tokenUrl: /rest/plat/smapp/v1/oauth/token
+        qureyTopoUrl: /api/monitor/v1/query-topo
+mysql:
     user: root
     password: 930927
     address: 127.0.0.1:3306
     db: ctccl
-elasticConfig:
+elasticSearch:
     # 是否开启
     enable: true
     # 服务地址，多个地址用逗号隔开
@@ -27,6 +29,10 @@ elasticConfig:
 log: # 日志配置
     # 日志路径
     dir: "./log"
+app:
+    configFile: "./conf/config.yaml"
+    port: "8081"
+    host: "127.0.0.1"
 
 
 

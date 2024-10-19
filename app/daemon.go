@@ -18,7 +18,7 @@ type Daemon struct {
 }
 
 func NewDaemon(cfg *config.ServerConfig) *Daemon {
-	address := cfg.Host + ":" + cfg.Port
+	address := cfg.App.Host + ":" + cfg.App.Port
 	routers := router.InitRoute()
 
 	//init ccae client config
@@ -58,7 +58,7 @@ func (da *Daemon) Run() error {
 func (da *Daemon) Shutdown() error {
 	glog.Info("Shutdown of Daemon")
 
-	shutdownTimeout := da.Config.ShutTimeOut
+	shutdownTimeout := da.Config.CCAE.Server.ShutdownTimeout
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(shutdownTimeout)*time.Second)
 	defer cancel()

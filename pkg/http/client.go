@@ -96,14 +96,14 @@ var CCAEClient *Client
 
 // NewClient 返回一个新的客户端
 func NewClient(conf *config.ServerConfig) *Client {
-	protocolHostPort := fmt.Sprintf("%s://%s:%s", conf.CCAEServer.Protocol, conf.CCAEServer.Host, conf.CCAEServer.Port)
+	protocolHostPort := fmt.Sprintf("%s://%s:%s", conf.CCAE.Server.Protocol, conf.CCAE.Server.Host, conf.CCAE.Server.Port)
 	CCAEClient = &Client{
 		ProtocolHostPort:  protocolHostPort,
-		LoginPath:         conf.CCAEAPIs.TokenUrl,
-		TopoPath:          conf.CCAEAPIs.QureyTopoUrl,
-		UserName:          conf.CCAEServer.UserName,
-		UserPassword:      conf.CCAEServer.UserPassword,
-		TokenTimeOut:      time.Duration(conf.CCAEServer.TokenTimeOut),
+		LoginPath:         conf.CCAE.Api.TokenUrl,
+		TopoPath:          conf.CCAE.Api.QureyTopoUrl,
+		UserName:          conf.CCAE.Server.UserName,
+		UserPassword:      conf.CCAE.Server.UserPassword,
+		TokenTimeOut:      time.Duration(conf.CCAE.Server.TokenTimeOut),
 		ContentType:       "application/json",
 		Header:            make(http.Header),
 		HTTPClient:        NewHTTPClient(&HTTPConfig{}),

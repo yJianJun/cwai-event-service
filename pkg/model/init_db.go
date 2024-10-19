@@ -7,6 +7,7 @@ import (
 	"github.com/olivere/elastic"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"time"
 )
 
 const eventIndexMapping = `{
@@ -57,7 +58,7 @@ var DB *gorm.DB
 var ESclient *elastic.Client // ES客户端
 
 func ConnectDatabase(conf *config.ServerConfig) error {
-	dsn := generateDSN(conf.MysqlConfig)
+	dsn := generateDSN(conf.Mysql)
 	database, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
 		return fmt.Errorf("failed to connect to database: %w", err)
@@ -72,7 +73,7 @@ func ConnectDatabase(conf *config.ServerConfig) error {
 }
 
 // 生成DSN字符串
-func generateDSN(mysqlConfig config.MysqlConfig) string {
+func generateDSN(mysqlConfig config.Mysql) string {
 	return fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8&parseTime=True&loc=Local",
 		mysqlConfig.User, mysqlConfig.Password, mysqlConfig.Address, mysqlConfig.Db)
 }
@@ -83,7 +84,7 @@ func migrateDatabase(database *gorm.DB) error {
 }
 
 func InitElasticSearch(conf *config.ServerConfig) error {
-	elasticConfig := conf.ElasticConfig
+	elasticConfig := conf.ElasticSearch
 	if !elasticConfig.Enable {
 		return nil
 	}
@@ -102,11 +103,11 @@ func InitElasticSearch(conf *config.ServerConfig) error {
 	return nil
 }
 
-func createElasticClient(config config.ElasticConfig) (*elastic.Client, error) {
+func createElasticClient(config config.ElaticSearch) (*elastic.Client, error) {
 	client, err := elastic.NewClient(
 		elastic.SetURL(config.Url),
 		elastic.SetSniff(config.Sniff),
-		elastic.SetHealthcheckInterval(config.HealthCheckInterval),
+		elastic.SetHealthcheckInterval(time.Duration(config.HealthCheckInterval)),
 	)
 	if err != nil {
 		return nil, err
