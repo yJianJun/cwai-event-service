@@ -29,13 +29,6 @@ func NewServerCommand() *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Run: func(cmd *cobra.Command, args []string) {
-			if err := opts.ReadYAML(configPath); err != nil {
-				fmt.Fprintf(os.Stderr, "[WARN] read config file failed: %s\n", err)
-			}
-			if err := opts.Parse(); err != nil {
-				fmt.Fprintf(os.Stderr, "[WARN] parse config failed: %s\n", err)
-				os.Exit(1)
-			}
 			fmt.Fprintf(os.Stderr, "config: %+v\n", opts)
 			if err := runDaemon(opts); err != nil {
 				fmt.Fprintf(os.Stderr, "%v\n", err)

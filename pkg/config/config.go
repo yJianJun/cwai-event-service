@@ -1,14 +1,10 @@
 package config
 
 import (
-	"bytes"
 	"flag"
 	"fmt"
 	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/cobra"
-	"io/ioutil"
-	"os"
-
 	"github.com/spf13/viper"
 )
 
@@ -108,28 +104,7 @@ func (mo *ServerConfig) Init() {
 func (mo *ServerConfig) BindFlags(cmd *cobra.Command) {
 	cmd.Flags().StringP("host", "H", "", "listen host")
 	cmd.Flags().StringP("port", "p", "", "listen port")
-
 	viper.BindPFlags(cmd.Flags()) //命令行标志的值设置覆盖值
-}
-
-// ParseYAML 从YAML文件解析参数
-func (mo *ServerConfig) ReadYAML(path string) (err error) {
-	viper.SetConfigType("YAML")
-	f, err := os.Open(path)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-	content, err := ioutil.ReadAll(f)
-	if err != nil {
-		return err
-	}
-	viper.ReadConfig(bytes.NewBuffer(content))
-	return nil
-}
-
-func (mo *ServerConfig) Parse() (err error) {
-	return viper.Unmarshal(mo)
 }
 
 func (mo *ServerConfig) Validate() error {
