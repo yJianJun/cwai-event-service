@@ -1,51 +1,134 @@
 {
   "events" : {
     "aliases" : {},
-    "mappings" : {
-      "_doc" : {
-        "properties" : {
-          "bandwidth" : {
-            "type" : "long"
+    "mappings": {
+      "_doc": {
+        "_size": {
+          "enabled": true
+        },
+        "properties": {
+          "specversion": {
+            "type": "keyword"
           },
-          "data_size" : {
-            "type" : "long"
+          "id": {
+            "type": "keyword"
           },
-          "error_code" : {
-            "type" : "long"
+          "source": {
+            "type": "keyword"
           },
-          "event_type" : {
-            "type" : "keyword"
+          "ctyunregion": {
+            "type": "keyword"
           },
-          "id" : {
-            "type" : "long"
+          "type": {
+            "type": "keyword"
           },
-          "level" : {
-            "type" : "keyword"
+          "datacontenttype": {
+            "type": "keyword"
           },
-          "local_guid" : {
-            "type" : "text",
-            "analyzer" : "ik_max_word"
+          "subject": {
+            "type": "keyword"
           },
-          "remote_guid" : {
-            "type" : "text",
-            "analyzer" : "ik_max_word"
+          "time": {
+            "type": "date",
+            "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
           },
-          "time_duration" : {
-            "type" : "long"
+          "task_id": {
+            "type": "keyword"
           },
-          "timestamp" : {
-            "type" : "date",
-            "format" : "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+          "task_record_id": {
+            "type": "keyword"
+          },
+          "task_name": {
+            "type": "keyword"
+          },
+          "task_detail": {
+            "type": "keyword"
+          },
+          "level": {
+            "type": "keyword"
+          },
+          "account_id": {
+            "type": "keyword"
+          },
+          "user_id": {
+            "type": "keyword"
+          },
+          "region_id": {
+            "type": "keyword"
+          },
+          "resource_group_id": {
+            "type": "keyword"
+          },
+          "resource_group_name": {
+            "type": "text",
+            "analyzer": "ik_max_word"
+          },
+          "data": {
+            "properties": {
+              "time": {
+                "type": "date",
+                "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+              },
+              "status": {
+                "type": "text",
+                "analyzer": "ik_max_word"
+              },
+              "status_message": {
+                "type": "text",
+                "analyzer": "ik_max_word"
+              },
+              "compute_type": {
+                "type": "keyword"
+              },
+              "node_ip": {
+                "type": "text",
+                "analyzer": "ik_max_word"
+              },
+              "node_name": {
+                "type": "text",
+                "analyzer": "ik_max_word"
+              },
+              "pod_namespace": {
+                "type": "keyword"
+              },
+              "pod_ip": {
+                "type": "text",
+                "analyzer": "ik_max_word"
+              },
+              "pod_name": {
+                "type": "text",
+                "analyzer": "ik_max_word"
+              },
+              "compute_detail": {
+                "type": "text",
+                "analyzer": "ik_max_word"
+              },
+              "event_time": {
+                "type": "date",
+                "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+              },
+              "local_guid": { "type": "keyword"},
+              "remoteguid": { "type": "keyword"},
+              "errcode": { "type": "keyword"},
+              "err_message": {
+                "type": "text",
+                "analyzer": "ik_max_word"
+              },
+              "content": {
+                "type": "text",
+                "analyzer": "ik_max_word"
+              }
+            }
           }
         }
       }
     },
     "settings" : {
       "index" : {
-        "creation_date" : "1729074465926",
+        "creation_date" : "1729736043927",
         "number_of_shards" : "5",
         "number_of_replicas" : "1",
-        "uuid" : "QMePFhlBTku6vqS7wKu9ZA",
+        "uuid" : "ZNqT_BrHQ32Yj0JRsRjapQ",
         "version" : {
           "created" : "6082399"
         },

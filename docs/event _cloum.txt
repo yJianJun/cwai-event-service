@@ -1,0 +1,46 @@
+### 通用
+`specversion	    事件格式版本	string	默认0	1.0
+`id	            事件唯一标识id	string	是	自生成，使用google/uuid库生成	已对齐：与云监控对齐格式，金建江
+`source	        事件来源	    string	是	可选：ctyun.yunxiao_resource_group	集合通信库等 ctyun.yunxiao_task
+`ctyunregion	资源池名	    string	是	annotation:	池内上报自动补齐，云监控；公网上报需要指定ctyunregion
+`time	        时间（北京时间）	string	是		上报时间
+`type	        事件类型描述	string	是	task_failed
+`datacontenttype	编码说明	    string	是	固定值：application/json
+`subject	        主题	        string	是	固定格式: ctyun.yunxiao_resource_group:taskname-xx
+`task_id	        事件对象id	string	是	annotation:task_id	 事件对象信息；事件任务详情示例：task_record_id:<id>;task_pod:<pod>;
+`task_record_id	事件对象job id	string	是	annotation:task_record_id
+`task_name	    事件对象名	string	是	annotation:task_name
+`task_detail	    事件对象详情	string	否
+`level	        事件级别	    string	是		见如下
+`account_id	    租户id	    string	是	annotation:account_id
+`user_id	        用户id	    string	是	annotation:user_id
+`region_id	    资源池id	    string	是	annotation:region_id
+`resource_group_id	资源组id	string	是	annotation:resource_group_id
+`resource_group_name	资源组名	string	是	annotation:resource_group_name
+`data	        事件消息详情	object	是		见下表
+
+### 算力
+`time	        事件发生时间	string	是		timestamp
+`status	        状态	        string	是
+`status_message	状态信息	    string	是		event_massage
+
+
+### ctccl
+`compute_type	计算资源类型	string	是	环境变量COMPUTE_TYPE示例：POD；NODE	发生事件所在资源组、裸金属、云主机或pod,计算资源详情hostname:"";ip:""
+`node_ip	节点ip	string	否	环境变量NODE_IP
+`node_name	计算资源id	string	否	环境变量NODE_NAME
+`pod_namespace	pod命名空间	string	否	环境变量POD_NAMESPACE
+`pod_ip	pod ip	string	否	环境变量POD_IP
+`pod_name	pod名	string	否	环境变量POD_NAME
+`compute_detail	计算资源详情	string	否
+`localguid	本地ib卡guid
+`remoteguid	远程ib卡guid
+`errcode	    异常代码
+`err_message	异常信息
+
+### 训练日志
+`content	            事件信息	string	是		event_massage
+
+
+
+

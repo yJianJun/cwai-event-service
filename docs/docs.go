@@ -543,19 +543,19 @@ const docTemplate = `{
                     "example": "ctccl-inter-node-bandwidth"
                 },
                 "id": {
-                    "description": "ID 事件的唯一标识符\n@description 事件的唯一标识符\n@example 1",
-                    "type": "integer"
+                    "description": "ID 事件的唯一标识符\n@description 事件的唯一标识符\n@example \"ctccl-regionid-accountid-taskid-时间戳-pid-eventcount\"",
+                    "type": "string"
                 },
                 "level": {
                     "description": "Level 事件等级\n@description 事件等级，例如\"High\"\n@example \"High\"",
                     "type": "string"
                 },
                 "local_guid": {
-                    "description": "LocalGuid 本端ib/roce设备nodegid\nRequired: true\nExample: 0x98039b03009a2b3a",
+                    "description": "LocalGuid 本端ib/roce设备nodegid\nRequired: true\nExample: \"0x98039b03009a2b3a\"",
                     "type": "string"
                 },
                 "remote_guid": {
-                    "description": "RemoteGuid 对端ib/roce设备nodegid\nRequired: true\nExample: 0xc49b150003a1420c",
+                    "description": "RemoteGuid 对端ib/roce设备nodegid\nRequired: true\nExample: \"0xc49b150003a1420c\"",
                     "type": "string"
                 },
                 "time_duration": {
