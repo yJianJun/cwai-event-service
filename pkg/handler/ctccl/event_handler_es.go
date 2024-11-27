@@ -15,6 +15,18 @@ import (
 	"time"
 )
 
+func bindAndValidateInput(c *gin.Context) (common.EventUpdate, error) {
+	var input common.EventUpdate
+	if err := c.ShouldBindJSON(&input); err != nil {
+		return input, err
+	}
+	return input, nil
+}
+
+func handleInternalServerError(c *gin.Context, msg string) {
+	c.JSON(http.StatusInternalServerError, gin.H{common.Message: msg})
+}
+
 // CreateEventFromES godoc
 // @Summary 创建新的事件
 // @Description 从请求中解析JSON并在Elasticsearch中存储一个新的事件

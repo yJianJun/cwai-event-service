@@ -5,8 +5,6 @@ import (
 	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/config"
 	"fmt"
 	"github.com/olivere/elastic"
-	"gorm.io/driver/mysql"
-	"gorm.io/gorm"
 	"time"
 )
 
@@ -135,33 +133,12 @@ const eventIndexMapping = `{
   }
 }`
 
-var DB *gorm.DB
 var ESclient *elastic.Client // ES客户端
-
-func ConnectDatabase(conf *config.ServerConfig) error {
-	dsn := generateDSN(conf.Mysql)
-	database, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
-	if err != nil {
-		return fmt.Errorf("failed to connect to database: %w", err)
-	}
-
-	if err := migrateDatabase(database); err != nil {
-		return fmt.Errorf("failed to migrate database: %w", err)
-	}
-
-	DB = database
-	return nil
-}
 
 // 生成DSN字符串
 func generateDSN(mysqlConfig config.Mysql) string {
 	return fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8&parseTime=True&loc=Local",
 		mysqlConfig.User, mysqlConfig.Password, mysqlConfig.Address, mysqlConfig.Db)
-}
-
-// 迁移数据库
-func migrateDatabase(database *gorm.DB) error {
-	return database.AutoMigrate(&Event{})
 }
 
 func InitElasticSearch(conf *config.ServerConfig) error {

@@ -23,7 +23,6 @@ func NewDaemon(cfg *config.ServerConfig) *Daemon {
 
 	//init ccae client config
 	client.NewClient(cfg)
-	model.ConnectDatabase(cfg)
 	model.InitElasticSearch(cfg)
 
 	srv := &http.Server{

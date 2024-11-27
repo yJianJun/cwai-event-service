@@ -39,15 +39,7 @@ func InitRoute() *gin.Engine {
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 
 	groupCTCCL := router.Group(CTCCL)
-	DbHandler := groupCTCCL.Group(db)
 	docs.SwaggerInfo.BasePath = "/ctccl"
-	{
-		DbHandler.GET("/query", ctccl.GetAllEventFromDB)
-		DbHandler.POST("/save", ctccl.CreateEventFromDB)
-		DbHandler.GET("/query/:id", ctccl.FindEventByIdFromDB)
-		DbHandler.PUT("/update/:id", ctccl.UpdateEventFromDB)
-		DbHandler.DELETE("/delete/:id", ctccl.DeleteEventFromDB)
-	}
 	EsHandler := groupCTCCL.Group(es)
 	{
 		EsHandler.POST("/page", ctccl.PageEventFromES)
