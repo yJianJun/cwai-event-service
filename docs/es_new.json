@@ -1,134 +1,136 @@
 {
   "events" : {
     "aliases" : {},
-    "mappings": {
-      "_doc": {
-        "_size": {
-          "enabled": true
+    "mappings" : {
+      "_doc" : {
+        "_size" : {
+          "enabled" : true
         },
-        "properties": {
-          "specversion": {
-            "type": "keyword"
+        "properties" : {
+          "account_id" : {
+            "type" : "keyword"
           },
-          "id": {
-            "type": "keyword"
+          "ctyunregion" : {
+            "type" : "keyword"
           },
-          "source": {
-            "type": "keyword"
-          },
-          "ctyunregion": {
-            "type": "keyword"
-          },
-          "type": {
-            "type": "keyword"
-          },
-          "datacontenttype": {
-            "type": "keyword"
-          },
-          "subject": {
-            "type": "keyword"
-          },
-          "time": {
-            "type": "date",
-            "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
-          },
-          "task_id": {
-            "type": "keyword"
-          },
-          "task_record_id": {
-            "type": "keyword"
-          },
-          "task_name": {
-            "type": "keyword"
-          },
-          "task_detail": {
-            "type": "keyword"
-          },
-          "level": {
-            "type": "keyword"
-          },
-          "account_id": {
-            "type": "keyword"
-          },
-          "user_id": {
-            "type": "keyword"
-          },
-          "region_id": {
-            "type": "keyword"
-          },
-          "resource_group_id": {
-            "type": "keyword"
-          },
-          "resource_group_name": {
-            "type": "text",
-            "analyzer": "ik_max_word"
-          },
-          "data": {
-            "properties": {
-              "time": {
-                "type": "date",
-                "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+          "data" : {
+            "properties" : {
+              "compute_detail" : {
+                "type" : "text",
+                "analyzer" : "ik_max_word"
               },
-              "status": {
-                "type": "text",
-                "analyzer": "ik_max_word"
+              "compute_type" : {
+                "type" : "keyword"
               },
-              "status_message": {
-                "type": "text",
-                "analyzer": "ik_max_word"
+              "content" : {
+                "type" : "text",
+                "analyzer" : "ik_max_word"
               },
-              "compute_type": {
-                "type": "keyword"
+              "err_message" : {
+                "type" : "text",
+                "analyzer" : "ik_max_word"
               },
-              "node_ip": {
-                "type": "text",
-                "analyzer": "ik_max_word"
+              "errcode" : {
+                "type" : "keyword"
               },
-              "node_name": {
-                "type": "text",
-                "analyzer": "ik_max_word"
+              "local_guid" : {
+                "type" : "keyword"
               },
-              "pod_namespace": {
-                "type": "keyword"
+              "node_ip" : {
+                "type" : "text",
+                "analyzer" : "ik_max_word"
               },
-              "pod_ip": {
-                "type": "text",
-                "analyzer": "ik_max_word"
+              "node_name" : {
+                "type" : "text",
+                "analyzer" : "ik_max_word"
               },
-              "pod_name": {
-                "type": "text",
-                "analyzer": "ik_max_word"
+              "pod_ip" : {
+                "type" : "text",
+                "analyzer" : "ik_max_word"
               },
-              "compute_detail": {
-                "type": "text",
-                "analyzer": "ik_max_word"
+              "pod_name" : {
+                "type" : "text",
+                "analyzer" : "ik_max_word"
               },
-              "event_time": {
-                "type": "date",
-                "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+              "pod_namespace" : {
+                "type" : "keyword"
               },
-              "local_guid": { "type": "keyword"},
-              "remoteguid": { "type": "keyword"},
-              "errcode": { "type": "keyword"},
-              "err_message": {
-                "type": "text",
-                "analyzer": "ik_max_word"
+              "remote_guid" : {
+                "type" : "keyword"
               },
-              "content": {
-                "type": "text",
-                "analyzer": "ik_max_word"
+              "status" : {
+                "type" : "text",
+                "analyzer" : "ik_max_word"
+              },
+              "status_message" : {
+                "type" : "text",
+                "analyzer" : "ik_max_word"
+              },
+              "time" : {
+                "type" : "date",
+                "format" : "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
               }
             }
+          },
+          "datacontenttype" : {
+            "type" : "keyword"
+          },
+          "id" : {
+            "type" : "keyword"
+          },
+          "level" : {
+            "type" : "keyword"
+          },
+          "region_id" : {
+            "type" : "keyword"
+          },
+          "resource_group_id" : {
+            "type" : "keyword"
+          },
+          "resource_group_name" : {
+            "type" : "text",
+            "analyzer" : "ik_max_word"
+          },
+          "source" : {
+            "type" : "keyword"
+          },
+          "specversion" : {
+            "type" : "keyword"
+          },
+          "subject" : {
+            "type" : "keyword"
+          },
+          "task_detail" : {
+            "type" : "keyword"
+          },
+          "task_id" : {
+            "type" : "keyword"
+          },
+          "task_name" : {
+            "type" : "keyword"
+          },
+          "task_record_id" : {
+            "type" : "keyword"
+          },
+          "time" : {
+            "type" : "date",
+            "format" : "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+          },
+          "type" : {
+            "type" : "keyword"
+          },
+          "user_id" : {
+            "type" : "keyword"
           }
         }
       }
     },
     "settings" : {
       "index" : {
-        "creation_date" : "1729736043927",
+        "creation_date" : "1732734893541",
         "number_of_shards" : "5",
         "number_of_replicas" : "1",
-        "uuid" : "ZNqT_BrHQ32Yj0JRsRjapQ",
+        "uuid" : "kvo-Q6t3RIeVwH0wEZyasA",
         "version" : {
           "created" : "6082399"
         },

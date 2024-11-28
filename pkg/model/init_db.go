@@ -4,7 +4,7 @@ import (
 	"context"
 	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/config"
 	"fmt"
-	"github.com/olivere/elastic"
+	"github.com/olivere/elastic/v7"
 	"time"
 )
 
@@ -111,12 +111,8 @@ const eventIndexMapping = `{
               "type": "text",
               "analyzer": "ik_max_word"
             },
-            "event_time": {
-              "type": "date",
-              "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
-            },
             "local_guid": { "type": "keyword"},
-            "remoteguid": { "type": "keyword"},
+            "remote_guid": { "type": "keyword"},
             "errcode": { "type": "keyword"},
             "err_message": {
               "type": "text",

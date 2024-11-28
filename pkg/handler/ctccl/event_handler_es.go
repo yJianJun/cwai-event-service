@@ -8,7 +8,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/olivere/elastic"
+	"github.com/olivere/elastic/v7"
 	"log"
 	"net/http"
 	"reflect"
