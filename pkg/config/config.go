@@ -6,6 +6,7 @@ import (
 	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"strings"
 )
 
 type server struct {
@@ -55,6 +56,7 @@ type ElaticSearch struct {
 	Sniff               bool   `yaml:"sniff"`
 	HealthCheckInterval int    `yaml:"healthCheckInterval"`
 	LogPre              string `yaml:"logPre"`
+	Password            string `yaml:"password"`
 }
 
 type log struct {
@@ -83,6 +85,9 @@ func (mo *ServerConfig) Init() {
 	// 读取配置文件
 	v := viper.New()
 	v.SetConfigFile(configFile)
+	viper.AutomaticEnv()
+	replacer := strings.NewReplacer(".", "_")
+	viper.SetEnvKeyReplacer(replacer)
 	if err := v.ReadInConfig(); err != nil {
 		fmt.Errorf("配置解析失败:%s\n", err)
 	}

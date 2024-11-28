@@ -68,8 +68,7 @@
               "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
             },
             "status": {
-              "type": "text",
-              "analyzer": "ik_max_word"
+              "type": "keyword"
             },
             "status_message": {
               "type": "text",
@@ -87,7 +86,8 @@
               "analyzer": "ik_max_word"
             },
             "pod_namespace": {
-              "type": "keyword"
+              "type": "text",
+              "analyzer": "ik_max_word"
             },
             "pod_ip": {
               "type": "text",
@@ -100,7 +100,7 @@
             "compute_detail": {
               "type": "text",
               "analyzer": "ik_max_word"
-            },
+            },//删除
             "local_guid": { "type": "keyword"},
             "remote_guid": { "type": "keyword"},
             "errcode": { "type": "keyword"},

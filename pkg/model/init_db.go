@@ -163,6 +163,8 @@ func createElasticClient(config config.ElaticSearch) (*elastic.Client, error) {
 		elastic.SetSniff(config.Sniff),
 		elastic.SetHealthcheckInterval(time.Duration(config.HealthCheckInterval)),
 	)
+	service := elastic.NewXPackSecurityChangePasswordService(client)
+	_, err = service.Password(config.Password).Username("elastic").Do(context.Background())
 	if err != nil {
 		return nil, err
 	}
