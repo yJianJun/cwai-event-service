@@ -30,39 +30,39 @@
           "type": "date",
           "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
         },
-        "task_id": {
-          "type": "keyword"
-        },
-        "task_record_id": {
-          "type": "keyword"
-        },
-        "task_name": {
-          "type": "keyword"
-        },
-        "task_detail": {
-          "type": "keyword"
-        },
-        "level": {
-          "type": "keyword"
-        },
-        "account_id": {
-          "type": "keyword"
-        },
-        "user_id": {
-          "type": "keyword"
-        },
-        "region_id": {
-          "type": "keyword"
-        },
-        "resource_group_id": {
-          "type": "keyword"
-        },
-        "resource_group_name": {
-          "type": "text",
-          "analyzer": "ik_max_word"
-        },
         "data": {
           "properties": {
+            "task_id": {
+              "type": "keyword"
+            },
+            "task_record_id": {
+              "type": "keyword"
+            },
+            "task_name": {
+              "type": "keyword"
+            },
+            "task_detail": {
+              "type": "keyword"
+            },
+            "level": {
+              "type": "keyword"
+            },
+            "account_id": {
+              "type": "keyword"
+            },
+            "user_id": {
+              "type": "keyword"
+            },
+            "region_id": {
+              "type": "keyword"
+            },
+            "resource_group_id": {
+              "type": "keyword"
+            },
+            "resource_group_name": {
+              "type": "text",
+              "analyzer": "ik_max_word"
+            },
             "time": {
               "type": "date",
               "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"

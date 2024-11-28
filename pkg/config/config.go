@@ -86,7 +86,7 @@ func (mo *ServerConfig) Init() {
 	v := viper.New()
 	v.SetConfigFile(configFile)
 	viper.AutomaticEnv()
-	replacer := strings.NewReplacer(".", "_")
+	replacer := strings.NewReplacer("_", ".")
 	viper.SetEnvKeyReplacer(replacer)
 	if err := v.ReadInConfig(); err != nil {
 		fmt.Errorf("配置解析失败:%s\n", err)

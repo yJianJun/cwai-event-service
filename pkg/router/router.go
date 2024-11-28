@@ -3,7 +3,9 @@ package router
 
 import (
 	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/docs"
+	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/handler/compute_task"
 	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/handler/ctccl"
+	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/handler/training_log"
 	handlerv1 "ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/handler/v1"
 	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/middleware"
 	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/router/router_middleware"
@@ -14,10 +16,11 @@ import (
 )
 
 const (
-	GROUP_V1 = "/openapi/v4/cwai"
-	CTCCL    = "/ctccl"
-	db       = "/db"
-	es       = "/es"
+	GROUP_V1     = "/openapi/v4/cwai"
+	CTCCL        = "/ctccl"
+	TRAINING_LOG = "/train"
+	COMPUTE_TASK = "/compute"
+	es           = "/es"
 )
 
 func InitRoute() *gin.Engine {
@@ -38,15 +41,21 @@ func InitRoute() *gin.Engine {
 	groupv1.POST("/server/topo", handlerv1.QueryNetTopo)
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 
-	groupCTCCL := router.Group(CTCCL)
 	docs.SwaggerInfo.BasePath = "/ctccl"
-	EsHandler := groupCTCCL.Group(es)
+	groupCTCCL := router.Group(CTCCL)
 	{
-		EsHandler.POST("/page", ctccl.PageEventFromES)
-		EsHandler.POST("/save", ctccl.CreateEventFromES)
-		EsHandler.GET("/query/:id", ctccl.FindEventByIdFromES)
-		EsHandler.PUT("/update/:id", ctccl.UpdateEventFromES)
-		EsHandler.DELETE("/delete/:id", ctccl.DeleteEventFromES)
+		groupCTCCL.POST("/page", ctccl.PageEventFromES)
+		groupCTCCL.GET("/query/:id", ctccl.FindEventByIdFromES)
+	}
+	groupTrainingLog := router.Group(TRAINING_LOG)
+	{
+		groupTrainingLog.POST("/page", training_log.PageEventFromES)
+		groupTrainingLog.GET("/query/:id", training_log.FindEventByIdFromES)
+	}
+	groupComputeTask := router.Group(COMPUTE_TASK)
+	{
+		groupComputeTask.POST("/page", compute_task.PageEventFromES)
+		groupComputeTask.GET("/query/:id", compute_task.FindEventByIdFromES)
 	}
 	return router
 }

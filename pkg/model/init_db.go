@@ -8,120 +8,277 @@ import (
 	"time"
 )
 
-const eventIndexMapping = `{
+const compute_task_event_mapping = `{
   "mappings": {
-    "_doc": {
-      "_size": {
-        "enabled": true
+    "properties": {
+      "spec_version": {
+        "type": "keyword"
       },
-      "properties": {
-        "specversion": {
-          "type": "keyword"
-        },
-        "id": {
-          "type": "keyword"
-        },
-        "source": {
-          "type": "keyword"
-        },
-        "ctyunregion": {
-          "type": "keyword"
-        },
-        "type": {
-          "type": "keyword"
-        },
-        "datacontenttype": {
-          "type": "keyword"
-        },
-        "subject": {
-          "type": "keyword"
-        },
-        "time": {
-          "type": "date",
-          "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
-        },
-        "task_id": {
-          "type": "keyword"
-        },
-        "task_record_id": {
-          "type": "keyword"
-        },
-        "task_name": {
-          "type": "keyword"
-        },
-        "task_detail": {
-          "type": "keyword"
-        },
-        "level": {
-          "type": "keyword"
-        },
-        "account_id": {
-          "type": "keyword"
-        },
-        "user_id": {
-          "type": "keyword"
-        },
-        "region_id": {
-          "type": "keyword"
-        },
-        "resource_group_id": {
-          "type": "keyword"
-        },
-        "resource_group_name": {
-          "type": "text",
-          "analyzer": "ik_max_word"
-        },
-        "data": {
-          "properties": {
-            "time": {
-              "type": "date",
-              "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
-            },
-            "status": {
-              "type": "text",
-              "analyzer": "ik_max_word"
-            },
-            "status_message": {
-              "type": "text",
-              "analyzer": "ik_max_word"
-            },
-            "compute_type": {
-              "type": "keyword"
-            },
-            "node_ip": {
-              "type": "text",
-              "analyzer": "ik_max_word"
-            },
-            "node_name": {
-              "type": "text",
-              "analyzer": "ik_max_word"
-            },
-            "pod_namespace": {
-              "type": "keyword"
-            },
-            "pod_ip": {
-              "type": "text",
-              "analyzer": "ik_max_word"
-            },
-            "pod_name": {
-              "type": "text",
-              "analyzer": "ik_max_word"
-            },
-            "compute_detail": {
-              "type": "text",
-              "analyzer": "ik_max_word"
-            },
-            "local_guid": { "type": "keyword"},
-            "remote_guid": { "type": "keyword"},
-            "errcode": { "type": "keyword"},
-            "err_message": {
-              "type": "text",
-              "analyzer": "ik_max_word"
-            },
-            "content": {
-              "type": "text",
-              "analyzer": "ik_max_word"
-            }
+      "id": {
+        "type": "keyword"
+      },
+      "source": {
+        "type": "keyword"
+      },
+      "ctyun_region": {
+        "type": "keyword"
+      },
+      "type": {
+        "type": "keyword"
+      },
+      "data_content_type": {
+        "type": "keyword"
+      },
+      "time": {
+        "type": "date",
+        "format": "strict_date_optional_time||epoch_millis"
+      },
+      "subject": {
+        "type": "keyword"
+      },
+      "data": {
+        "properties": {
+          "task_id": {
+            "type": "keyword"
+          },
+          "task_record_id": {
+            "type": "keyword"
+          },
+          "task_name": {
+            "type": "text",
+            "analyzer": "ik_max_word"
+          },
+          "task_detail": {
+            "type": "text",
+            "analyzer": "ik_max_word"
+          },
+          "account_id": {
+            "type": "keyword"
+          },
+          "user_id": {
+            "type": "keyword"
+          },
+          "region_id": {
+            "type": "keyword"
+          },
+          "resource_group_id": {
+            "type": "keyword"
+          },
+          "resource_group_name": {
+            "type": "text",
+            "analyzer": "ik_max_word"
+          },
+          "level": {
+            "type": "keyword"
+          },
+          "time": {
+            "type": "date",
+            "format": "strict_date_optional_time||epoch_millis"
+          },
+          "status": {
+            "type": "keyword"
+          },
+          "status_message": {
+            "type": "text",
+            "analyzer": "ik_max_word"
+          }
+        }
+      }
+    }
+  }
+}`
+const ctccl_event_mapping = `{
+  "mappings": {
+    "properties": {
+      "spec_version": {
+        "type": "keyword"
+      },
+      "id": {
+        "type": "keyword"
+      },
+      "source": {
+        "type": "keyword"
+      },
+      "ctyun_region": {
+        "type": "keyword"
+      },
+      "type": {
+        "type": "keyword"
+      },
+      "data_content_type": {
+        "type": "keyword"
+      },
+      "time": {
+        "type": "date",
+        "format": "strict_date_optional_time||epoch_millis"
+      },
+      "subject": {
+        "type": "keyword"
+      },
+      "data": {
+        "properties": {
+          "task_id": {
+            "type": "keyword"
+          },
+          "task_record_id": {
+            "type": "keyword"
+          },
+          "task_name": {
+            "type": "text",
+            "analyzer": "ik_max_word"
+          },
+          "account_id": {
+            "type": "keyword"
+          },
+          "user_id": {
+            "type": "keyword"
+          },
+          "compute_type": {
+            "type": "keyword"
+          },
+          "node_ip": {
+            "type": "ip"
+          },
+          "node_name": {
+            "type": "text",
+            "analyzer": "ik_max_word"
+          },
+          "pod_namespace": {
+            "type": "text",
+            "analyzer": "ik_max_word"
+          },
+          "pod_ip": {
+            "type": "ip"
+          },
+          "pod_name": {
+            "type": "text",
+            "analyzer": "ik_max_word"
+          },
+          "region_id": {
+            "type": "keyword"
+          },
+          "resource_group_id": {
+            "type": "keyword"
+          },
+          "resource_group_name": {
+            "type": "text",
+            "analyzer": "ik_max_word"
+          },
+          "level": {
+            "type": "keyword"
+          },
+          "time": {
+            "type": "date",
+            "format": "strict_date_optional_time||epoch_millis"
+          },
+          "localguid": {
+            "type": "keyword"
+          },
+          "remoteguid": {
+            "type": "keyword"
+          },
+          "errcode": {
+            "type": "keyword"
+          },
+          "err_message": {
+            "type": "text"
+          }
+        }
+      }
+    }
+  }
+}`
+const training_log_event_mapping = `{
+  "mappings": {
+    "properties": {
+      "spec_version": {
+        "type": "keyword"
+      },
+      "id": {
+        "type": "keyword"
+      },
+      "source": {
+        "type": "keyword"
+      },
+      "ctyun_region": {
+        "type": "keyword"
+      },
+      "type": {
+        "type": "keyword"
+      },
+      "data_content_type": {
+        "type": "keyword"
+      },
+      "time": {
+        "type": "date",
+        "format": "strict_date_optional_time||epoch_millis"
+      },
+      "subject": {
+        "type": "keyword"
+      },
+      "data": {
+        "properties": {
+          "task_id": {
+            "type": "keyword"
+          },
+          "task_record_id": {
+            "type": "keyword"
+          },
+          "task_name": {
+            "type": "text",
+            "analyzer": "ik_max_word"
+          },
+          "task_detail": {
+            "type": "text",
+            "analyzer": "ik_max_word"
+          },
+          "account_id": {
+            "type": "keyword"
+          },
+          "user_id": {
+            "type": "keyword"
+          },
+          "compute_type": {
+            "type": "keyword"
+          },
+          "node_ip": {
+            "type": "ip"
+          },
+          "node_name": {
+            "type": "text",
+            "analyzer": "ik_max_word"
+          },
+          "pod_namespace": {
+            "type": "text",
+            "analyzer": "ik_max_word"
+          },
+          "pod_ip": {
+            "type": "ip"
+          },
+          "pod_name": {
+            "type": "text",
+            "analyzer": "ik_max_word"
+          },
+          "region_id": {
+            "type": "keyword"
+          },
+          "resource_group_id": {
+            "type": "keyword"
+          },
+          "resource_group_name": {
+            "type": "text",
+            "analyzer": "ik_max_word"
+          },
+          "level": {
+            "type": "keyword"
+          },
+          "time": {
+            "type": "date",
+            "format": "strict_date_optional_time||epoch_millis"
+          },
+          "content": {
+            "type": "text",
+            "analyzer": "ik_max_word"
           }
         }
       }
@@ -172,7 +329,17 @@ func createElasticClient(config config.ElaticSearch) (*elastic.Client, error) {
 }
 
 func createIndexMapping(client *elastic.Client) error {
-	return checkAndCreateIndex(client, "events", eventIndexMapping)
+	// 创建索引和映射时捕获错误
+	if err := checkAndCreateIndex(client, "compute_task_events", compute_task_event_mapping); err != nil {
+		return fmt.Errorf("failed to create compute task event mapping: %w", err)
+	}
+	if err := checkAndCreateIndex(client, "ctccl_events", ctccl_event_mapping); err != nil {
+		return fmt.Errorf("failed to create ctccl event mapping: %w", err)
+	}
+	if err := checkAndCreateIndex(client, "training_log_events", training_log_event_mapping); err != nil {
+		return fmt.Errorf("failed to create training log event mapping: %w", err)
+	}
+	return nil
 }
 
 func checkAndCreateIndex(client *elastic.Client, indexName string, mapping string) error {

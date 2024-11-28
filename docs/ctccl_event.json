@@ -1,0 +1,101 @@
+{
+  "mappings": {
+    "properties": {
+      "spec_version": {
+        "type": "keyword"
+      },
+      "id": {
+        "type": "keyword"
+      },
+      "source": {
+        "type": "keyword"
+      },
+      "ctyun_region": {
+        "type": "keyword"
+      },
+      "type": {
+        "type": "keyword"
+      },
+      "data_content_type": {
+        "type": "keyword"
+      },
+      "time": {
+        "type": "date",
+        "format": "strict_date_optional_time||epoch_millis"
+      },
+      "subject": {
+        "type": "keyword"
+      },
+      "data": {
+        "properties": {
+          "level": {
+            "type": "keyword"
+          },
+          "node_ip": {
+            "type": "ip"
+          },
+          "node_name": {
+            "type": "text",
+            "analyzer": "ik_max_word"
+          },
+          "pod_ip": {
+            "type": "ip"
+          },
+          "pod_name": {
+            "type": "text",
+            "analyzer": "ik_max_word"
+          },
+          "pod_namespace": {
+            "type": "text",
+            "analyzer": "ik_max_word"
+          },
+          "task_id": {
+            "type": "keyword"
+          },
+          "task_record_id": {
+            "type": "keyword"
+          },
+          "task_name": {
+            "type": "text",
+            "analyzer": "ik_max_word"
+          },
+          "account_id": {
+            "type": "keyword"
+          },
+          "user_id": {
+            "type": "keyword"
+          },
+          "compute_type": {
+            "type": "keyword"
+          },
+          "region_id": {
+            "type": "keyword"
+          },
+          "resource_group_id": {
+            "type": "keyword"
+          },
+          "resource_group_name": {
+            "type": "text",
+            "analyzer": "ik_max_word"
+          },
+          "time": {
+            "type": "date",
+            "format": "strict_date_optional_time||epoch_millis"
+          },
+          "localguid": {
+            "type": "keyword"
+          },
+          "remoteguid": {
+            "type": "keyword"
+          },
+          "errcode": {
+            "type": "keyword"
+          },
+          "err_message": {
+            "type": "text"
+          }
+        }
+      }
+    }
+  }
+}
