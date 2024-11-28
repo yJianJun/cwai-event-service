@@ -263,19 +263,27 @@ func searchEventsFromES(pageRequest model.EventPage) (*elastic.SearchResult, err
 		var val, _ = pageRequest.Time.Value()
 		str := val.(string)
 		now, _ := time.Parse("2006-01-02 15:04:05", str)
-		timeQuery = elastic.NewRangeQuery("timestamp").Lte(str).Gte(
+		timeQuery = elastic.NewRangeQuery("time").Lte(str).Gte(
 			util.GetPastMonthToday(now, 1))
 	}
-	var levelQuery, bandiWdthQuery, dataSizeQuery, errcodeQuery, timeDurationQuery *elastic.WildcardQuery
-	var localGuidQuery, remoteGuidQuery *elastic.MatchPhraseQuery
+	var levelQuery, computeTypeQuery, podNameSpaceQuery, remoteGuidQuery, localGuidQuery, errcodeQuery *elastic.WildcardQuery
+	var statusQuery, statusMessageQuery, nodeIpQuery, nodeNameQuery, podIpQuery, podNameQuery, computeDetailQuery, errMessageQuery, contentQuery *elastic.MatchPhraseQuery
 	if pageRequest.Keyword != "" {
 		levelQuery = elastic.NewWildcardQuery("level", "*"+pageRequest.Keyword+"*")
-		localGuidQuery = elastic.NewMatchPhraseQuery("local_guid", pageRequest.Keyword)
-		remoteGuidQuery = elastic.NewMatchPhraseQuery("remote_guid", pageRequest.Keyword)
-		bandiWdthQuery = elastic.NewWildcardQuery("bandwidth", "*"+pageRequest.Keyword+"*")
-		dataSizeQuery = elastic.NewWildcardQuery("data_size", "*"+pageRequest.Keyword+"*")
-		errcodeQuery = elastic.NewWildcardQuery("error_code", "*"+pageRequest.Keyword+"*")
-		timeDurationQuery = elastic.NewWildcardQuery("time_duration", "*"+pageRequest.Keyword+"*")
+		statusQuery = elastic.NewMatchPhraseQuery("data.status", pageRequest.Keyword)
+		statusMessageQuery = elastic.NewMatchPhraseQuery("data.status_message", pageRequest.Keyword)
+		nodeIpQuery = elastic.NewMatchPhraseQuery("data.node_ip", pageRequest.Keyword)
+		nodeNameQuery = elastic.NewMatchPhraseQuery("data.node_name", pageRequest.Keyword)
+		podIpQuery = elastic.NewMatchPhraseQuery("data.pod_ip", pageRequest.Keyword)
+		podNameQuery = elastic.NewMatchPhraseQuery("data.pod_name", pageRequest.Keyword)
+		computeDetailQuery = elastic.NewMatchPhraseQuery("data.compute_detail", pageRequest.Keyword)
+		errMessageQuery = elastic.NewMatchPhraseQuery("data.err_message", pageRequest.Keyword)
+		contentQuery = elastic.NewMatchPhraseQuery("data.content", pageRequest.Keyword)
+		computeTypeQuery = elastic.NewWildcardQuery("data.compute_type", "*"+pageRequest.Keyword+"*")
+		podNameSpaceQuery = elastic.NewWildcardQuery("data.pod_namespace", "*"+pageRequest.Keyword+"*")
+		localGuidQuery = elastic.NewWildcardQuery("data.local_guid", "*"+pageRequest.Keyword+"*")
+		remoteGuidQuery = elastic.NewWildcardQuery("data.remote_guid", "*"+pageRequest.Keyword+"*")
+		errcodeQuery = elastic.NewWildcardQuery("data.errcode", "*"+pageRequest.Keyword+"*")
 	}
 	query := elastic.NewBoolQuery()
 
@@ -283,8 +291,9 @@ func searchEventsFromES(pageRequest model.EventPage) (*elastic.SearchResult, err
 		query.Should(timeQuery)
 	}
 	if pageRequest.Keyword != "" {
-		query.Should(levelQuery).Should(bandiWdthQuery).Should(dataSizeQuery).Should(errcodeQuery).Should(timeDurationQuery)
-		query.Should(localGuidQuery).Should(remoteGuidQuery)
+		query.Should(levelQuery).Should(computeTypeQuery).Should(podNameSpaceQuery).Should(errcodeQuery).Should(localGuidQuery).
+			Should(remoteGuidQuery).Should(statusQuery).Should(statusMessageQuery).Should(contentQuery).Should(nodeIpQuery).
+			Should(nodeNameQuery).Should(podIpQuery).Should(podNameQuery).Should(computeDetailQuery).Should(errMessageQuery)
 	}
 	source, _ := query.Source()
 	log.Printf("es查询Query:%v", source)
