@@ -3,6 +3,7 @@ package training_log
 import (
 	"context"
 	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/common"
+	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/domain"
 	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/model"
 	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/util"
 	"encoding/json"
@@ -97,7 +98,7 @@ func getEventByIdFromES(c *gin.Context, id string) *model.TrainingLogEvent {
 // @Success      200 {object} common.PageVo
 // @Router       /es/page [post]
 func PageEventFromES(c *gin.Context) {
-	var pageRequest model.EventPage
+	var pageRequest domain.EventPage
 	if err := c.ShouldBindJSON(&pageRequest); err != nil {
 		panic(common.CommonError{
 			Code: http.StatusBadRequest,
@@ -125,7 +126,7 @@ func PageEventFromES(c *gin.Context) {
 	c.JSON(http.StatusOK, pageVo)
 }
 
-func searchEventsFromES(pageRequest model.EventPage) (*elastic.SearchResult, error) {
+func searchEventsFromES(pageRequest domain.EventPage) (*elastic.SearchResult, error) {
 	var timeQuery *elastic.RangeQuery
 
 	if !time.Time(pageRequest.Time).IsZero() {

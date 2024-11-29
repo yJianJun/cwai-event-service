@@ -4,6 +4,8 @@ import (
 	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/config"
 	"fmt"
 	"github.com/sirupsen/logrus"
+	"io"
+	"log"
 	"os"
 	"path"
 )
@@ -75,7 +77,7 @@ func setOutPutFile(level logrus.Level) {
 	if err != nil {
 		fmt.Println("open log file err", err)
 	}
-	logrus.SetOutput(os.Stderr)
+	log.SetOutput(io.MultiWriter(os.Stderr, os.Stdout)) // io.MultiWriter 返回一个 io.Writer 对象
 	logrus.SetLevel(level)
 	return
 }

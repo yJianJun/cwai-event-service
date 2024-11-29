@@ -3,12 +3,12 @@ package router
 
 import (
 	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/docs"
-	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/handler/compute_task"
-	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/handler/ctccl"
-	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/handler/training_log"
 	handlerv1 "ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/handler/v1"
 	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/middleware"
 	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/router/router_middleware"
+	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/service/compute_task_service"
+	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/service/ctccl"
+	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/service/training_log"
 	"github.com/gin-gonic/gin"
 	"github.com/golang/glog"
 	swaggerfiles "github.com/swaggo/files"
@@ -54,8 +54,8 @@ func InitRoute() *gin.Engine {
 	}
 	groupComputeTask := router.Group(COMPUTE_TASK)
 	{
-		groupComputeTask.POST("/page", compute_task.PageEventFromES)
-		groupComputeTask.GET("/query/:id", compute_task.FindEventByIdFromES)
+		groupComputeTask.POST("/page", compute_task_service.PageEventFromES)
+		groupComputeTask.GET("/query/:id", compute_task_service.FindEventByIdFromES)
 	}
 	return router
 }

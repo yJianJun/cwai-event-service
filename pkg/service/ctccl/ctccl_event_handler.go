@@ -1,8 +1,9 @@
-package compute_task
+package ctccl
 
 import (
 	"context"
 	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/common"
+	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/domain"
 	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/model"
 	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/util"
 	"encoding/json"
@@ -51,7 +52,7 @@ func FindEventByIdFromES(c *gin.Context) {
 	c.JSON(http.StatusOK, common.Response{Code: http.StatusOK, Data: event})
 }
 
-func getEventByIdFromES(c *gin.Context, id string) *model.ComputingTasksEvent {
+func getEventByIdFromES(c *gin.Context, id string) *model.CtcclEvent {
 	searchResult, err := model.ESclient.Search().
 		Index("events").
 		Type("_doc").
@@ -74,7 +75,7 @@ func getEventByIdFromES(c *gin.Context, id string) *model.ComputingTasksEvent {
 				Msg:  common.DataSerializationFailedMessage,
 			})
 		}
-		var event model.ComputingTasksEvent
+		var event model.CtcclEvent
 		if err := json.Unmarshal(data, &event); err != nil {
 			panic(common.CommonError{
 				Code: http.StatusUnprocessableEntity,
@@ -97,7 +98,7 @@ func getEventByIdFromES(c *gin.Context, id string) *model.ComputingTasksEvent {
 // @Success      200 {object} common.PageVo
 // @Router       /es/page [post]
 func PageEventFromES(c *gin.Context) {
-	var pageRequest model.EventPage
+	var pageRequest domain.EventPage
 	if err := c.ShouldBindJSON(&pageRequest); err != nil {
 		panic(common.CommonError{
 			Code: http.StatusBadRequest,
@@ -125,7 +126,7 @@ func PageEventFromES(c *gin.Context) {
 	c.JSON(http.StatusOK, pageVo)
 }
 
-func searchEventsFromES(pageRequest model.EventPage) (*elastic.SearchResult, error) {
+func searchEventsFromES(pageRequest domain.EventPage) (*elastic.SearchResult, error) {
 	var timeQuery *elastic.RangeQuery
 
 	if !time.Time(pageRequest.Time).IsZero() {
@@ -135,22 +136,28 @@ func searchEventsFromES(pageRequest model.EventPage) (*elastic.SearchResult, err
 		timeQuery = elastic.NewRangeQuery("time").Lte(str).Gte(
 			util.GetPastMonthToday(now, 1))
 	}
-	var levelQuery, statusQuery, taskIDQuery, taskRecordIDQuery, accountIDQuery, userIDQuery, regionIDQuery, resourceGroupIDQuery *elastic.WildcardQuery
-	var taskNameQuery, statusMessageQuery, taskDetailQuery, resourceGroupNameQuery *elastic.MatchPhraseQuery
+	var levelQuery, nodeIpQuery, localguidQuery, remoteguidQuery, errcodeQuery, podIpQuery, podNameSpaceQuery, taskIDQuery, taskRecordIDQuery, accountIDQuery, userIDQuery, computeTypeQuery, regionIDQuery, resourceGroupIDQuery *elastic.WildcardQuery
+	var nodeNameQuery, errMessageQuery, podNameQuery, contentQuery, taskNameQuery, taskDetailQuery, resourceGroupNameQuery *elastic.MatchPhraseQuery
 	if pageRequest.Keyword != "" {
 		levelQuery = elastic.NewWildcardQuery("data.level", "*"+pageRequest.Keyword+"*")
+		nodeIpQuery = elastic.NewWildcardQuery("data.node_ip", "*"+pageRequest.Keyword+"*")
+		nodeNameQuery = elastic.NewMatchPhraseQuery("data.node_name", pageRequest.Keyword)
+		podIpQuery = elastic.NewWildcardQuery("data.pod_ip", "*"+pageRequest.Keyword+"*")
+		podNameQuery = elastic.NewMatchPhraseQuery("data.pod_name", pageRequest.Keyword)
+		podNameSpaceQuery = elastic.NewWildcardQuery("data.pod_namespace", "*"+pageRequest.Keyword+"*")
 		taskIDQuery = elastic.NewWildcardQuery("data.task_id", "*"+pageRequest.Keyword+"*")
 		taskRecordIDQuery = elastic.NewWildcardQuery("data.task_record_id", "*"+pageRequest.Keyword+"*")
 		taskNameQuery = elastic.NewMatchPhraseQuery("data.task_name", pageRequest.Keyword)
-		taskDetailQuery = elastic.NewMatchPhraseQuery("data.task_detail", pageRequest.Keyword)
 		accountIDQuery = elastic.NewWildcardQuery("data.account_id", "*"+pageRequest.Keyword+"*")
 		userIDQuery = elastic.NewWildcardQuery("data.user_id", "*"+pageRequest.Keyword+"*")
+		computeTypeQuery = elastic.NewWildcardQuery("data.compute_type", "*"+pageRequest.Keyword+"*")
 		regionIDQuery = elastic.NewWildcardQuery("data.region_id", "*"+pageRequest.Keyword+"*")
 		resourceGroupIDQuery = elastic.NewWildcardQuery("data.resource_group_id", "*"+pageRequest.Keyword+"*")
 		resourceGroupNameQuery = elastic.NewMatchPhraseQuery("data.resource_group_name", pageRequest.Keyword)
-
-		statusQuery = elastic.NewWildcardQuery("data.status", "*"+pageRequest.Keyword+"*")
-		statusMessageQuery = elastic.NewMatchPhraseQuery("data.status_message", pageRequest.Keyword)
+		localguidQuery = elastic.NewWildcardQuery("data.localguid", "*"+pageRequest.Keyword+"*")
+		remoteguidQuery = elastic.NewWildcardQuery("data.remoteguid", "*"+pageRequest.Keyword+"*")
+		errcodeQuery = elastic.NewWildcardQuery("data.errcode", "*"+pageRequest.Keyword+"*")
+		errMessageQuery = elastic.NewMatchPhraseQuery("data.err_message", pageRequest.Keyword)
 	}
 	query := elastic.NewBoolQuery()
 
@@ -158,9 +165,11 @@ func searchEventsFromES(pageRequest model.EventPage) (*elastic.SearchResult, err
 		query.Should(timeQuery)
 	}
 	if pageRequest.Keyword != "" {
-		query.Should(levelQuery).Should(taskIDQuery).Should(taskRecordIDQuery).Should(statusQuery).Should(statusMessageQuery).
-			Should(taskNameQuery).Should(taskDetailQuery).Should(accountIDQuery).Should(userIDQuery).
-			Should(regionIDQuery).Should(resourceGroupIDQuery).Should(resourceGroupNameQuery)
+		query.Should(levelQuery).Should(nodeIpQuery).Should(nodeNameQuery).Should(podIpQuery).
+			Should(podNameQuery).Should(contentQuery).Should(podNameSpaceQuery).Should(taskIDQuery).Should(taskRecordIDQuery).
+			Should(taskNameQuery).Should(taskDetailQuery).Should(accountIDQuery).Should(userIDQuery).Should(computeTypeQuery).
+			Should(regionIDQuery).Should(resourceGroupIDQuery).Should(resourceGroupNameQuery).Should(localguidQuery).Should(remoteguidQuery).
+			Should(errcodeQuery).Should(errMessageQuery)
 	}
 	source, _ := query.Source()
 	log.Printf("es查询Query:%v", source)
@@ -174,18 +183,18 @@ func searchEventsFromES(pageRequest model.EventPage) (*elastic.SearchResult, err
 		Do(context.Background())
 }
 
-func parseSearchResults(searchResult *elastic.SearchResult) []model.ComputingTasksEvent {
+func parseSearchResults(searchResult *elastic.SearchResult) []model.CtcclEvent {
 	fmt.Printf("查询消耗时间 %d ms, 结果总数: %d\n", searchResult.TookInMillis, searchResult.TotalHits()) //nolint:forbidigo
 	if searchResult.TotalHits() > 0 {
-		events := make([]model.ComputingTasksEvent, 0)
-		for _, elem := range searchResult.Each(reflect.TypeOf(model.ComputingTasksEvent{})) {
-			if event, ok := elem.(model.ComputingTasksEvent); ok {
+		events := make([]model.CtcclEvent, 0)
+		for _, elem := range searchResult.Each(reflect.TypeOf(model.CtcclEvent{})) {
+			if event, ok := elem.(model.CtcclEvent); ok {
 				events = append(events, event)
 			}
 		}
 		return events
 	}
-	return []model.ComputingTasksEvent{}
+	return []model.CtcclEvent{}
 }
 
 func calculateTotalPages(totalCount int64, pageSize int) int64 {

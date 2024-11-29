@@ -7,6 +7,7 @@ import (
 // ComputingTasksEvent 算力任务事件
 // @description 代表一个事件
 type ComputingTasksEvent struct {
+	*domain.Event `json:"-"`
 	// SpecVersion 事件格式版本
 	// @description 事件格式版本
 	// @example "1.0"

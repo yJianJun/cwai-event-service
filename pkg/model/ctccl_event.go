@@ -3,6 +3,7 @@ package model
 import "ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/domain"
 
 type CtcclEvent struct {
+	domain.Event `json:"-"`
 	// SpecVersion 事件格式版本
 	// @swagger:description 事件格式版本
 	// @swagger:example "1.0"
