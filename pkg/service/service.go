@@ -1,11 +1,10 @@
-package compute_task_service
+package service
 
 import (
 	"context"
 	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/common"
 	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/domain"
 	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/model"
-	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/util"
 	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
@@ -16,88 +15,14 @@ import (
 	"time"
 )
 
-func bindAndValidateInput(c *gin.Context) (common.EventUpdate, error) {
-	var input common.EventUpdate
-	if err := c.ShouldBindJSON(&input); err != nil {
-		return input, err
-	}
-	return input, nil
-}
-
-func handleInternalServerError(c *gin.Context, msg string) {
-	c.JSON(http.StatusInternalServerError, gin.H{common.Message: msg})
-}
-
-// FindEventByIdFromES godoc
-// @Summary 查找事件
-// @Description 通过ID从Elasticsearch中查找事件
-// @Tags ctccl ES
-// @Accept json
-// @Produce json
-// @Param id path string true "事件ID"
-// @Success 200 {object} map[string]common.Response
-// @Failure 404 {object} string
-// @Router /es/query/{id} [get]
-func FindEventByIdFromES(c *gin.Context) {
-	idParam := c.Param("id")
-	// 获取事件
-	event := getEventByIdFromES(c, idParam)
-	if event == nil {
-		c.JSON(http.StatusOK, common.Response{
-			Code:    http.StatusNotFound,
-			Message: common.RecordNotFoundMessage,
-		})
-		return
-	}
-	c.JSON(http.StatusOK, common.Response{Code: http.StatusOK, Data: event})
-}
-
-func getEventByIdFromES(c *gin.Context, id string) *model.ComputingTasksEvent {
-	searchResult, err := model.ESclient.Search().
-		Index("events").
-		Type("_doc").
-		Query(elastic.NewTermQuery("id", id)).
-		Size(1).
-		Do(c.Request.Context())
-	if err != nil {
-		panic(common.CommonError{
-			Code: http.StatusNotFound,
-			Msg:  common.SearchDataFailureMessage,
-		})
-	}
-	if searchResult.TotalHits() > 0 {
-		hit := searchResult.Hits.Hits[0]
-		source := hit.Source
-		data, err := source.MarshalJSON()
-		if err != nil {
-			panic(common.CommonError{
-				Code: http.StatusUnprocessableEntity,
-				Msg:  common.DataSerializationFailedMessage,
-			})
-		}
-		var event model.ComputingTasksEvent
-		if err := json.Unmarshal(data, &event); err != nil {
-			panic(common.CommonError{
-				Code: http.StatusUnprocessableEntity,
-				Msg:  common.DataDeserializationFailedMessage,
-			})
-		}
-		event.ID_ = hit.Id
-		return &event
-	}
-	return nil
-}
-
-
 func SearchEventsFromES(pageRequest domain.EventPage) (*elastic.SearchResult, error) {
 	var timeQuery *elastic.RangeQuery
 
-	if !time.Time(pageRequest.Time).IsZero() {
-		var val, _ = pageRequest.Time.Value()
-		str := val.(string)
-		now, _ := time.Parse("2006-01-02 15:04:05", str)
-		timeQuery = elastic.NewRangeQuery("time").Lte(str).Gte(
-			util.GetPastMonthToday(now, 1))
+	if !time.Time(pageRequest.StartTime).IsZero() {
+		startVal, _ := pageRequest.StartTime.Value()
+		endVal, _ := pageRequest.EndTime.Value()
+		startTime, endTime := startVal.(string), endVal.(string)
+		timeQuery = elastic.NewRangeQuery("time").Lte(startTime).Gte(endTime)
 	}
 	var levelQuery, statusQuery, taskIDQuery, taskRecordIDQuery, accountIDQuery, userIDQuery, regionIDQuery, resourceGroupIDQuery *elastic.WildcardQuery
 	var taskNameQuery, statusMessageQuery, taskDetailQuery, resourceGroupNameQuery *elastic.MatchPhraseQuery
@@ -138,16 +63,56 @@ func SearchEventsFromES(pageRequest domain.EventPage) (*elastic.SearchResult, er
 		Do(context.Background())
 }
 
-func ParseSearchResults(searchResult *elastic.SearchResult) []model.ComputingTasksEvent {
+func ParseSearchResults(searchResult *elastic.SearchResult) []model.Event {
 	fmt.Printf("查询消耗时间 %d ms, 结果总数: %d\n", searchResult.TookInMillis, searchResult.TotalHits()) //nolint:forbidigo
 	if searchResult.TotalHits() > 0 {
-		events := make([]model.ComputingTasksEvent, 0)
-		for _, elem := range searchResult.Each(reflect.TypeOf(model.ComputingTasksEvent{})) {
-			if event, ok := elem.(model.ComputingTasksEvent); ok {
+		events := make([]model.Event, 0)
+		for _, elem := range searchResult.Each(reflect.TypeOf(model.Event{})) {
+			if event, ok := elem.(model.Event); ok {
 				events = append(events, event)
 			}
 		}
 		return events
 	}
-	return []model.ComputingTasksEvent{}
+	return []model.Event{}
+}
+
+func CalculateTotalPages(totalCount int64, pageSize int) int64 {
+	return (totalCount + int64(pageSize) - 1) / int64(pageSize)
+}
+
+func GetEventByIdFromES(c *gin.Context, id string) *model.Event {
+	searchResult, err := model.ESclient.Search().
+		Index("events").
+		Type("_doc").
+		Query(elastic.NewTermQuery("id", id)).
+		Size(1).
+		Do(c.Request.Context())
+	if err != nil {
+		panic(common.CommonError{
+			Code: http.StatusNotFound,
+			Msg:  common.SearchDataFailureMessage,
+		})
+	}
+	if searchResult.TotalHits() > 0 {
+		hit := searchResult.Hits.Hits[0]
+		source := hit.Source
+		data, err := source.MarshalJSON()
+		if err != nil {
+			panic(common.CommonError{
+				Code: http.StatusUnprocessableEntity,
+				Msg:  common.DataSerializationFailedMessage,
+			})
+		}
+		var event model.Event
+		if err := json.Unmarshal(data, &event); err != nil {
+			panic(common.CommonError{
+				Code: http.StatusUnprocessableEntity,
+				Msg:  common.DataDeserializationFailedMessage,
+			})
+		}
+		event.ID_ = hit.Id
+		return &event
+	}
+	return nil
 }

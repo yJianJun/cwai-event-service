@@ -1,6 +1,4 @@
-package common
-
-import "ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/domain"
+package domain
 
 // EventUpdate 编辑事件时的请求体
 // @description 编辑一个事件的请求
@@ -21,7 +19,7 @@ type EventUpdate struct {
 	// Timestamp 时间戳
 	// @description 事件发生的时间戳，格式为"2006-01-02 15:04:05"
 	// @example "2006-01-02 15:04:05"
-	Timestamp domain.MyTime `json:"timestamp"  `
+	Timestamp MyTime `json:"timestamp"  `
 	// ID_ ElasticSearch默认生成id
 	// @description 创建不用传，在删除、根据id查询、修改的时候需要传
 	// @example "yrEolJIBVsd01DrwhORI"
@@ -87,8 +85,8 @@ type SessionsReq struct {
 }
 
 type NetTopoReq struct {
-	IdType        string            `json:"idType,omitempty"`
-	Category      string            `json:"category,omitempty"`
-	RelationLayer int               `json:"relationLayer,omitempty"`
-	Resources     []domain.Resource `json:"resources"`
+	IdType        string     `json:"idType,omitempty"`
+	Category      string     `json:"category,omitempty"`
+	RelationLayer int        `json:"relationLayer,omitempty"`
+	Resources     []Resource `json:"resources"`
 }

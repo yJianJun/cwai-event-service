@@ -1,0 +1,33 @@
+specversion	        事件格式版本	        string	默认0	1.0
+id	                事件唯一标识id	    string	是	代码生成	采用满足RFC4122规范的uuid（例如google/uuid 生成算法）
+source	            事件来源	            string	是	可选：ctyun.yunxiao_resource_group / ctyun.yunxiao_task	资源组、任务
+ctyunregion	        资源池名	            string	是	annotation:ctyunregion	池内上报自动补齐，云监控；公网上报需要指定
+type	            事件类型描述	        string	是	待振民确认：task_failed
+datacontenttype	    编码说明	            string	是	固定值：application/json
+subject	            主题	                string	是	固定格式:<source>.<regionname>.<accountid>.<事件关联的资源>
+time	            上报时间	            string	否	2024-11-22T07:55:00.652213323Z	CloudEvents 中，时间戳字段通常使用 ISO 8601 格式来表示事件的发生时间。这个格式保证了跨系统、跨时区的一致性。
+
+
+task_id	            事件对象id	        string	是	环境变量TASK_ID	事件对象信息；事件任务详情示例：task_record_id:<id>;task_pod:<pod>;
+task_record_id	    事件对象job id	    string	是	环境变量TASK_RECORD_ID
+task_name	        事件对象名	        string	是	环境变量TASK_NAME
+task_detail	        事件对象详情	        string	否	annotation:task_detail
+account_id	        租户id	            string	是	环境变量ACCOUNT_ID
+user_id	            用户id	            string	是	环境变量USER_ID
+compute_type	    计算资源类型	        string	是	环境变量COMPUTE_TYPE 示例：POD；NODE	发生事件所在资源组、裸金属、云主机或pod,计算资源详情hostname:"";ip:""
+node_ip	            节点ip	            string	是	环境变量NODE_IP
+node_name	        计算资源id	        string	是	环境变量NODE_NAME
+pod_namespace	    pod命名空间	        string	否	环境变量POD_NAMESPACE
+pod_ip	            pod ip	            string	否	环境变量POD_IP
+pod_name	        pod名	            string	否	环境变量POD_NAME
+region_id	        资源池id	            string	是	环境变量REGION_ID
+resource_group_id	资源组id	            string	是	环境变量RESOURCE_GROUP_ID
+resource_group_name	资源组名	            string	是	环境变量RESOURCE_GROUP_NAME
+level	            事件级别	            string	是	示例：Critical，Warning，Info
+status	            状态	                string	是
+event_massage	    状态信息	            string	是
+status_massage
+localguid	        本地ib卡guid
+remoteguid	        远程ib卡guid
+errcode	            异常代码
+errmessage	        异常信息

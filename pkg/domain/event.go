@@ -1,14 +1,11 @@
 package domain
-import (
-	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/common"
-)
 
 // EventPage 定义了事件分页的请求参数
 // @Description 该结构体用于指定事件分页查询时所需的参数。通过设置这些参数，可以灵活地获取所需的事件数据。
 type EventPage struct {
 	// BasePageRequest 为基础分页请求参数。
 	// in: body
-	common.BasePageRequest
+	BasePageRequest
 
 	// QueryType 用于指定查询的类型。
 	// 标准资源组和扩展资源组节点事件使用 "node"；任务事件使用 "task"。
@@ -68,8 +65,4 @@ type EventPage struct {
 	// example: "task-12345"
 	// in: query
 	TaskID string `json:"taskID,omitempty" validate:"omitempty"`
-}
-
-type Event struct {
-
 }

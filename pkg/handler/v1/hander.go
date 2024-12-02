@@ -16,7 +16,7 @@ import (
 // QueryNetTopo 处理查询网络拓扑的请求。它验证请求，根据需要获取令牌，并获取拓扑数据。
 func QueryNetTopo(c *gin.Context) {
 	var (
-		req      common.NetTopoReq
+		req      domain.NetTopoReq
 		topoData *domain.NetTopoData
 	)
 
@@ -64,7 +64,7 @@ func QueryNetTopo(c *gin.Context) {
 }
 
 // TopoRequest 向指定客户端发送网络拓扑请求，并返回拓扑数据或错误。
-func TopoRequest(client *client.Client, req *common.NetTopoReq) (*domain.NetTopoData, error) {
+func TopoRequest(client *client.Client, req *domain.NetTopoReq) (*domain.NetTopoData, error) {
 	resp, err := client.Post(client.TopoPath, 0, nil, req)
 	if err != nil {
 		klog.Errorf("Topo request to ccae failed: %v", err)

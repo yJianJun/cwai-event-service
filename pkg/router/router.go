@@ -3,12 +3,10 @@ package router
 
 import (
 	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/docs"
+	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/handler"
 	handlerv1 "ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/handler/v1"
 	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/middleware"
 	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/router/router_middleware"
-	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/service/compute_task_service"
-	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/service/ctccl"
-	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/service/training_log"
 	"github.com/gin-gonic/gin"
 	"github.com/golang/glog"
 	swaggerfiles "github.com/swaggo/files"
@@ -16,11 +14,8 @@ import (
 )
 
 const (
-	GROUP_V1     = "/openapi/v4/cwai"
-	CTCCL        = "/ctccl"
-	TRAINING_LOG = "/train"
-	COMPUTE_TASK = "/compute"
-	es           = "/es"
+	GROUP_V1 = "/openapi/v4/cwai"
+	EVENT    = "/event"
 )
 
 func InitRoute() *gin.Engine {
@@ -42,20 +37,10 @@ func InitRoute() *gin.Engine {
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 
 	docs.SwaggerInfo.BasePath = "/ctccl"
-	groupCTCCL := router.Group(CTCCL)
+	eventGroup := router.Group(EVENT)
 	{
-		groupCTCCL.POST("/page", ctccl.PageEventFromES)
-		groupCTCCL.GET("/query/:id", ctccl.FindEventByIdFromES)
-	}
-	groupTrainingLog := router.Group(TRAINING_LOG)
-	{
-		groupTrainingLog.POST("/page", training_log.PageEventFromES)
-		groupTrainingLog.GET("/query/:id", training_log.FindEventByIdFromES)
-	}
-	groupComputeTask := router.Group(COMPUTE_TASK)
-	{
-		groupComputeTask.POST("/page", compute_task_service.PageEventFromES)
-		groupComputeTask.GET("/query/:id", compute_task_service.FindEventByIdFromES)
+		eventGroup.POST("/page", handler.PageEventFromES)
+		eventGroup.GET("/query/:id", handler.FindEventByIdFromES)
 	}
 	return router
 }
