@@ -23,20 +23,20 @@ func (t *MyTime) UnmarshalJSON(data []byte) error {
 	str := string(data)
 	//去除接收的str收尾多余的"
 	timeStr := strings.Trim(str, "\"")
-	t1, err := time.Parse("2006-01-02 15:04:05", timeStr)
+	t1, err := time.Parse("2006-01-02T15:04:05Z", timeStr)
 	*t = MyTime(t1)
 	return err
 }
 
 func (t MyTime) MarshalJSON() ([]byte, error) {
-	formatted := fmt.Sprintf("\"%v\"", time.Time(t).Format("2006-01-02 15:04:05"))
+	formatted := fmt.Sprintf("\"%v\"", time.Time(t).Format("2006-01-02T15:04:05Z"))
 	return []byte(formatted), nil
 }
 
 func (t MyTime) Value() (driver.Value, error) {
 	// MyTime 转换成 time.Time 类型
 	tTime := time.Time(t)
-	return tTime.Format("2006-01-02 15:04:05"), nil
+	return tTime.Format("2006-01-02T15:04:05Z"), nil
 }
 
 func (t *MyTime) Scan(v interface{}) error {

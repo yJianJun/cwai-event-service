@@ -1,57 +1,61 @@
-package model
-
-import (
-	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/domain"
-)
+package domain
 
 // Event 表示雲端事件的結構
 type Event struct {
-	// specversion: 事件格式版本, 默认值为1.0
-	// example: 1.0
+	// 事件格式版本
+	// @swagger:description 事件格式版本, 默认值为1.0
+	// @swagger:example "1.0"
 	SpecVersion string `json:"spec_version"`
 
-	// id: 事件唯一标识id，代码生成，采用RFC4122规范的UUID
-	// required: true
-	// example: 123e4567-e89b-12d3-a456-426614174000
+	// 事件唯一标识id
+	// @swagger:description 事件唯一标识id，代码生成，采用RFC4122规范的UUID
+	// @swagger:required true
+	// @swagger:example "123e4567-e89b-12d3-a456-426614174000"
 	ID string `json:"id"`
 
-	// source: 事件来源，可以是ctyun.yunxiao_resource_group或ctyun.yunxiao_task
-	// required: true
-	// example: ctyun.yunxiao_task
+	// 事件来源
+	// @swagger:description 事件来源，可以是ctyun.yunxiao_resource_group或ctyun.yunxiao_task
+	// @swagger:required true
+	// @swagger:example "ctyun.yunxiao_task"
 	Source string `json:"source"`
 
-	// ctyunregion: 资源池名，annotation:ctyunregion，池内上报自动补齐，云监控；公网上报需要指定
-	// required: true
-	// example: cn-north-1
+	// 资源池名
+	// @swagger:description 资源池名，annotation:ctyunregion，池内上报自动补齐，云监控；公网上报需要指定
+	// @swagger:required true
+	// @swagger:example "cn-north-1"
 	CtyunRegion string `json:"ctyun_region"`
 
-	// type: 事件类型描述，待振民确认：task_failed
-	// required: true
-	// example: task_failed
+	// 事件类型描述
+	// @swagger:description 事件类型描述，待振民确认：task_failed
+	// @swagger:required true
+	// @swagger:example "task_failed"
 	Type string `json:"type"`
 
-	// datacontenttype: 编码说明，固定值：application/json
-	// required: true
-	// example: application/json
+	// 编码说明
+	// @swagger:description 编码说明，固定值：application/json
+	// @swagger:required true
+	// @swagger:example "application/json"
 	DataContentType string `json:"data_content_type"`
 
-	// subject: 主题，格式为<source>.<regionname>.<accountid>.<事件关联的资源>
-	// required: true
-	// example: ctyun.yunxiao_task.cn-north-1.123456789012.resource1
+	// 主题
+	// @swagger:description 主题，格式为<source>.<regionname>.<accountid>.<事件关联的资源>
+	// @swagger:required true
+	// @swagger:example "ctyun.yunxiao_task.cn-north-1.123456789012.resource1"
 	Subject string `json:"subject"`
 
-	// time: 上报时间，格式为ISO 8601，例：2024-11-22T07:55:00Z
-	// example: 2024-11-22T07:55:00.652213323Z
-	Time domain.MyTime `json:"time,omitempty"`
+	// 上报时间
+	// @swagger:description 上报时间，格式为ISO 8601，例：2024-11-22T07:55:00Z
+	// @swagger:example "2024-11-22T07:55:00.652213323Z"
+	Time MyTime `json:"time,omitempty"`
 
-	// ID_ ElasticSearch默认生成id，不在json序列化中显示
-	// @description 创建时不用传，在删除、根据id查询、修改的时候需要传
-	// @example "yrEolJIBVsd01DrwhORI"
+	// ElasticSearch生成的id
+	// @swagger:description 创建时不用传，在删除、根据id查询、修改的时候需要传
+	// @swagger:example "yrEolJIBVsd01DrwhORI"
 	ID_ string `json:"-"`
 
-	// data: 事件的详细数据
-	// @description 与事件关联的详细数据信息
-	// @example "详细事件数据示例"
+	// 事件的详细数据
+	// @swagger:description 与事件关联的详细数据信息
+	// @swagger:example "详细事件数据示例"
 	Data Data `json:"data"`
 }
 
@@ -143,7 +147,7 @@ type Data struct {
 	Status string `json:"status"`
 
 	// 状态信息
-	// @swagger:description 关于当前状态的详细信息
+	// @swagger:description 状态信息详细
 	// @swagger:example "运行正常"
 	EventMessage string `json:"event_massage"`
 
@@ -164,7 +168,7 @@ type Data struct {
 	// @swagger:example "描述错误原因"
 	ErrMessage string `json:"err_message,omitempty"`
 
-	// 状态信息
+	// 扩展状态信息
 	// @swagger:example "扩展状态信息"
 	StatusMessage string `json:"status_message,omitempty"`
 }

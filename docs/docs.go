@@ -24,7 +24,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/es/page": {
+        "/event/page": {
             "post": {
                 "description": "根据请求参数从ElasticSearch中分页获取事件。如果请求类型为\"task\"，则会执行事件搜索。",
                 "consumes": [
@@ -34,7 +34,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "ctccl ES"
+                    "events"
                 ],
                 "summary": "分页获取事件",
                 "parameters": [
@@ -70,7 +70,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/es/query/{id}": {
+        "/event/query/{id}": {
             "get": {
                 "description": "通过ID从Elasticsearch中查找和获取事件的信息",
                 "consumes": [
@@ -80,8 +80,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "ctccl",
-                    "Elasticsearch"
+                    "events"
                 ],
                 "summary": "查找事件",
                 "parameters": [
@@ -160,14 +159,8 @@ const docTemplate = `{
             "description": "该结构体用于指定事件分页查询时所需的参数。通过设置这些参数，可以灵活地获取所需的事件数据。",
             "type": "object",
             "required": [
-                "end_time",
-                "keyword",
                 "page",
-                "queryType",
-                "regionID",
-                "resourceGroupID",
-                "size",
-                "start_time"
+                "size"
             ],
             "properties": {
                 "end_time": {
@@ -176,12 +169,7 @@ const docTemplate = `{
                 },
                 "eventType": {
                     "description": "EventType 指定事件的类型。\n可以选择 \"Critical\", \"Warning\", 或 \"Info\"。\nexample: \"Critical\"\nin: query",
-                    "type": "string",
-                    "enum": [
-                        "Critical",
-                        "Warning",
-                        "Info"
-                    ]
+                    "type": "string"
                 },
                 "keyword": {
                     "description": "Keyword 用于筛选事件的关键词。\n例如可用于指定事件名称、描述中的特定短语。\nrequired: true\nexample: \"连接错误\"\nin: query",
@@ -197,11 +185,7 @@ const docTemplate = `{
                 },
                 "queryType": {
                     "description": "QueryType 用于指定查询的类型。\n该参数决定是查询节点事件（\"node\"）还是任务事件（\"task\"）。\nrequired: true\nexample: \"node\"\nin: query",
-                    "type": "string",
-                    "enum": [
-                        "node",
-                        "task"
-                    ]
+                    "type": "string"
                 },
                 "regionID": {
                     "description": "RegionID 指定事件所属的区域ID。\n此参数用于限定事件的地理或逻辑区域。\nrequired: true\nexample: \"/central//elasticsearch/\"\nin: query",

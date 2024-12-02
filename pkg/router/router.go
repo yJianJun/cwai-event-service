@@ -36,7 +36,7 @@ func InitRoute() *gin.Engine {
 	groupv1.POST("/server/topo", handlerv1.QueryNetTopo)
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 
-	docs.SwaggerInfo.BasePath = "/ctccl"
+	docs.SwaggerInfo.BasePath = "/"
 	eventGroup := router.Group(EVENT)
 	{
 		eventGroup.POST("/page", handler.PageEventFromES)

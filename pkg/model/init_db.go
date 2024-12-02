@@ -2,10 +2,11 @@ package model
 
 import (
 	"context"
+	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/common"
 	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/config"
 	"fmt"
-	"github.com/olivere/elastic/v7"
-	"time"
+	"github.com/elastic/go-elasticsearch/v8"
+	"strings"
 )
 
 const event_mapping = `{
@@ -34,7 +35,7 @@ const event_mapping = `{
       },
       "time": {
         "type": "date",
-        "format": "strict_date_optional_time||epoch_millis"
+        "format": "strict_date_optional_time||yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
       },
       "data": {
         "properties": {
@@ -113,7 +114,7 @@ const event_mapping = `{
   }
 }`
 
-var ESclient *elastic.Client // ES客户端
+var ESclient *elasticsearch.TypedClient // ES客户端
 
 // 生成DSN字符串
 func generateDSN(mysqlConfig config.Mysql) string {
@@ -141,16 +142,16 @@ func InitElasticSearch(conf *config.ServerConfig) error {
 	return nil
 }
 
-func createElasticClient(config config.ElaticSearch) (*elastic.Client, error) {
-	client, err := elastic.NewClient(
-		elastic.SetURL(config.Url),
-		elastic.SetSniff(config.Sniff),
-		elastic.SetHealthcheckInterval(time.Duration(config.HealthCheckInterval)),
-	)
+func createElasticClient(esConfig config.ElaticSearch) (*elasticsearch.TypedClient, error) {
+	elasticConfig := elasticsearch.Config{Addresses: []string{esConfig.Url}}
+	client, err := elasticsearch.NewTypedClient(elasticConfig)
+	if err != nil {
+		return nil, err
+	}
 	return client, err
 }
 
-func createIndexMapping(client *elastic.Client) error {
+func createIndexMapping(client *elasticsearch.TypedClient) error {
 	// 创建索引和映射时捕获错误
 	if err := checkAndCreateIndex(client, "events", event_mapping); err != nil {
 		return fmt.Errorf("failed to create compute task event mapping: %w", err)
@@ -158,16 +159,17 @@ func createIndexMapping(client *elastic.Client) error {
 	return nil
 }
 
-func checkAndCreateIndex(client *elastic.Client, indexName string, mapping string) error {
-	exists, err := client.IndexExists(indexName).Do(context.Background())
-	if err != nil {
-		return err
-	}
-	if !exists {
-		_, err := client.CreateIndex(indexName).Body(mapping).Do(context.Background())
+func checkAndCreateIndex(client *elasticsearch.TypedClient, indexName string, mapping string) error {
+	if exists, err := client.Indices.Exists(indexName).IsSuccess(context.Background()); !exists && err == nil {
+		res, err := client.Indices.Create(indexName).Raw(strings.NewReader(mapping)).Do(context.Background())
 		if err != nil {
 			return err
 		}
+		if !res.Acknowledged && res.Index != indexName {
+			common.Error(map[string]interface{}{"err": res}, "unexpected error during index creation")
+		}
+	} else if err != nil {
+		return err
 	}
 	return nil
 }
