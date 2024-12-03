@@ -9,26 +9,6 @@ import (
 	"strings"
 )
 
-type server struct {
-	Port            string `yaml:"port"`
-	Protocol        string `yaml:"protocol"`
-	Host            string `yaml:"host"`
-	UserName        string `yaml:"username"`
-	UserPassword    string `yaml:"password"`
-	TokenTimeOut    int64  `yaml:"tokenTimeOut"`
-	ShutdownTimeout int64  `yaml:"shutdownTimeout"`
-}
-
-type api struct {
-	TokenUrl     string `yaml:"tokenUrl"`
-	QureyTopoUrl string `yaml:"qureyTopoUrl"`
-}
-
-type CCAE struct {
-	Server server `yaml:"server"`
-	Api    api    `yaml:"api"`
-}
-
 type App struct {
 	ConfigFile string `json:"configFile"`
 	Port       string `json:"port"`
@@ -36,18 +16,8 @@ type App struct {
 }
 
 type ServerConfig struct {
-	CCAE          CCAE         `yaml:"ccae"`
-	Mysql         Mysql        `yaml:"mysql"`
 	ElasticSearch ElaticSearch `yaml:"elasticSearch"`
-	Log           log          `yaml:"log"`
 	App           App          `yaml:"app"`
-}
-
-type Mysql struct {
-	User     string `yaml:"user"`
-	Password string `yaml:"password"`
-	Address  string `yaml:"address"`
-	Db       string `yaml:"db"`
 }
 
 type ElaticSearch struct {
@@ -57,10 +27,6 @@ type ElaticSearch struct {
 	HealthCheckInterval int    `yaml:"healthCheckInterval"`
 	LogPre              string `yaml:"logPre"`
 	Password            string `yaml:"password"`
-}
-
-type log struct {
-	Dir string `yaml:"dir"`
 }
 
 var Config *ServerConfig

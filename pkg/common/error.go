@@ -67,28 +67,48 @@ var CodeMessage = ErrorCodeMap{
 
 func BadRequestMessage(c *gin.Context, code ErrorCode, message string, err error) {
 	if err != nil {
-		c.Error(err)
+		Error(
+			map[string]interface{}{
+				"code": code,
+				"erro": err,
+			},
+		)
 	}
 	errorResponseMessage(c, http.StatusOK, message)
 }
 
 func BadRequest(c *gin.Context, code ErrorCode, err error) {
 	if err != nil {
-		c.Error(err)
+		Error(
+			map[string]interface{}{
+				"code": code,
+				"erro": err,
+			},
+		)
 	}
 	errorResponse(c, http.StatusOK, code)
 }
 
 func InternalError(c *gin.Context, code ErrorCode, err error) {
 	if err != nil {
-		c.Error(err)
+		Error(
+			map[string]interface{}{
+				"code": code,
+				"erro": err,
+			},
+		)
 	}
 	errorResponse(c, http.StatusOK, code)
 }
 
 func NotAuthError(c *gin.Context, code ErrorCode, err error) {
 	if err != nil {
-		c.Error(err)
+		Error(
+			map[string]interface{}{
+				"code": code,
+				"erro": err,
+			},
+		)
 	}
 	errorResponse(c, http.StatusUnauthorized, code)
 }

@@ -1,10 +1,9 @@
-package client
+package util
 
 import (
 	"bytes"
 	"crypto/tls"
 	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/common"
-	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/config"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -90,27 +89,6 @@ type Client struct {
 	TokenTimeOutAt    time.Time
 	TokenTimeOut      time.Duration
 	HTTPClient        *http.Client
-}
-
-var CCAEClient *Client
-
-// NewClient 返回一个新的客户端
-func NewClient(conf *config.ServerConfig) *Client {
-	protocolHostPort := fmt.Sprintf("%s://%s:%s", conf.CCAE.Server.Protocol, conf.CCAE.Server.Host, conf.CCAE.Server.Port)
-	CCAEClient = &Client{
-		ProtocolHostPort:  protocolHostPort,
-		LoginPath:         conf.CCAE.Api.TokenUrl,
-		TopoPath:          conf.CCAE.Api.QureyTopoUrl,
-		UserName:          conf.CCAE.Server.UserName,
-		UserPassword:      conf.CCAE.Server.UserPassword,
-		TokenTimeOut:      time.Duration(conf.CCAE.Server.TokenTimeOut),
-		ContentType:       "application/json",
-		Header:            make(http.Header),
-		HTTPClient:        NewHTTPClient(&HTTPConfig{}),
-		DisableVerboseLog: true,
-		UseZapLogger:      true,
-	}
-	return CCAEClient
 }
 
 // NewHTTPClient 返回一个原生的http.Client

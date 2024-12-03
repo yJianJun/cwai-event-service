@@ -1,117 +1,108 @@
 {
   "mappings": {
-    "_doc": {
-      "_size": {
-        "enabled": true
+    "properties": {
+      "spec_version": {
+        "type": "keyword"
       },
-      "properties": {
-        "specversion": {
-          "type": "keyword"
-        },
-        "id": {
-          "type": "keyword"
-        },
-        "source": {
-          "type": "keyword"
-        },
-        "ctyunregion": {
-          "type": "keyword"
-        },
-        "type": {
-          "type": "keyword"
-        },
-        "datacontenttype": {
-          "type": "keyword"
-        },
-        "subject": {
-          "type": "keyword"
-        },
-        "time": {
-          "type": "date",
-          "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
-        },
-        "data": {
-          "properties": {
-            "task_id": {
-              "type": "keyword"
-            },
-            "task_record_id": {
-              "type": "keyword"
-            },
-            "task_name": {
-              "type": "keyword"
-            },
-            "task_detail": {
-              "type": "keyword"
-            },
-            "level": {
-              "type": "keyword"
-            },
-            "account_id": {
-              "type": "keyword"
-            },
-            "user_id": {
-              "type": "keyword"
-            },
-            "region_id": {
-              "type": "keyword"
-            },
-            "resource_group_id": {
-              "type": "keyword"
-            },
-            "resource_group_name": {
-              "type": "text",
-              "analyzer": "ik_max_word"
-            },
-            "time": {
-              "type": "date",
-              "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
-            },
-            "status": {
-              "type": "keyword"
-            },
-            "status_message": {
-              "type": "text",
-              "analyzer": "ik_max_word"
-            },
-            "compute_type": {
-              "type": "keyword"
-            },
-            "node_ip": {
-              "type": "text",
-              "analyzer": "ik_max_word"
-            },
-            "node_name": {
-              "type": "text",
-              "analyzer": "ik_max_word"
-            },
-            "pod_namespace": {
-              "type": "text",
-              "analyzer": "ik_max_word"
-            },
-            "pod_ip": {
-              "type": "text",
-              "analyzer": "ik_max_word"
-            },
-            "pod_name": {
-              "type": "text",
-              "analyzer": "ik_max_word"
-            },
-            "compute_detail": {
-              "type": "text",
-              "analyzer": "ik_max_word"
-            },//删除
-            "local_guid": { "type": "keyword"},
-            "remote_guid": { "type": "keyword"},
-            "errcode": { "type": "keyword"},
-            "err_message": {
-              "type": "text",
-              "analyzer": "ik_max_word"
-            },
-            "content": {
-              "type": "text",
-              "analyzer": "ik_max_word"
-            }
+      "id": {
+        "type": "keyword"
+      },
+      "source": {
+        "type": "keyword"
+      },
+      "ctyun_region": {
+        "type": "keyword"
+      },
+      "type": {
+        "type": "keyword"
+      },
+      "data_content_type": {
+        "type": "keyword"
+      },
+      "subject": {
+        "type": "keyword"
+      },
+      "time": {
+        "type": "date",
+        "format": "strict_date_optional_time||yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+      },
+      "data": {
+        "properties": {
+          "task_id": {
+            "type": "keyword"
+          },
+          "task_record_id": {
+            "type": "keyword"
+          },
+          "task_name": {
+            "type": "keyword"
+          },
+          "account_id": {
+            "type": "keyword"
+          },
+          "user_id": {
+            "type": "keyword"
+          },
+          "compute_type": {
+            "type": "keyword"
+          },
+          "node_ip": {
+            "type": "ip"
+          },
+          "node_name": {
+            "type": "keyword"
+          },
+          "pod_namespace": {
+            "type": "keyword"
+          },
+          "pod_ip": {
+            "type": "ip"
+          },
+          "pod_name": {
+            "type": "keyword"
+          },
+          "region_id": {
+            "type": "keyword"
+          },
+          "resource_group_id": {
+            "type": "keyword"
+          },
+          "resource_group_name": {
+            "type": "keyword"
+          },
+          "level": {
+            "type": "keyword"
+          },
+          "status": {
+            "type": "keyword"
+          },
+          "event_massage": {
+            "type": "text"
+          },
+          "local_guid": {
+            "type": "keyword"
+          },
+          "remote_guid": {
+            "type": "keyword"
+          },
+          "err_code": {
+            "type": "keyword"
+          },
+          "err_message": {
+            "type": "text"
+          },
+          "status_message": {
+            "type": "text"
+          },
+          "workspace_name": {
+            "type": "keyword"
+          },
+          "workspace_id": {
+            "type": "keyword"
+          },
+          "event_time": {
+            "type": "date",
+            "format": "strict_date_optional_time||yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
           }
         }
       }

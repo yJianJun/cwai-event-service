@@ -55,21 +55,14 @@ func runDaemon(opts *config.ServerConfig) error {
 	go func() {
 		errCh <- daemon.Run()
 	}()
-	//shutdown gracefully
-	sigHandles = append(sigHandles, daemon.Shutdown)
+
 	select {
 
 	case sig := <-signalCh:
 		klog.Infof("received signal: %s", sig)
-		for _, handle := range sigHandles {
-			if err := handle(); err != nil {
-				klog.Errorf("failed to handle signal: %v", err)
-			}
-		}
 		os.Exit(1)
 	case err := <-errCh:
 		return err
-
 	}
 	return nil
 }

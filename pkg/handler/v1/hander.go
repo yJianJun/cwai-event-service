@@ -2,22 +2,21 @@ package v1
 
 import (
 	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/common"
-	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/domain"
+	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/model"
+	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/util"
 	"encoding/json"
 	"errors"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	klog "k8s.io/klog/v2"
-
-	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/http"
 )
 
 // QueryNetTopo 处理查询网络拓扑的请求。它验证请求，根据需要获取令牌，并获取拓扑数据。
 func QueryNetTopo(c *gin.Context) {
 	var (
-		req      domain.NetTopoReq
-		topoData *domain.NetTopoData
+		req      model.NetTopoReq
+		topoData *model.NetTopoData
 	)
 
 	//parse request
@@ -29,12 +28,12 @@ func QueryNetTopo(c *gin.Context) {
 	klog.Infof("request info: %v", req)
 
 	//build client
-	if client.CCAEClient == nil {
+	if util.client.CCAEClient == nil {
 		common.InternalError(c, common.WatcherInternalError, errors.New("Init ccae client error!"))
 		return
 	}
-	if client.CCAEClient.TokenTimeOutAt.IsZero() || time.Now().After(client.CCAEClient.TokenTimeOutAt) {
-		err := GetNewToken(client.CCAEClient)
+	if util.client.CCAEClient.TokenTimeOutAt.IsZero() || time.Now().After(util.client.CCAEClient.TokenTimeOutAt) {
+		err := GetNewToken(util.client.CCAEClient)
 		if err != nil {
 			common.InternalError(c, common.WatcherInternalError, errors.New("Get ccae new token error!"))
 			return
@@ -42,7 +41,7 @@ func QueryNetTopo(c *gin.Context) {
 	}
 
 	//build reqeust
-	topoData, err := TopoRequest(client.CCAEClient, &req)
+	topoData, err := TopoRequest(util.client.CCAEClient, &req)
 	if err != nil {
 		common.BadRequestMessage(c, common.WatcherInvalidParam, err.Error(), err)
 		return
@@ -64,7 +63,7 @@ func QueryNetTopo(c *gin.Context) {
 }
 
 // TopoRequest 向指定客户端发送网络拓扑请求，并返回拓扑数据或错误。
-func TopoRequest(client *client.Client, req *domain.NetTopoReq) (*domain.NetTopoData, error) {
+func TopoRequest(client *util.client, req *model.NetTopoReq) (*model.NetTopoData, error) {
 	resp, err := client.Post(client.TopoPath, 0, nil, req)
 	if err != nil {
 		klog.Errorf("Topo request to ccae failed: %v", err)
@@ -87,8 +86,8 @@ func TopoRequest(client *client.Client, req *domain.NetTopoReq) (*domain.NetTopo
 }
 
 // GetNewToken 请求新的身份验证令牌并使用新令牌及其超时更新客户端。
-func GetNewToken(client *client.Client) error {
-	resp, err := client.Put(client.LoginPath, 0, client.Header, domain.UserInfo{
+func GetNewToken(client *util.client) error {
+	resp, err := client.Put(client.LoginPath, 0, client.Header, model.UserInfo{
 		GrantType: "password",
 		UserName:  client.UserName,
 		Value:     client.UserPassword,
@@ -97,7 +96,7 @@ func GetNewToken(client *client.Client) error {
 		klog.Error(err)
 		return err
 	}
-	tokenInfo := domain.TokenInfo{}
+	tokenInfo := model.TokenInfo{}
 	err = json.Unmarshal(resp, &tokenInfo)
 	if err != nil {
 		klog.Errorf("unmarshal resource group response failed: %v", err)

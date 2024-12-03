@@ -1,15 +1,11 @@
 package app
 
 import (
-	"context"
 	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/config"
-	"net/http"
-	"time"
-
-	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/http"
-	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/model"
 	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/router"
+	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/util"
 	"github.com/golang/glog"
+	"net/http"
 )
 
 type Daemon struct {
@@ -20,10 +16,7 @@ type Daemon struct {
 func NewDaemon(cfg *config.ServerConfig) *Daemon {
 	address := cfg.App.Host + ":" + cfg.App.Port
 	routers := router.InitRoute()
-
-	//init ccae client config
-	client.NewClient(cfg)
-	model.InitElasticSearch(cfg)
+	util.InitElasticSearch(cfg)
 
 	srv := &http.Server{
 		Addr:    address,
@@ -50,28 +43,5 @@ func (da *Daemon) Run() error {
 	if err != nil {
 		return err
 	}
-	return nil
-}
-
-// shutdown gracefully
-func (da *Daemon) Shutdown() error {
-	glog.Info("Shutdown of Daemon")
-
-	shutdownTimeout := da.Config.CCAE.Server.ShutdownTimeout
-
-	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(shutdownTimeout)*time.Second)
-	defer cancel()
-	if err := da.Server.Shutdown(ctx); err != nil {
-		glog.Fatal("Server Shutdown:", err)
-		return err
-	}
-
-	// catching ctx.Done()
-	select {
-	case <-ctx.Done():
-		glog.Infof("shutdown timeout")
-	}
-
-	glog.Infof("shutdown gracefully")
 	return nil
 }

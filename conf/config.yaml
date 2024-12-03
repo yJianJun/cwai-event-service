@@ -1,20 +1,3 @@
-ccae:
-    server:
-        protocol: https
-        host: ccae.manager.ctyun.cn
-        port: 26335
-        userName: lndxsy502cs
-        userPassword: Lnsydx502cs@2024
-        tokenTimeOut: 1800
-        shutdownTimeout: 1800
-    api:
-        tokenUrl: /rest/plat/smapp/v1/oauth/token
-        qureyTopoUrl: /api/monitor/v1/query-topo
-mysql:
-    user: root
-    password: 930927
-    address: 127.0.0.1:3306
-    db: ctccl
 elasticSearch:
     # 是否开启
     enable: true
@@ -29,7 +12,12 @@ elasticSearch:
     password: 123456
 log: # 日志配置
     # 日志路径
-    dir: "./log"
+    name: cwai-watcher
+    level: debug
+    traceLevel: error
+    logToDir: .
+    maxSizeInMiB: 10
+    maxAgeInDays: 30
 app:
     configFile: "./conf/config.yaml"
     port: "8081"

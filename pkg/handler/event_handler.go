@@ -2,35 +2,11 @@ package handler
 
 import (
 	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/common"
-	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/domain"
+	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/model"
 	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/service"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
-
-// FindEventByIdFromES godoc
-// @Summary 查找事件
-// @Description 通过ID从Elasticsearch中查找和获取事件的信息
-// @Tags events
-// @Accept json
-// @Produce json
-// @Param id path string true "事件的唯一标识符"
-// @Success 200 {object} common.Response "返回成功时包含事件数据"
-// @Failure 404 {object} common.Response "未找到指定ID的事件"
-// @Router /event/query/{id} [get]
-func FindEventByIdFromES(c *gin.Context) {
-	idParam := c.Param("id")
-	// 获取事件
-	event := service.GetEventByIdFromES(c, idParam)
-	if event == nil {
-		c.JSON(http.StatusOK, common.Response{
-			Code:    http.StatusNotFound,
-			Message: common.RecordNotFoundMessage,
-		})
-		return
-	}
-	c.JSON(http.StatusOK, common.Response{Code: http.StatusOK, Data: event})
-}
 
 // PageEventFromES godoc
 // @Summary      分页获取事件
@@ -44,24 +20,20 @@ func FindEventByIdFromES(c *gin.Context) {
 // @Failure      404 {object} common.CommonError "搜索数据失败"
 // @Router       /event/page [post]
 func PageEventFromES(c *gin.Context) {
-	var pageRequest domain.EventPage
+	var pageRequest model.EventPage
 	if err := c.ShouldBindJSON(&pageRequest); err != nil {
-		panic(common.CommonError{
-			Code: http.StatusBadRequest,
-			Msg:  common.ParamBindFailureMessage,
-		})
+		common.BadRequestMessage(c, common.WatcherInvalidParam, err.Error(), err)
+		return
 	}
 	pageVo := common.PageVo{}
 	searchResult, err := service.SearchEventsFromES(pageRequest)
 	if err != nil {
-		panic(common.CommonError{
-			Code: http.StatusNotFound,
-			Msg:  common.SearchDataFailureMessage,
-		})
+		common.BadRequestMessage(c, common.WatcherInternalError, err.Error(), err)
+		return
 	}
 	events := service.ParseSearchResults(searchResult)
 	totalCount := searchResult.Hits.Total.Value
-	totalPage := service.CalculateTotalPages(totalCount, pageRequest.Size)
+	totalPage := service.CalculateTotalPages(totalCount, pageRequest.PageSize)
 	pageVo = common.PageVo{
 		TotalCount: totalCount,
 		TotalPage:  int(totalPage),

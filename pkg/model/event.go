@@ -1,11 +1,11 @@
-package domain
+package model
 
 // Event 表示雲端事件的結構
 type Event struct {
 	// 事件格式版本
 	// @swagger:description 事件格式版本, 默认值为1.0
 	// @swagger:example "1.0"
-	SpecVersion string `json:"spec_version"`
+	SpecVersion string `json:"specversion"`
 
 	// 事件唯一标识id
 	// @swagger:description 事件唯一标识id，代码生成，采用RFC4122规范的UUID
@@ -23,7 +23,7 @@ type Event struct {
 	// @swagger:description 资源池名，annotation:ctyunregion，池内上报自动补齐，云监控；公网上报需要指定
 	// @swagger:required true
 	// @swagger:example "cn-north-1"
-	CtyunRegion string `json:"ctyun_region"`
+	CtyunRegion string `json:"ctyunregion"`
 
 	// 事件类型描述
 	// @swagger:description 事件类型描述，待振民确认：task_failed
@@ -35,7 +35,7 @@ type Event struct {
 	// @swagger:description 编码说明，固定值：application/json
 	// @swagger:required true
 	// @swagger:example "application/json"
-	DataContentType string `json:"data_content_type"`
+	DataContentType string `json:"datacontenttype"`
 
 	// 主题
 	// @swagger:description 主题，格式为<source>.<regionname>.<accountid>.<事件关联的资源>
@@ -75,11 +75,6 @@ type Data struct {
 	// @swagger:description 事件对象的名称
 	// @swagger:example "TASK_NAME_example_value"
 	TaskName string `json:"task_name"`
-
-	// 事件对象详情
-	// @swagger:description 事件对象的详细信息
-	// @swagger:example "详细描述事件的相关信息"
-	TaskDetail string `json:"task_detail,omitempty"`
 
 	// 租户ID
 	// @swagger:description 与事件相关的租户标识号
@@ -149,26 +144,41 @@ type Data struct {
 	// 状态信息
 	// @swagger:description 状态信息详细
 	// @swagger:example "运行正常"
-	EventMessage string `json:"event_massage"`
+	EventMessage string `json:"event_message"`
 
 	// 本地IB卡GUID
 	// @swagger:example "local_guid_example_value"
-	LocalGUID string `json:"local_guid,omitempty"`
+	LocalGUID string `json:"localguid,omitempty"`
 
 	// 远程IB卡GUID
 	// @swagger:example "remote_guid_example_value"
-	RemoteGUID string `json:"remote_guid,omitempty"`
+	RemoteGUID string `json:"remoteguid,omitempty"`
 
 	// 异常代码
 	// @swagger:example "ERR_CODE_example_value"
-	ErrCode string `json:"err_code,omitempty"`
+	ErrCode string `json:"errcode,omitempty"`
 
 	// 异常信息
 	// @swagger:description 诊断事件的异常信息
 	// @swagger:example "描述错误原因"
-	ErrMessage string `json:"err_message,omitempty"`
+	ErrMessage string `json:"errmessage,omitempty"`
 
 	// 扩展状态信息
 	// @swagger:example "扩展状态信息"
 	StatusMessage string `json:"status_message,omitempty"`
+
+	// 工作空间名
+	// @swagger:description 工作空间的名称
+	// @swagger:example "WORKSPACE_NAME_example_value"
+	WorkspaceName string `json:"workspace_name"`
+
+	// 工作空间ID
+	// @swagger:description 工作空间的标识ID
+	// @swagger:example "WORKSPACE_ID_example_value"
+	WorkspaceID string `json:"workspace_id"`
+
+	// 事件发生时间
+	// @swagger:description 事件发生的时间戳，格式为ISO 8601，例：2024-11-22T07:55:00Z
+	// @swagger:example "2024-11-22T07:55:00.652213323Z"
+	EventTime int64 `json:"event_time"`
 }

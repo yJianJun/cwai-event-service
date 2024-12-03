@@ -1,7 +1,6 @@
 package common
 
 import (
-	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/domain"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -64,10 +63,4 @@ func SuccessMessage(c *gin.Context, message string) {
 
 func SuccessMessageData(c *gin.Context, message string, data interface{}) {
 	successResponse(c, message, data)
-}
-
-type NetTopoResp struct {
-	RetCode int                `json:"retCode"`
-	RetMsg  string             `json:"retMsg"`
-	Data    domain.NetTopoData `json:"data"`
 }
