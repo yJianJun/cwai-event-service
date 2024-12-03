@@ -2,10 +2,13 @@
 package router
 
 import (
+	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/docs"
 	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/handler"
 	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/router/router_middleware"
 	"github.com/gin-gonic/gin"
 	"github.com/golang/glog"
+	swaggerfiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 const (
@@ -21,6 +24,8 @@ func InitRoute() *gin.Engine {
 	if middlewares != nil {
 		router.Use(middlewares...)
 	}
+	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
+	docs.SwaggerInfo.BasePath = "/"
 	groupv1 := router.Group(GROUP_V1)
 	groupv1.POST("/list", handler.PageEventFromES)
 	return router

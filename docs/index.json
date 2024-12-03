@@ -1,0 +1,118 @@
+{
+  "events": {
+    "mappings": {
+      "properties": {
+        "specversion": {
+          "type": "keyword"
+        },
+        "id": {
+          "type": "keyword"
+        },
+        "source": {
+          "type": "keyword"
+        },
+        "ctyunregion": {
+          "type": "keyword"
+        },
+        "type": {
+          "type": "keyword"
+        },
+        "datacontenttype": {
+          "type": "keyword"
+        },
+        "subject": {
+          "type": "keyword"
+        },
+        "time": {
+          "type": "date",
+          "format": "strict_date_optional_time||epoch_millis"
+        },
+        "data": {
+          "properties": {
+            "task_id": {
+              "type": "keyword"
+            },
+            "task_record_id": {
+              "type": "keyword"
+            },
+            "task_name": {
+              "type": "text"
+            },
+            "account_id": {
+              "type": "keyword"
+            },
+            "user_id": {
+              "type": "keyword"
+            },
+            "compute_type": {
+              "type": "keyword"
+            },
+            "node_ip": {
+              "type": "ip"
+            },
+            "node_name": {
+              "type": "keyword"
+            },
+            "pod_namespace": {
+              "type": "keyword"
+            },
+            "pod_ip": {
+              "type": "ip"
+            },
+            "pod_name": {
+              "type": "keyword"
+            },
+            "region_id": {
+              "type": "keyword"
+            },
+            "resource_group_id": {
+              "type": "keyword"
+            },
+            "resource_group_name": {
+              "type": "text"
+            },
+            "level": {
+              "type": "keyword"
+            },
+            "status": {
+              "type": "keyword"
+            },
+            "event_message": {
+              "type": "text"
+            },
+            "localguid": {
+              "type": "keyword"
+            },
+            "errcode": {
+              "type": "keyword"
+            },
+            "workspace_name": {
+              "type": "text"
+            },
+            "workspace_id": {
+              "type": "keyword"
+            },
+            "event_time": {
+              "type": "date",
+              "format": "strict_date_optional_time||epoch_second"
+            }
+          }
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "routing": {
+          "allocation": {
+            "include": {
+              "_tier_preference": "data_content"
+            }
+          }
+        },
+        "number_of_shards": "3",
+        "provided_name": "events",
+        "number_of_replicas": "1"
+      }
+    }
+  }
+}

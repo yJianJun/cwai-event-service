@@ -9,13 +9,12 @@ import (
 	"io/ioutil"
 	"strings"
 	"time"
-	sdkMiddleware "work.ctyun.cn/git/cwai/cwai-api-sdk/pkg/middleware"
 )
 
 func RegisterMiddleware() []gin.HandlerFunc {
 	var middlers []gin.HandlerFunc
 	middlers = append(middlers, Logger(3*time.Second), Cors(), LoggerToFile())
-	middlers = append(middlers, sdkMiddleware.AuthUserInfo(cfg.AuthInfo.AuthHost, cfg.AuthInfo.AuthPath), sdkMiddleware.AuthPathPermission())
+	//middlers = append(middlers, sdkMiddleware.AuthUserInfo(cfg.AuthInfo.AuthHost, cfg.AuthInfo.AuthPath), sdkMiddleware.AuthPathPermission())
 	return middlers
 }
 

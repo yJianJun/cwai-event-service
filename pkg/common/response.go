@@ -25,20 +25,28 @@ func (res Response) getMessage() string {
 	return res.Message
 }
 
-// PageVo 分页响应结构
-// @Description 分页响应结构
+// PageVo 分页响应结构体
+// @Description 分页响应结构体包含分页信息
 type PageVo struct {
 	// 总条数
 	// @json:"totalCount,omitempty"
+	// @Description 总记录数
 	TotalCount int64 `json:"totalCount,omitempty"`
 
 	// 总页数
 	// @json:"totalPage,omitempty"
+	// @Description 总页数
 	TotalPage int `json:"totalPage,omitempty"`
 
 	// 数据
 	// @json:"data"
+	// @Description 当前页的数据
 	Data interface{} `json:"data"`
+
+	// 当前页码
+	// @json:"pageNo"
+	// @Description 当前页码
+	PageNo int `json:"pageNo"`
 }
 
 func successResponse(c *gin.Context, message string, data interface{}) {

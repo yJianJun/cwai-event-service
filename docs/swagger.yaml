@@ -8,90 +8,83 @@ definitions:
         type: string
     type: object
   common.PageVo:
-    description: 分页响应结构
+    description: 分页响应结构体包含分页信息
     properties:
       data:
         description: |-
           数据
           @json:"data"
+          @Description 当前页的数据
+      pageNo:
+        description: |-
+          当前页码
+          @json:"pageNo"
+          @Description 当前页码
+        type: integer
       totalCount:
         description: |-
           总条数
           @json:"totalCount,omitempty"
+          @Description 总记录数
         type: integer
       totalPage:
         description: |-
           总页数
           @json:"totalPage,omitempty"
+          @Description 总页数
         type: integer
     type: object
-  common.Response:
-    description: 接口响应结构
+  model.EventPage:
+    description: 该结构体用于指定事件分页查询时所需的参数。通过设置这些参数，可以灵活地获取符合条件的事件数据。
     properties:
-      code:
+      end:
         description: |-
-          响应代码
-          Example: 200
+          EndTime 事件的结束时间。
+          以时间戳格式指定事件的截止筛选时间，应大于或等于 StartTime。
+          in: query
+          required: false
+          example: 1625334000
         type: integer
-      data:
-        description: 响应数据
-      message:
+      eventLike:
         description: |-
-          响应消息
-          Example: "请求成功"
-          omitempty: 可选字段
-        type: string
-    type: object
-  domain.EventPage:
-    description: 该结构体用于指定事件分页查询时所需的参数。通过设置这些参数，可以灵活地获取所需的事件数据。
-    properties:
-      end_time:
-        description: |-
-          EndTime 事件的结束时间，应该晚于或等于 StartTime。
-          格式为 "2006-01-02 15:04:05"。
-          example: "2006-01-02 15:04:05"
+          EventLike 事件的模糊匹配关键词。
+          通过关键词进行模糊搜索来进一步筛选事件。
+          example: "error"
           in: query
         type: string
       eventType:
         description: |-
-          EventType 指定事件的类型。
-          可以选择 "Critical", "Warning", 或 "Info"。
+          EventType 指定要查询的事件类型。
+          可选的类型包括 "Critical", "Warning", 或 "Info"。
           example: "Critical"
-          in: query
-        type: string
-      keyword:
-        description: |-
-          Keyword 用于筛选事件的关键词。
-          例如可用于指定事件名称、描述中的特定短语。
-          required: true
-          example: "连接错误"
           in: query
         type: string
       nodeName:
         description: |-
-          NodeName 节点名称，仅在事件的查询类型为节点时使用。
-          对应于节点列表中的 instanceName。
+          NodeName 节点名称。
+          在查询类型为节点时使用，对应于节点列表中的 instanceName。
           example: "node-01"
           in: query
         type: string
-      page:
+      pageNo:
         description: |-
-          Page 是页码。
+          PageNo 页码。
+          指定请求的页码，页码从1开始。
+          required: true
+          in: query
           example: 1
-          required: true
-          in: query
         type: integer
-      queryType:
+      pageSize:
         description: |-
-          QueryType 用于指定查询的类型。
-          该参数决定是查询节点事件（"node"）还是任务事件（"task"）。
+          PageSize 每页条数。
+          指定每页返回的记录数。
           required: true
-          example: "node"
           in: query
-        type: string
+          example: 20
+        type: integer
       regionID:
         description: |-
-          RegionID 指定事件所属的区域ID。
+          RegionID 指定事件所属区域的ID。
           此参数用于限定事件的地理或逻辑区域。
           required: true
           example: "/central//elasticsearch/"
@@ -100,44 +93,33 @@ definitions:
       resourceGroupID:
         description: |-
           ResourceGroupID 指定事件所属资源组的ID。
-          用于组织和管理相关事件。
+          用于对事件进行组织和管理。
           required: true
           example: "rg-12345"
           in: query
         type: string
-      size:
+      sortType:
         description: |-
-          Size 是每页条数。
-          example: 10
-          required: true
-          in: query
-        type: integer
-      sort:
-        description: |-
-          Sort 指定排序类型，默认使用事件发生时间倒序。
-          可选项，若不指定则使用默认排序。
+          SortType 排序类型。
+          指定排序类型，默认按事件发生时间倒序。如不指定将使用默认排序。
           example: false
-          optional: true
           in: query
         type: boolean
-      start_time:
+      start:
         description: |-
           StartTime 事件的开始时间。
-          格式要求为 "2006-01-02 15:04:05"。
-          required: true
-          example: "2006-01-02 15:04:05"
+          以时间戳格式指定事件的起始筛选时间。
           in: query
-        type: string
+          required: false
+          example: 1625247600
+        type: integer
       taskID:
         description: |-
-          TaskID 指定任务的ID，仅在事件的查询类型为任务时为非空。
-          仅当查询类型为任务时有效。
+          TaskID 任务的ID。
+          在查询类型为任务时使用，仅此时有效。
           example: "task-12345"
           in: query
         type: string
-    required:
-    - page
-    - size
     type: object
 host: localhost:8081
 info:
@@ -153,7 +135,7 @@ info:
   title: CTCCL事件监听
   version: "1.0"
 paths:
-  /event/page:
+  /apis/v1/cwai-event-service/list:
     post:
       consumes:
       - application/json
@@ -164,7 +146,7 @@ paths:
         name: pageRequest
         required: true
         schema:
-          $ref: '#/definitions/domain.EventPage'
+          $ref: '#/definitions/model.EventPage'
       produces:
       - application/json
       responses:
@@ -181,31 +163,6 @@ paths:
           schema:
             $ref: '#/definitions/common.CommonError'
       summary: 分页获取事件
-      tags:
-      - events
-  /event/query/{id}:
-    get:
-      consumes:
-      - application/json
-      description: 通过ID从Elasticsearch中查找和获取事件的信息
-      parameters:
-      - description: 事件的唯一标识符
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: 返回成功时包含事件数据
-          schema:
-            $ref: '#/definitions/common.Response'
-        "404":
-          description: 未找到指定ID的事件
-          schema:
-            $ref: '#/definitions/common.Response'
-      summary: 查找事件
       tags:
       - events
 securityDefinitions:

@@ -14,11 +14,11 @@ import (
 // @Tags         events
 // @Accept       json
 // @Produce      json
-// @Param        pageRequest body domain.EventPage true "分页请求参数，包括查询类型(queryType)和大小(size)"
+// @Param        pageRequest body model.EventPage true "分页请求参数，包括查询类型(queryType)和大小(size)"
 // @Success      200 {object} common.PageVo "返回分页信息，包括总数(totalCount)、总页数(totalPage)、以及事件数据(data)"
 // @Failure      400 {object} common.CommonError "参数绑定失败"
 // @Failure      404 {object} common.CommonError "搜索数据失败"
-// @Router       /event/page [post]
+// @Router       /apis/v1/cwai-event-service/list [post]
 func PageEventFromES(c *gin.Context) {
 	var pageRequest model.EventPage
 	if err := c.ShouldBindJSON(&pageRequest); err != nil {
@@ -38,6 +38,7 @@ func PageEventFromES(c *gin.Context) {
 		TotalCount: totalCount,
 		TotalPage:  int(totalPage),
 		Data:       events,
+		PageNo:     pageRequest.PageNo,
 	}
 	c.JSON(http.StatusOK, pageVo)
 }

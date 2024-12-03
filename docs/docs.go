@@ -24,7 +24,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/event/page": {
+        "/apis/v1/cwai-event-service/list": {
             "post": {
                 "description": "根据请求参数从ElasticSearch中分页获取事件。如果请求类型为\"task\"，则会执行事件搜索。",
                 "consumes": [
@@ -44,7 +44,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/domain.EventPage"
+                            "$ref": "#/definitions/model.EventPage"
                         }
                     }
                 ],
@@ -69,44 +69,6 @@ const docTemplate = `{
                     }
                 }
             }
-        },
-        "/event/query/{id}": {
-            "get": {
-                "description": "通过ID从Elasticsearch中查找和获取事件的信息",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "events"
-                ],
-                "summary": "查找事件",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "事件的唯一标识符",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "返回成功时包含事件数据",
-                        "schema": {
-                            "$ref": "#/definitions/common.Response"
-                        }
-                    },
-                    "404": {
-                        "description": "未找到指定ID的事件",
-                        "schema": {
-                            "$ref": "#/definitions/common.Response"
-                        }
-                    }
-                }
-            }
         }
     },
     "definitions": {
@@ -122,93 +84,72 @@ const docTemplate = `{
             }
         },
         "common.PageVo": {
-            "description": "分页响应结构",
+            "description": "分页响应结构体包含分页信息",
             "type": "object",
             "properties": {
                 "data": {
-                    "description": "数据\n@json:\"data\""
+                    "description": "数据\n@json:\"data\"\n@Description 当前页的数据"
+                },
+                "pageNo": {
+                    "description": "当前页码\n@json:\"pageNo\"\n@Description 当前页码",
+                    "type": "integer"
                 },
                 "totalCount": {
-                    "description": "总条数\n@json:\"totalCount,omitempty\"",
+                    "description": "总条数\n@json:\"totalCount,omitempty\"\n@Description 总记录数",
                     "type": "integer"
                 },
                 "totalPage": {
-                    "description": "总页数\n@json:\"totalPage,omitempty\"",
+                    "description": "总页数\n@json:\"totalPage,omitempty\"\n@Description 总页数",
                     "type": "integer"
                 }
             }
         },
-        "common.Response": {
-            "description": "接口响应结构",
+        "model.EventPage": {
+            "description": "该结构体用于指定事件分页查询时所需的参数。通过设置这些参数，可以灵活地获取符合条件的事件数据。",
             "type": "object",
             "properties": {
-                "code": {
-                    "description": "响应代码\nExample: 200",
+                "end": {
+                    "description": "EndTime 事件的结束时间。\n以时间戳格式指定事件的截止筛选时间，应大于或等于 StartTime。\nin: query\nrequired: false\nexample: 1625334000",
                     "type": "integer"
                 },
-                "data": {
-                    "description": "响应数据"
-                },
-                "message": {
-                    "description": "响应消息\nExample: \"请求成功\"\nomitempty: 可选字段",
-                    "type": "string"
-                }
-            }
-        },
-        "domain.EventPage": {
-            "description": "该结构体用于指定事件分页查询时所需的参数。通过设置这些参数，可以灵活地获取所需的事件数据。",
-            "type": "object",
-            "required": [
-                "page",
-                "size"
-            ],
-            "properties": {
-                "end_time": {
-                    "description": "EndTime 事件的结束时间，应该晚于或等于 StartTime。\n格式为 \"2006-01-02 15:04:05\"。\nexample: \"2006-01-02 15:04:05\"\nin: query",
+                "eventLike": {
+                    "description": "EventLike 事件的模糊匹配关键词。\n通过关键词进行模糊搜索来进一步筛选事件。\nexample: \"error\"\nin: query",
                     "type": "string"
                 },
                 "eventType": {
-                    "description": "EventType 指定事件的类型。\n可以选择 \"Critical\", \"Warning\", 或 \"Info\"。\nexample: \"Critical\"\nin: query",
-                    "type": "string"
-                },
-                "keyword": {
-                    "description": "Keyword 用于筛选事件的关键词。\n例如可用于指定事件名称、描述中的特定短语。\nrequired: true\nexample: \"连接错误\"\nin: query",
+                    "description": "EventType 指定要查询的事件类型。\n可选的类型包括 \"Critical\", \"Warning\", 或 \"Info\"。\nexample: \"Critical\"\nin: query",
                     "type": "string"
                 },
                 "nodeName": {
-                    "description": "NodeName 节点名称，仅在事件的查询类型为节点时使用。\n对应于节点列表中的 instanceName。\nexample: \"node-01\"\nin: query",
+                    "description": "NodeName 节点名称。\n在查询类型为节点时使用，对应于节点列表中的 instanceName。\nexample: \"node-01\"\nin: query",
                     "type": "string"
                 },
-                "page": {
-                    "description": "Page 是页码。\nexample: 1\nrequired: true\nin: query",
+                "pageNo": {
+                    "description": "PageNo 页码。\n指定请求的页码，页码从1开始。\nrequired: true\nin: query\nexample: 1",
                     "type": "integer"
                 },
-                "queryType": {
-                    "description": "QueryType 用于指定查询的类型。\n该参数决定是查询节点事件（\"node\"）还是任务事件（\"task\"）。\nrequired: true\nexample: \"node\"\nin: query",
-                    "type": "string"
+                "pageSize": {
+                    "description": "PageSize 每页条数。\n指定每页返回的记录数。\nrequired: true\nin: query\nexample: 20",
+                    "type": "integer"
                 },
                 "regionID": {
-                    "description": "RegionID 指定事件所属的区域ID。\n此参数用于限定事件的地理或逻辑区域。\nrequired: true\nexample: \"/central//elasticsearch/\"\nin: query",
+                    "description": "RegionID 指定事件所属区域的ID。\n此参数用于限定事件的地理或逻辑区域。\nrequired: true\nexample: \"/central//elasticsearch/\"\nin: query",
                     "type": "string"
                 },
                 "resourceGroupID": {
-                    "description": "ResourceGroupID 指定事件所属资源组的ID。\n用于组织和管理相关事件。\nrequired: true\nexample: \"rg-12345\"\nin: query",
+                    "description": "ResourceGroupID 指定事件所属资源组的ID。\n用于对事件进行组织和管理。\nrequired: true\nexample: \"rg-12345\"\nin: query",
                     "type": "string"
                 },
-                "size": {
-                    "description": "Size 是每页条数。\nexample: 10\nrequired: true\nin: query",
-                    "type": "integer"
-                },
-                "sort": {
-                    "description": "Sort 指定排序类型，默认使用事件发生时间倒序。\n可选项，若不指定则使用默认排序。\nexample: false\noptional: true\nin: query",
+                "sortType": {
+                    "description": "SortType 排序类型。\n指定排序类型，默认按事件发生时间倒序。如不指定将使用默认排序。\nexample: false\nin: query",
                     "type": "boolean"
                 },
-                "start_time": {
-                    "description": "StartTime 事件的开始时间。\n格式要求为 \"2006-01-02 15:04:05\"。\nrequired: true\nexample: \"2006-01-02 15:04:05\"\nin: query",
-                    "type": "string"
+                "start": {
+                    "description": "StartTime 事件的开始时间。\n以时间戳格式指定事件的起始筛选时间。\nin: query\nrequired: false\nexample: 1625247600",
+                    "type": "integer"
                 },
                 "taskID": {
-                    "description": "TaskID 指定任务的ID，仅在事件的查询类型为任务时为非空。\n仅当查询类型为任务时有效。\nexample: \"task-12345\"\nin: query",
+                    "description": "TaskID 任务的ID。\n在查询类型为任务时使用，仅此时有效。\nexample: \"task-12345\"\nin: query",
                     "type": "string"
                 }
             }

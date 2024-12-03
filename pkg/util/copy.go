@@ -6,7 +6,7 @@ import (
 )
 
 // CopyProperties 将 source 结构体的字段值拷贝到 dst 结构体的相同名称字段
-func CopyProperties(dst, src interface{}) error {
+func CopyProperties(dst, src interface{}) {
 	sval := reflect.ValueOf(src).Elem()
 	dval := reflect.ValueOf(dst).Elem()
 	for i := 0; i < sval.NumField(); i++ {
@@ -30,7 +30,6 @@ func CopyProperties(dst, src interface{}) error {
 			dvalue.Set(value)
 		}
 	}
-	return nil
 }
 
 func IsInvalid(v reflect.Value) bool {

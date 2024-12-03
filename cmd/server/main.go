@@ -20,7 +20,7 @@
 package main
 
 import (
-	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/cmd/server/app"
+	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/cmd/app"
 	"fmt"
 	"log"
 	"math/rand"

@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/common"
 	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/model"
 	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/util"
 	"encoding/json"
@@ -9,14 +10,13 @@ import (
 	"github.com/elastic/go-elasticsearch/v8/typedapi/types"
 	"log"
 	"strconv"
+	"time"
 )
-
-const timeZoneUTC = "UTC"
 
 func SearchEventsFromES(pageRequest model.EventPage) (*core_search.Response, error) {
 
 	// 构建时间查询
-	timeQuery := buildTimeQuery(pageRequest.Start, pageRequest.End, timeZoneUTC)
+	timeQuery := buildTimeQuery(pageRequest.Start, pageRequest.End)
 
 	// 构建事件类型查询
 	eventTypeQuery := buildTermQuery(pageRequest.EventType, "type")
@@ -34,7 +34,7 @@ func SearchEventsFromES(pageRequest model.EventPage) (*core_search.Response, err
 	regionIdQuery := buildTermQuery(pageRequest.RegionID, "data.region_id")
 
 	// 构建资源组ID查询
-	resourceGroupIdQuery := buildTermQuery(pageRequest.ResourceGroupID, "resourceGroupID")
+	resourceGroupIdQuery := buildTermQuery(pageRequest.ResourceGroupID, "data.resource_group_id")
 
 	// 构建布尔查询
 	query := types.NewBoolQuery()
@@ -68,6 +68,10 @@ func SearchEventsFromES(pageRequest model.EventPage) (*core_search.Response, err
 		Query(&types.Query{Bool: query}).
 		From((pageRequest.PageNo - 1) * pageRequest.PageSize).
 		Size(pageRequest.PageSize).
+		//Sort([]types.SortCombinations{
+		//	types.SortOptions{SortOptions: map[string]types.FieldSort{
+		//		"data.event_time": {Order: &sortorder.Desc},
+		//	}}}).
 		Do(context.Background())
 	if err != nil {
 		return nil, err
@@ -75,14 +79,13 @@ func SearchEventsFromES(pageRequest model.EventPage) (*core_search.Response, err
 	return res, nil
 }
 
-func buildTimeQuery(start, end int64, timeZone string) map[string]types.RangeQuery {
+func buildTimeQuery(start, end int64) map[string]types.RangeQuery {
 	if start != 0 && end != 0 {
 		startTimeStr, endTimeStr := strconv.FormatInt(start, 10), strconv.FormatInt(end, 10)
 		return map[string]types.RangeQuery{
 			"data.event_time": types.DateRangeQuery{
-				Gte:      &startTimeStr,
-				Lte:      &endTimeStr,
-				TimeZone: &timeZone, //check
+				Gte: &startTimeStr,
+				Lte: &endTimeStr,
 			},
 		}
 	}
@@ -107,18 +110,25 @@ func buildMatchPhraseQuery(value, field string) map[string]types.MatchPhraseQuer
 	return nil
 }
 
-func ParseSearchResults(searchResult *core_search.Response) []model.Event {
+func ParseSearchResults(searchResult *core_search.Response) []model.EventResponse {
 	if searchResult.Hits.Total.Value > 0 {
-		events := make([]model.Event, 0)
+		eventResponses := make([]model.EventResponse, 0)
 		for _, hit := range searchResult.Hits.Hits {
-			var event model.Event
-			if err := json.Unmarshal(hit.Source_, &event); err == nil {
-				events = append(events, event)
+			var eventResponse model.EventResponse
+			if err := json.Unmarshal(hit.Source_, &eventResponse); err == nil {
+				evenTime := time.Unix(eventResponse.Data.EventTime, 0)
+				eventResponse.EventTimeUTC = evenTime.UTC()
+				eventResponses = append(eventResponses, eventResponse)
+			} else {
+				common.Error(map[string]interface{}{
+					"hit":  hit.Source_,
+					"erro": err,
+				})
 			}
 		}
-		return events
+		return eventResponses
 	}
-	return []model.Event{}
+	return []model.EventResponse{}
 }
 
 func CalculateTotalPages(totalCount int64, pageSize int) int64 {
