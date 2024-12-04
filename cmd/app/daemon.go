@@ -4,6 +4,7 @@ import (
 	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/config"
 	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/router"
 	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/util"
+	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/validatorx"
 	"github.com/golang/glog"
 	"net/http"
 )
@@ -17,7 +18,8 @@ func NewDaemon(cfg *config.ServerConfig) *Daemon {
 	address := cfg.App.Host + ":" + cfg.App.Port
 	routers := router.InitRoute()
 	util.InitElasticSearch(cfg)
-
+	// 参数校验器初始化、如错误提示中文转译、注册自定义校验器等
+	validatorx.Init()
 	srv := &http.Server{
 		Addr:    address,
 		Handler: routers,

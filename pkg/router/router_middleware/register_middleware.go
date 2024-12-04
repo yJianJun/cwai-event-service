@@ -7,13 +7,15 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/golang/glog"
 	"io/ioutil"
+	"net/http"
+	"runtime/debug"
 	"strings"
 	"time"
 )
 
 func RegisterMiddleware() []gin.HandlerFunc {
 	var middlers []gin.HandlerFunc
-	middlers = append(middlers, Logger(3*time.Second), Cors(), LoggerToFile())
+	middlers = append(middlers, Logger(3*time.Second), Cors(), LoggerToFile(), ExceptionMiddleware())
 	//middlers = append(middlers, sdkMiddleware.AuthUserInfo(cfg.AuthInfo.AuthHost, cfg.AuthInfo.AuthPath), sdkMiddleware.AuthPathPermission())
 	return middlers
 }
@@ -93,6 +95,45 @@ func Logger(duration time.Duration) gin.HandlerFunc {
 			glog.Infof(message)
 		}
 
+	}
+}
+
+func ExceptionMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		defer func() {
+			if err := recover(); err != nil {
+				// 修改错误信息解析
+				c.AbortWithStatusJSON(500, errorResponse(err))
+				c.Abort()
+			}
+		}()
+		c.Next()
+	}
+}
+func errorResponse(err interface{}) common.Response {
+	switch v := err.(type) {
+	case common.CommonError:
+		common.Error(map[string]interface{}{"err": v.Error()})
+		// 符合预期的错误，可以直接返回给客户端
+		return common.Response{
+			Code:    v.Code,
+			Message: v.Msg,
+		}
+	case error:
+		// 一律返回服务器错误，避免返回堆栈错误给客户端，实际还可以针对系统错误做其他处理
+		debug.PrintStack()
+		common.Error(map[string]interface{}{"err": v.Error()})
+		return common.Response{
+			Code:    http.StatusInternalServerError,
+			Message: v.Error(),
+		}
+	default:
+		debug.PrintStack()
+		common.Error(map[string]interface{}{"err": "系统未知异常"})
+		return common.Response{
+			Code:    http.StatusInternalServerError,
+			Message: "系统未知异常",
+		}
 	}
 }
 

@@ -4,6 +4,7 @@ import (
 	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/common"
 	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/model"
 	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/service"
+	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/validatorx"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -21,10 +22,7 @@ import (
 // @Router       /apis/v1/cwai-event-service/list [post]
 func PageEventFromES(c *gin.Context) {
 	var pageRequest model.EventPage
-	if err := c.ShouldBindJSON(&pageRequest); err != nil {
-		common.BadRequestMessage(c, common.WatcherInvalidParam, err.Error(), err)
-		return
-	}
+	validatorx.ShouldBindJSON(c, &pageRequest)
 	pageVo := common.PageVo{}
 	searchResult, err := service.SearchEventsFromES(pageRequest)
 	if err != nil {

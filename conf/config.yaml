@@ -9,7 +9,8 @@ elasticSearch:
     healthcheckInterval: 5
     # 日志前缀
     logPre: ES-
-    password: 123456
+    password: xwViJm3InjSCXAhN
+    username: elastic
 log: # 日志配置
     # 日志路径
     name: cwai-watcher

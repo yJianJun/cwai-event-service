@@ -8,7 +8,7 @@ type EventPage struct {
 	// required: true
 	// example: "/central//elasticsearch/"
 	// in: query
-	RegionID string `json:"regionID,omitempty"`
+	RegionID string `json:"regionID" binding:"required" msg:"regionID 必传！"`
 
 	// StartTime 事件的开始时间。
 	// 以时间戳格式指定事件的起始筛选时间。
@@ -28,50 +28,50 @@ type EventPage struct {
 	// 可选的类型包括 "Critical", "Warning", 或 "Info"。
 	// example: "Critical"
 	// in: query
-	EventType string `json:"eventType,omitempty"`
+	EventType string `json:"eventType" binding:"oneof=Critical Warning Info"`
 
 	// ResourceGroupID 指定事件所属资源组的ID。
 	// 用于对事件进行组织和管理。
 	// required: true
 	// example: "rg-12345"
 	// in: query
-	ResourceGroupID string `json:"resourceGroupID,omitempty"`
+	ResourceGroupID string `json:"resourceGroupID" binding:"required" msg:"resourceGroupID 必传！"`
 
 	// NodeName 节点名称。
 	// 在查询类型为节点时使用，对应于节点列表中的 instanceName。
 	// example: "node-01"
 	// in: query
-	NodeName string `json:"nodeName,omitempty"`
+	NodeName string `json:"nodeName"`
 
 	// TaskID 任务的ID。
 	// 在查询类型为任务时使用，仅此时有效。
 	// example: "task-12345"
 	// in: query
-	TaskID string `json:"taskID,omitempty"`
+	TaskID string `json:"taskID"`
 
 	// SortType 排序类型。
 	// 指定排序类型，默认按事件发生时间倒序。如不指定将使用默认排序。
 	// example: false
 	// in: query
-	SortType bool `json:"sortType,omitempty"`
+	SortType bool `json:"sortType"`
 
 	// EventLike 事件的模糊匹配关键词。
 	// 通过关键词进行模糊搜索来进一步筛选事件。
 	// example: "error"
 	// in: query
-	EventLike string `json:"eventLike,omitempty"`
+	EventLike string `json:"eventLike"`
 
 	// PageNo 页码。
 	// 指定请求的页码，页码从1开始。
 	// required: true
 	// in: query
 	// example: 1
-	PageNo int `json:"pageNo"`
+	PageNo int `json:"pageNo" binding:"required" msg:"pageNo 必传！"`
 
 	// PageSize 每页条数。
 	// 指定每页返回的记录数。
 	// required: true
 	// in: query
 	// example: 20
-	PageSize int `json:"pageSize"`
+	PageSize int `json:"pageSize" binding:"required" msg:"pageSize 必传！"`
 }
