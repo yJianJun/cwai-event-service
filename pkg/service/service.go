@@ -64,7 +64,7 @@ func SearchEventsFromES(pageRequest model.EventPage) (*core_search.Response, err
 
 	// 执行搜索请求
 	res, err := util.ESclient.Search().
-		Index("events").
+		Index("events*").
 		Query(&types.Query{Bool: query}).
 		From((pageRequest.PageNo - 1) * pageRequest.PageSize).
 		Size(pageRequest.PageSize).
