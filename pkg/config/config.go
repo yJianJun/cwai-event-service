@@ -27,6 +27,7 @@ type ElaticSearch struct {
 	HealthCheckInterval int    `yaml:"healthCheckInterval"`
 	LogPre              string `yaml:"logPre"`
 	Password            string `yaml:"password"`
+	Username            string `yaml:"username"`
 }
 
 var Config *ServerConfig

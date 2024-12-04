@@ -27,7 +27,11 @@ func InitElasticSearch(conf *config.ServerConfig) {
 }
 
 func createElasticClient(esConfig config.ElaticSearch) (*elasticsearch.TypedClient, error) {
-	elasticConfig := elasticsearch.Config{Addresses: []string{esConfig.Url}}
+	elasticConfig := elasticsearch.Config{
+		Addresses: []string{esConfig.Url},
+		Username:  esConfig.Username,
+		Password:  esConfig.Password,
+	}
 	client, err := elasticsearch.NewTypedClient(elasticConfig)
 	if err != nil {
 		return nil, err
