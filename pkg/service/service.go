@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	core_search "github.com/elastic/go-elasticsearch/v8/typedapi/core/search"
 	"github.com/elastic/go-elasticsearch/v8/typedapi/types"
+	"github.com/elastic/go-elasticsearch/v8/typedapi/types/enums/sortorder"
 	"log"
 	"strconv"
 	"time"
@@ -59,24 +60,38 @@ func SearchEventsFromES(pageRequest model.EventPage) (*core_search.Response, err
 		query.Should = append(query.Should, types.Query{MatchPhrase: eventLikeQuery})
 	}
 
-	// 打印查询日志
-	log.Printf("ES查询Query: %v", query)
-
-	// 执行搜索请求
-	res, err := util.ESclient.Search().
+	// 创建搜索请求
+	search := util.ESclient.Search().
 		Index("events*").
 		Query(&types.Query{Bool: query}).
 		From((pageRequest.PageNo - 1) * pageRequest.PageSize).
-		Size(pageRequest.PageSize).
-		//Sort([]types.SortCombinations{
-		//	types.SortOptions{SortOptions: map[string]types.FieldSort{
-		//		"data.event_time": {Order: &sortorder.Desc},
-		//	}}}).
-		Do(context.Background())
+		Size(pageRequest.PageSize)
+
+	// 应用排序
+	search = applySort(search, pageRequest.SortType)
+
+	// 执行搜索请求
+	res, err := search.Do(context.Background())
+
+	// 打印查询日志
+	log.Printf("ES查询Search: %v", search)
 	if err != nil {
 		return nil, err
 	}
 	return res, nil
+}
+
+// 提取排序函数
+func applySort(search *core_search.Search, sortType bool) *core_search.Search {
+	sortOrder := sortorder.Desc
+	if sortType {
+		sortOrder = sortorder.Asc
+	}
+	return search.Sort(types.SortOptions{
+		SortOptions: map[string]types.FieldSort{
+			"data.event_time": {Order: &sortOrder},
+		},
+	})
 }
 
 func buildTimeQuery(start, end int64) map[string]types.RangeQuery {
