@@ -1,5 +1,18 @@
 package model
 
+// header结构体
+type UserInfo struct {
+	RegionID  string `json:"regionID"`
+	UserID    string `json:"userID"`
+	AccountID string `json:"accountID"`
+}
+
+type AuthInfo struct {
+	RegionID  string `json:"regionID"`
+	UserID    string `json:"userID"`
+	AccountID string `json:"accountID"`
+}
+
 // EventPage 定义了事件分页查询的请求参数。
 // @Description 该结构体用于指定事件分页查询时所需的参数。通过设置这些参数，可以灵活地获取符合条件的事件数据。
 type EventPage struct {

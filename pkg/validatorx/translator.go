@@ -1,9 +1,9 @@
 package validatorx
 
 import (
-	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/common"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
+	"work.ctyun.cn/git/cwai/cwai-api-sdk/pkg/common"
 )
 
 // 绑定请求体中的json至form结构体，并拷贝至另一结构体

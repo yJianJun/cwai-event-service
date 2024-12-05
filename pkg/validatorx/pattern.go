@@ -1,8 +1,9 @@
 package validatorx
 
 import (
-	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/common"
 	"regexp"
+
+	"work.ctyun.cn/git/cwai/cwai-api-sdk/pkg/common"
 
 	"github.com/go-playground/validator/v10"
 )

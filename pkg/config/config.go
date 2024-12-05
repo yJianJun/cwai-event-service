@@ -1,23 +1,29 @@
 package config
 
 import (
-	"flag"
-	"fmt"
-	"github.com/fsnotify/fsnotify"
+	"bytes"
+	"io"
+	"os"
+
 	"github.com/spf13/cobra"
+
 	"github.com/spf13/viper"
-	"strings"
+	"work.ctyun.cn/git/cwai/cwai-toolbox/logger"
 )
 
-type App struct {
-	ConfigFile string `json:"configFile"`
-	Port       string `json:"port"`
-	Host       string `json:"host"`
-}
+var EventServerConfig = &ServerConfig{}
 
 type ServerConfig struct {
-	ElasticSearch ElaticSearch `yaml:"elasticSearch"`
 	App           App          `yaml:"app"`
+	ElasticSearch ElaticSearch `yaml:"elasticSearch"`
+	LoggerInfo    LoggerInfo   `mapstructure:"logger"`
+	AuthInfo      AuthInfo     `mapstructure:"auth"`
+}
+
+type App struct {
+	Port        string `json:"port"`
+	Host        string `json:"host"`
+	ShutTimeOut int    `json:"shuttimeout"`
 }
 
 type ElaticSearch struct {
@@ -30,56 +36,74 @@ type ElaticSearch struct {
 	Username            string `yaml:"username"`
 }
 
-var Config *ServerConfig
+type LoggerInfo struct {
+	Name         string `mapstructure:"name"`
+	Level        string `mapstructure:"level"`
+	TraceLevel   string `mapstructure:"traceLevel"`
+	LogToDir     string `mapstructure:"logToDir"`
+	MaxSizeInMiB int    `mapstructure:"maxSizeInMiB"`
+	MaxAgeInDays int    `mapstructure:"maxAgeInDays"`
+}
 
-const ConfigFile = "./conf/config.yaml" // 配置文件
+type AuthInfo struct {
+	AuthHost string `mapstructure:"authHost"`
+	AuthPath string `mapstructure:"authPath"`
+}
 
 func NewConfig() *ServerConfig {
-	Config = &ServerConfig{}
-	Config.Init()
-	return Config
+	EventServerConfig.Init()
+	if os.Getenv("DEBUG") == "ture" {
+		EventServerConfig.LoggerInfo.Level = string(logger.LogLevelDebug)
+	}
+	return EventServerConfig
 }
 
-// Init 初始化配置
+// Init 初始化默认参数
 func (mo *ServerConfig) Init() {
-	var configFile string
-	// 读取配置文件优先级: 命令行 > 默认值
-	flag.StringVar(&configFile, "c", ConfigFile, "配置配置")
-	if len(configFile) == 0 {
-		// 读取默认配置文件
-		fmt.Println("配置文件不存在！")
-	}
-	// 读取配置文件
-	v := viper.New()
-	v.SetConfigFile(configFile)
-	viper.AutomaticEnv()
-	replacer := strings.NewReplacer("_", ".")
-	viper.SetEnvKeyReplacer(replacer)
-	if err := v.ReadInConfig(); err != nil {
-		fmt.Errorf("配置解析失败:%s\n", err)
-	}
-	// 动态监测配置文件
-	v.WatchConfig()
-	v.OnConfigChange(func(in fsnotify.Event) {
-		fmt.Println("配置文件发生改变")
-		if err := v.Unmarshal(mo); err != nil {
-			panic(fmt.Errorf("配置重载失败:%s\n", err))
-		}
-	})
-	if err := v.Unmarshal(mo); err != nil {
-		fmt.Errorf("配置重载失败:%s\n", err)
-	}
-	// 设置配置文件
-	mo.App.ConfigFile = configFile
+	viper.SetDefault("app.host", "0.0.0.0")
+	viper.SetDefault("app.port", "8081")
+	viper.SetDefault("app.shuttimeout", 60)
+	viper.SetDefault("logger.name", "cwai-event-service")
+	viper.SetDefault("logger.level", "debug")
+	viper.SetDefault("logger.traceLevel", "error")
+	viper.SetDefault("logger.logToDir", ".")
+	viper.SetDefault("logger.maxSizeInMiB", "10")
+	viper.SetDefault("logger.maxAgeInDays", "30")
+	viper.SetDefault("auth.authHost", "https://cwai.ctyun.cn:10004")
+	viper.SetDefault("auth.authPath", "/apis/v1/workspace-service/workspace/userInfo")
 }
 
-func (mo *ServerConfig) BindFlags(cmd *cobra.Command) {
-	cmd.Flags().StringP("host", "H", "", "listen host")
-	cmd.Flags().StringP("port", "p", "", "listen port")
-	viper.BindPFlags(cmd.Flags()) //命令行标志的值设置覆盖值
+func (mo *ServerConfig) BindFlags(cmd *cobra.Command) error {
+	cmd.Flags().StringP("app.host", "H", "", "listen host")
+	cmd.Flags().StringP("app.port", "p", "", "listen port")
+
+	err := viper.BindPFlags(cmd.Flags())
+	return err
+}
+
+// ParseYAML 从YAML文件解析参数
+func (mo *ServerConfig) ReadYAML(path string) (err error) {
+	viper.SetConfigType("YAML")
+	f, err := os.Open(path)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	content, err := io.ReadAll(f)
+	if err != nil {
+		return err
+	}
+
+	err = viper.ReadConfig(bytes.NewBuffer(content))
+
+	return err
+}
+
+func (mo *ServerConfig) Parse() (err error) {
+	return viper.Unmarshal(mo)
 }
 
 func (mo *ServerConfig) Validate() error {
-	//TODO
 	return nil
 }

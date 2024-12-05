@@ -2,18 +2,23 @@ package service
 
 import (
 	"context"
-	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/common"
-	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/model"
-	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/util"
 	"encoding/json"
-	core_search "github.com/elastic/go-elasticsearch/v8/typedapi/core/search"
-	"github.com/elastic/go-elasticsearch/v8/typedapi/types"
 	"log"
 	"strconv"
 	"time"
+
+	core_search "github.com/elastic/go-elasticsearch/v8/typedapi/core/search"
+	"github.com/elastic/go-elasticsearch/v8/typedapi/types"
+	"github.com/elastic/go-elasticsearch/v8/typedapi/types/enums/sortorder"
+	"work.ctyun.cn/git/cwai/cwai-api-sdk/pkg/common"
+	"work.ctyun.cn/git/cwai/cwai-event-service/pkg/model"
+	util "work.ctyun.cn/git/cwai/cwai-event-service/pkg/utils"
 )
 
-func SearchEventsFromES(pageRequest model.EventPage) (*core_search.Response, error) {
+func SearchEventsFromES(pageRequest model.EventPage,userInfo model.UserInfo) (*core_search.Response, error) {
+
+	//todo: 构建用户信息查询
+
 
 	// 构建时间查询
 	timeQuery := buildTimeQuery(pageRequest.Start, pageRequest.End)
@@ -59,24 +64,38 @@ func SearchEventsFromES(pageRequest model.EventPage) (*core_search.Response, err
 		query.Should = append(query.Should, types.Query{MatchPhrase: eventLikeQuery})
 	}
 
-	// 打印查询日志
-	log.Printf("ES查询Query: %v", query)
-
-	// 执行搜索请求
-	res, err := util.ESclient.Search().
+	// 创建搜索请求
+	search := util.ESclient.Search().
 		Index("events*").
 		Query(&types.Query{Bool: query}).
 		From((pageRequest.PageNo - 1) * pageRequest.PageSize).
-		Size(pageRequest.PageSize).
-		//Sort([]types.SortCombinations{
-		//	types.SortOptions{SortOptions: map[string]types.FieldSort{
-		//		"data.event_time": {Order: &sortorder.Desc},
-		//	}}}).
-		Do(context.Background())
+		Size(pageRequest.PageSize)
+
+	// 应用排序
+	search = applySort(search, pageRequest.SortType)
+
+	// 执行搜索请求
+	res, err := search.Do(context.Background())
+
+	// 打印查询日志
+	log.Printf("ES查询Search: %v", search)
 	if err != nil {
 		return nil, err
 	}
 	return res, nil
+}
+
+// 提取排序函数
+func applySort(search *core_search.Search, sortType bool) *core_search.Search {
+	sortOrder := sortorder.Desc
+	if sortType {
+		sortOrder = sortorder.Asc
+	}
+	return search.Sort(types.SortOptions{
+		SortOptions: map[string]types.FieldSort{
+			"data.event_time": {Order: &sortOrder},
+		},
+	})
 }
 
 func buildTimeQuery(start, end int64) map[string]types.RangeQuery {
@@ -110,7 +129,7 @@ func buildMatchPhraseQuery(value, field string) map[string]types.MatchPhraseQuer
 	return nil
 }
 
-func ParseSearchResults(searchResult *core_search.Response) []model.EventResponse {
+func ParseSearchResults(searchResult *core_search.Response,userInfo model.UserInfo) ([]model.EventResponse error) {
 	if searchResult.Hits.Total.Value > 0 {
 		eventResponses := make([]model.EventResponse, 0)
 		for _, hit := range searchResult.Hits.Hits {
