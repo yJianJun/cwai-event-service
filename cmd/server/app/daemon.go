@@ -8,7 +8,6 @@ import (
 	"work.ctyun.cn/git/cwai/cwai-event-service/pkg/config"
 	"work.ctyun.cn/git/cwai/cwai-event-service/pkg/router"
 	"work.ctyun.cn/git/cwai/cwai-event-service/pkg/utils"
-	"work.ctyun.cn/git/cwai/cwai-event-service/pkg/validatorx"
 	"work.ctyun.cn/git/cwai/cwai-toolbox/logger"
 )
 
@@ -61,9 +60,6 @@ func (da *Daemon) Run() error {
 		logger.Errorf(context.TODO(), "Init elasticsearch failed: %v\n", err)
 		return err
 	}
-
-	// 参数校验器初始化、如错误提示中文转译、注册自定义校验器等
-	validatorx.Init()
 
 	startError := make(chan error)
 	go func(errCh chan error) {

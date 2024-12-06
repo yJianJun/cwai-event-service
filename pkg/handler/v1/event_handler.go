@@ -8,7 +8,6 @@ import (
 	"work.ctyun.cn/git/cwai/cwai-api-sdk/pkg/common"
 	"work.ctyun.cn/git/cwai/cwai-event-service/pkg/model"
 	"work.ctyun.cn/git/cwai/cwai-event-service/pkg/service"
-	"work.ctyun.cn/git/cwai/cwai-event-service/pkg/validatorx"
 	"work.ctyun.cn/git/cwai/cwai-toolbox/logger"
 )
 
@@ -29,8 +28,8 @@ func PageEventFromES(c *gin.Context) {
 		pageRequest model.EventPage
 	)
 
-	//todo: 处理error通过common.BadRequestMessage返回前端
-	validatorx.ShouldBindJSON(c, &pageRequest)
+	//validatorx.ShouldBindJSON(c, &pageRequest)
+	c.ShouldBindJSON(&pageRequest)
 
 	//parse header
 	if err := c.BindHeader(&userInfo); err != nil {

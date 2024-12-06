@@ -10,15 +10,13 @@ import (
 	core_search "github.com/elastic/go-elasticsearch/v8/typedapi/core/search"
 	"github.com/elastic/go-elasticsearch/v8/typedapi/types"
 	"github.com/elastic/go-elasticsearch/v8/typedapi/types/enums/sortorder"
-	"work.ctyun.cn/git/cwai/cwai-api-sdk/pkg/common"
 	"work.ctyun.cn/git/cwai/cwai-event-service/pkg/model"
 	util "work.ctyun.cn/git/cwai/cwai-event-service/pkg/utils"
 )
 
-func SearchEventsFromES(pageRequest model.EventPage,userInfo model.UserInfo) (*core_search.Response, error) {
+func SearchEventsFromES(pageRequest model.EventPage, userInfo model.UserInfo) (*core_search.Response, error) {
 
 	//todo: 构建用户信息查询
-
 
 	// 构建时间查询
 	timeQuery := buildTimeQuery(pageRequest.Start, pageRequest.End)
@@ -129,7 +127,7 @@ func buildMatchPhraseQuery(value, field string) map[string]types.MatchPhraseQuer
 	return nil
 }
 
-func ParseSearchResults(searchResult *core_search.Response,userInfo model.UserInfo) ([]model.EventResponse error) {
+func ParseSearchResults(searchResult *core_search.Response, userInfo model.UserInfo) ([]model.EventResponse, error) {
 	if searchResult.Hits.Total.Value > 0 {
 		eventResponses := make([]model.EventResponse, 0)
 		for _, hit := range searchResult.Hits.Hits {
@@ -139,15 +137,12 @@ func ParseSearchResults(searchResult *core_search.Response,userInfo model.UserIn
 				eventResponse.EventTimeUTC = evenTime.UTC()
 				eventResponses = append(eventResponses, eventResponse)
 			} else {
-				common.Error(map[string]interface{}{
-					"hit":  hit.Source_,
-					"erro": err,
-				})
+				return nil, err
 			}
 		}
-		return eventResponses
+		return eventResponses, nil
 	}
-	return []model.EventResponse{}
+	return nil, nil
 }
 
 func CalculateTotalPages(totalCount int64, pageSize int) int64 {
