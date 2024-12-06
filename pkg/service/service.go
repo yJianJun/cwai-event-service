@@ -2,19 +2,21 @@ package service
 
 import (
 	"context"
-	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/common"
-	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/model"
-	"ctyun-code.srdcloud.cn/aiplat/cwai-watcher/pkg/util"
 	"encoding/json"
-	core_search "github.com/elastic/go-elasticsearch/v8/typedapi/core/search"
-	"github.com/elastic/go-elasticsearch/v8/typedapi/types"
-	"github.com/elastic/go-elasticsearch/v8/typedapi/types/enums/sortorder"
 	"log"
 	"strconv"
 	"time"
+
+	core_search "github.com/elastic/go-elasticsearch/v8/typedapi/core/search"
+	"github.com/elastic/go-elasticsearch/v8/typedapi/types"
+	"github.com/elastic/go-elasticsearch/v8/typedapi/types/enums/sortorder"
+	"work.ctyun.cn/git/cwai/cwai-event-service/pkg/model"
+	util "work.ctyun.cn/git/cwai/cwai-event-service/pkg/utils"
 )
 
-func SearchEventsFromES(pageRequest model.EventPage) (*core_search.Response, error) {
+func SearchEventsFromES(pageRequest model.EventPage, userInfo model.UserInfo) (*core_search.Response, error) {
+
+	//todo: 构建用户信息查询
 
 	// 构建时间查询
 	timeQuery := buildTimeQuery(pageRequest.Start, pageRequest.End)
@@ -34,6 +36,9 @@ func SearchEventsFromES(pageRequest model.EventPage) (*core_search.Response, err
 	// 构建区域ID查询
 	regionIdQuery := buildTermQuery(pageRequest.RegionID, "data.region_id")
 
+	// 构建 user ID查询
+	userIdQuery := buildTermQuery(userInfo.UserID, "data.user_id")
+
 	// 构建资源组ID查询
 	resourceGroupIdQuery := buildTermQuery(pageRequest.ResourceGroupID, "data.resource_group_id")
 
@@ -45,19 +50,21 @@ func SearchEventsFromES(pageRequest model.EventPage) (*core_search.Response, err
 	}
 
 	if timeQuery != nil {
-		query.Should = append(query.Should, types.Query{Range: timeQuery})
+		query.Filter = append(query.Filter, types.Query{Range: timeQuery})
 	}
 	if eventTypeQuery != nil {
-		query.Should = append(query.Should, types.Query{Term: eventTypeQuery})
-	}
-	if nodeNameQuery != nil {
-		query.Should = append(query.Should, types.Query{MatchPhrase: nodeNameQuery})
+		query.Filter = append(query.Filter, types.Query{Term: eventTypeQuery})
 	}
 	if taskIdQuery != nil {
-		query.Should = append(query.Should, types.Query{Term: taskIdQuery})
+		query.Filter = append(query.Filter, types.Query{Term: taskIdQuery})
+	} else if nodeNameQuery != nil {
+		query.Filter = append(query.Filter, types.Query{MatchPhrase: nodeNameQuery})
+	}
+	if userIdQuery != nil {
+		query.Filter = append(query.Filter, types.Query{Term: userIdQuery})
 	}
 	if eventLikeQuery != nil {
-		query.Should = append(query.Should, types.Query{MatchPhrase: eventLikeQuery})
+		query.Filter = append(query.Filter, types.Query{MatchPhrase: eventLikeQuery})
 	}
 
 	// 创建搜索请求
@@ -74,7 +81,7 @@ func SearchEventsFromES(pageRequest model.EventPage) (*core_search.Response, err
 	res, err := search.Do(context.Background())
 
 	// 打印查询日志
-	log.Printf("ES查询Search: %v", search)
+	logger.Infof(context.TODO(), "ES查询Search: %s", search)
 	if err != nil {
 		return nil, err
 	}
@@ -125,7 +132,7 @@ func buildMatchPhraseQuery(value, field string) map[string]types.MatchPhraseQuer
 	return nil
 }
 
-func ParseSearchResults(searchResult *core_search.Response) []model.EventResponse {
+func ParseSearchResults(searchResult *core_search.Response, userInfo model.UserInfo) ([]model.EventResponse, error) {
 	if searchResult.Hits.Total.Value > 0 {
 		eventResponses := make([]model.EventResponse, 0)
 		for _, hit := range searchResult.Hits.Hits {
@@ -135,15 +142,12 @@ func ParseSearchResults(searchResult *core_search.Response) []model.EventRespons
 				eventResponse.EventTimeUTC = evenTime.UTC()
 				eventResponses = append(eventResponses, eventResponse)
 			} else {
-				common.Error(map[string]interface{}{
-					"hit":  hit.Source_,
-					"erro": err,
-				})
+				return nil, err
 			}
 		}
-		return eventResponses
+		return eventResponses, nil
 	}
-	return []model.EventResponse{}
+	return nil, nil
 }
 
 func CalculateTotalPages(totalCount int64, pageSize int) int64 {

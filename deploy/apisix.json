@@ -1,0 +1,47 @@
+{
+    "uri": "/central/event-service/*",
+    "name": "event-service",
+    "methods": [
+      "GET",
+      "POST",
+      "PUT",
+      "DELETE",
+      "PATCH",
+      "HEAD",
+      "OPTIONS",
+      "CONNECT",
+      "TRACE",
+      "PURGE"
+    ],
+    "plugins": {
+      "proxy-rewrite": {
+        "regex_uri": [
+          "^/central/event-service/(.*)$",
+          "/apis/v1/event-service/$1"
+        ]
+      }
+    },
+    "upstream": {
+      "nodes": [
+        {
+          "host": "cwai-event-service.cwai.svc",
+          "port": 8081,
+          "weight": 1
+        }
+      ],
+      "timeout": {
+        "connect": 300,
+        "send": 300,
+        "read": 300
+      },
+      "type": "roundrobin",
+      "scheme": "http",
+      "pass_host": "pass",
+      "keepalive_pool": {
+        "idle_timeout": 60,
+        "requests": 1000,
+        "size": 320
+      }
+    },
+    "status": 1
+  }
