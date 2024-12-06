@@ -21,7 +21,7 @@ type EventPage struct {
 	// required: true
 	// example: "/central//elasticsearch/"
 	// in: query
-	RegionID string `json:"regionID" binding:"required" msg:"required=regionID 必传！"`
+	RegionID string `json:"regionID" binding:"required"`
 
 	// StartTime 事件的开始时间。
 	// 以时间戳格式指定事件的起始筛选时间。
@@ -41,14 +41,14 @@ type EventPage struct {
 	// 可选的类型包括 "Critical", "Warning", 或 "Info"。
 	// example: "Critical"
 	// in: query
-	EventType string `json:"eventType" binding:"oneof=Critical Warning Info" msg:"oneof=eventType只能是Critical，Warning，Info"`
+	EventType string `json:"eventType" binding:"oneof=Critical Warning Info"`
 
 	// ResourceGroupID 指定事件所属资源组的ID。
 	// 用于对事件进行组织和管理。
 	// required: true
 	// example: "rg-12345"
 	// in: query
-	ResourceGroupID string `json:"resourceGroupID" binding:"required" msg:"required=resourceGroupID 必传！"`
+	ResourceGroupID string `json:"resourceGroupID" binding:"required"`
 
 	// NodeName 节点名称。
 	// 在查询类型为节点时使用，对应于节点列表中的 instanceName。
@@ -79,12 +79,12 @@ type EventPage struct {
 	// required: true
 	// in: query
 	// example: 1
-	PageNo int `json:"pageNo" binding:"required" msg:"required=pageNo 必传！"`
+	PageNo int `json:"pageNo" binding:"required"`
 
 	// PageSize 每页条数。
 	// 指定每页返回的记录数。
 	// required: true
 	// in: query
 	// example: 20
-	PageSize int `json:"pageSize" binding:"required" msg:"required=pageSize 必传！"`
+	PageSize int `json:"pageSize" binding:"required"`
 }

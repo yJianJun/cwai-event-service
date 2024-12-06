@@ -36,6 +36,9 @@ func SearchEventsFromES(pageRequest model.EventPage, userInfo model.UserInfo) (*
 	// 构建区域ID查询
 	regionIdQuery := buildTermQuery(pageRequest.RegionID, "data.region_id")
 
+	// 构建 user ID查询
+	userIdQuery := buildTermQuery(userInfo.UserID, "data.user_id")
+
 	// 构建资源组ID查询
 	resourceGroupIdQuery := buildTermQuery(pageRequest.ResourceGroupID, "data.resource_group_id")
 
@@ -47,19 +50,21 @@ func SearchEventsFromES(pageRequest model.EventPage, userInfo model.UserInfo) (*
 	}
 
 	if timeQuery != nil {
-		query.Should = append(query.Should, types.Query{Range: timeQuery})
+		query.Filter = append(query.Filter, types.Query{Range: timeQuery})
 	}
 	if eventTypeQuery != nil {
-		query.Should = append(query.Should, types.Query{Term: eventTypeQuery})
-	}
-	if nodeNameQuery != nil {
-		query.Should = append(query.Should, types.Query{MatchPhrase: nodeNameQuery})
+		query.Filter = append(query.Filter, types.Query{Term: eventTypeQuery})
 	}
 	if taskIdQuery != nil {
-		query.Should = append(query.Should, types.Query{Term: taskIdQuery})
+		query.Filter = append(query.Filter, types.Query{Term: taskIdQuery})
+	} else if nodeNameQuery != nil {
+		query.Filter = append(query.Filter, types.Query{MatchPhrase: nodeNameQuery})
+	}
+	if userIdQuery != nil {
+		query.Filter = append(query.Filter, types.Query{Term: userIdQuery})
 	}
 	if eventLikeQuery != nil {
-		query.Should = append(query.Should, types.Query{MatchPhrase: eventLikeQuery})
+		query.Filter = append(query.Filter, types.Query{MatchPhrase: eventLikeQuery})
 	}
 
 	// 创建搜索请求
@@ -76,7 +81,7 @@ func SearchEventsFromES(pageRequest model.EventPage, userInfo model.UserInfo) (*
 	res, err := search.Do(context.Background())
 
 	// 打印查询日志
-	log.Printf("ES查询Search: %v", search)
+	logger.Infof(context.TODO(), "ES查询Search: %s", search)
 	if err != nil {
 		return nil, err
 	}
