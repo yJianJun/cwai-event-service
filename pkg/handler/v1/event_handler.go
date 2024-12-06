@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"encoding/json"
+	"errors"
 
 	"github.com/gin-gonic/gin"
 	"work.ctyun.cn/git/cwai/cwai-api-sdk/pkg/common"
@@ -29,7 +30,17 @@ func PageEventFromES(c *gin.Context) {
 	)
 
 	//validatorx.ShouldBindJSON(c, &pageRequest)
-	c.ShouldBindJSON(&pageRequest)
+	if err := c.ShouldBindJSON(&pageRequest); err != nil {
+		logger.Errorf(context.TODO(), "parse param failed: %s\n", err)
+		common.BadRequestMessage(c, common.EventInvalidParam, "", err)
+		return
+	}
+
+	if pageRequest.End < pageRequest.Start {
+		logger.Error(context.TODO(), "结束时间不能小于开始时间")
+		common.BadRequestMessage(c, common.EventInvalidParam, "", errors.New("结束时间不能小于开始时间"))
+		return
+	}
 
 	//parse header
 	if err := c.BindHeader(&userInfo); err != nil {
