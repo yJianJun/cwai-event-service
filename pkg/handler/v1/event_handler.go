@@ -29,11 +29,7 @@ func PageEventFromES(c *gin.Context) {
 	)
 
 	//validatorx.ShouldBindJSON(c, &pageRequest)
-	if err := c.ShouldBindJSON(&pageRequest); err != nil {
-		logger.Errorf(context.TODO(), "parse param failed: %s\n", err)
-		common.BadRequestMessage(c, common.EventInvalidParam, "", err)
-		return
-	}
+	c.ShouldBindJSON(&pageRequest)
 
 	//parse header
 	if err := c.BindHeader(&userInfo); err != nil {
