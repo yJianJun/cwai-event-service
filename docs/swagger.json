@@ -18,153 +18,9 @@
     "host": "localhost:8081",
     "basePath": "/ctccl",
     "paths": {
-        "/db/delete/{id}": {
-            "delete": {
-                "description": "通过ID从数据库删除事件",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "ctccl DB"
-                ],
-                "summary": "删除事件",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "事件ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "数据删除成功",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid ID parameter",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Record not found!",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "数据删除失败",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/db/query": {
-            "get": {
-                "description": "查询所有事件",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "ctccl DB"
-                ],
-                "summary": "获取事件列表",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/model.Event"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/db/query/{id}": {
-            "get": {
-                "description": "从数据库中通过 ID 获取特定事件",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "ctccl DB"
-                ],
-                "summary": "按 ID 查找事件",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Event ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "$ref": "#/definitions/model.Event"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/db/save": {
+        "/apis/v1/cwai-event-service/list": {
             "post": {
-                "description": "从数据库中创建一个新的事件",
+                "description": "根据请求参数从ElasticSearch中分页获取事件。如果请求类型为\"task\"，则会执行事件搜索。",
                 "consumes": [
                     "application/json"
                 ],
@@ -172,168 +28,12 @@
                     "application/json"
                 ],
                 "tags": [
-                    "ctccl DB"
-                ],
-                "summary": "创建一个新的事件",
-                "parameters": [
-                    {
-                        "description": "Event数据",
-                        "name": "event",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/model.Event"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            }
-        },
-        "/db/update/{id}": {
-            "put": {
-                "description": "根据id修改事件",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "ctccl DB"
-                ],
-                "summary": "修改事件",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Event ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "编辑参数",
-                        "name": "event",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/model.Event"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            }
-        },
-        "/es/delete/{id}": {
-            "delete": {
-                "description": "根据给定的ID删除ES中的事件",
-                "tags": [
-                    "ctccl ES"
-                ],
-                "summary": "删除ES中的事件",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "事件ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/common.Response"
-                        }
-                    },
-                    "400": {
-                        "description": "无效的ID消息",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "404": {
-                        "description": "未找到记录的消息",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "500": {
-                        "description": "内部服务器错误消息",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/es/page": {
-            "post": {
-                "description": "根据请求参数从ElasticSearch中分页获取事件",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "ctccl ES"
+                    "events"
                 ],
                 "summary": "分页获取事件",
                 "parameters": [
                     {
-                        "description": "分页请求参数",
+                        "description": "分页请求参数，包括查询类型(queryType)和大小(size)",
                         "name": "pageRequest",
                         "in": "body",
                         "required": true,
@@ -344,246 +44,106 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "返回分页信息，包括总数(totalCount)、总页数(totalPage)、以及事件数据(data)",
                         "schema": {
                             "$ref": "#/definitions/common.PageVo"
                         }
-                    }
-                }
-            }
-        },
-        "/es/query/{id}": {
-            "get": {
-                "description": "通过ID从Elasticsearch中查找事件",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "ctccl ES"
-                ],
-                "summary": "查找事件",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "事件ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
+                    },
+                    "400": {
+                        "description": "参数绑定失败",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "$ref": "#/definitions/common.Response"
-                            }
+                            "$ref": "#/definitions/common.CommonError"
                         }
                     },
                     "404": {
-                        "description": "Not Found",
+                        "description": "搜索数据失败",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/common.CommonError"
                         }
                     }
                 }
-            }
-        },
-        "/es/save": {
-            "post": {
-                "description": "从请求中解析JSON并在Elasticsearch中存储一个新的事件",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "ctccl ES"
-                ],
-                "summary": "创建新的事件",
-                "parameters": [
-                    {
-                        "description": "事件详情",
-                        "name": "event",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/model.Event"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "{\"message\": \"数据创建成功\"}",
-                        "schema": {
-                            "$ref": "#/definitions/common.Response"
-                        }
-                    },
-                    "400": {
-                        "description": "{\"error\": \"invalid request\"}",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "500": {
-                        "description": "{\"error\": \"internal server error\"}",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/es/update/{id}": {
-            "put": {
-                "description": "更新来自Elasticsearch的事件",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "ctccl ES"
-                ],
-                "summary": "Update an event from Elasticsearch",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Event ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Event data",
-                        "name": "event",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/model.Event"
-                        }
-                    }
-                ],
-                "responses": {}
             }
         }
     },
     "definitions": {
-        "common.PageVo": {
-            "description": "分页响应结构",
-            "type": "object",
-            "properties": {
-                "data": {
-                    "description": "数据\n@json:\"data\""
-                },
-                "totalCount": {
-                    "description": "总条数\n@json:\"totalCount,omitempty\"",
-                    "type": "integer"
-                },
-                "totalPage": {
-                    "description": "总页数\n@json:\"totalPage,omitempty\"",
-                    "type": "integer"
-                }
-            }
-        },
-        "common.Response": {
-            "description": "接口响应结构",
+        "common.CommonError": {
             "type": "object",
             "properties": {
                 "code": {
-                    "description": "响应代码\nExample: 200",
                     "type": "integer"
                 },
-                "data": {
-                    "description": "响应数据"
-                },
-                "message": {
-                    "description": "响应消息\nExample: \"请求成功\"\nomitempty: 可选字段",
+                "msg": {
                     "type": "string"
                 }
             }
         },
-        "model.Event": {
-            "description": "代表一个事件",
+        "common.PageVo": {
+            "description": "分页响应结构体包含分页信息",
             "type": "object",
-            "required": [
-                "event_type",
-                "local_guid",
-                "remote_guid",
-                "timestamp"
-            ],
             "properties": {
-                "bandwidth": {
-                    "description": "BandWidth 带宽Gb/s\nRequired: false\nExample: 10",
+                "data": {
+                    "description": "数据\n@json:\"data\"\n@Description 当前页的数据"
+                },
+                "pageNo": {
+                    "description": "当前页码\n@json:\"pageNo\"\n@Description 当前页码",
                     "type": "integer"
                 },
-                "data_size": {
-                    "description": "DataSize 数据量（B）\nRequired: false\nExample: 1048576",
+                "totalCount": {
+                    "description": "总条数\n@json:\"totalCount,omitempty\"\n@Description 总记录数",
                     "type": "integer"
                 },
-                "error_code": {
-                    "description": "ErrorCode 异常代码\nRequired: false\nExample: 1012",
+                "totalPage": {
+                    "description": "总页数\n@json:\"totalPage,omitempty\"\n@Description 总页数",
                     "type": "integer"
-                },
-                "event_type": {
-                    "description": "EventType 事件类型\n@description 事件类型，例如\"ctccl-inter-node-bandwidth\"\n@example \"ctccl-inter-node-bandwidth\"",
-                    "type": "string",
-                    "example": "ctccl-inter-node-bandwidth"
-                },
-                "id": {
-                    "description": "ID 事件的唯一标识符\n@description 事件的唯一标识符\n@example \"ctccl-regionid-accountid-taskid-时间戳-pid-eventcount\"",
-                    "type": "string"
-                },
-                "level": {
-                    "description": "Level 事件等级\n@description 事件等级，例如\"High\"\n@example \"High\"",
-                    "type": "string"
-                },
-                "local_guid": {
-                    "description": "LocalGuid 本端ib/roce设备nodegid\nRequired: true\nExample: \"0x98039b03009a2b3a\"",
-                    "type": "string"
-                },
-                "remote_guid": {
-                    "description": "RemoteGuid 对端ib/roce设备nodegid\nRequired: true\nExample: \"0xc49b150003a1420c\"",
-                    "type": "string"
-                },
-                "time_duration": {
-                    "description": "TimeDuration 时间间隔(ms)\nRequired: false\nExample: 5000",
-                    "type": "integer"
-                },
-                "timestamp": {
-                    "description": "Timestamp 时间戳\n@description 事件发生的时间戳，格式为\"2006-01-02 15:04:05\"\n@example \"2006-01-02 15:04:05\"",
-                    "type": "string"
                 }
             }
         },
         "model.EventPage": {
-            "description": "事件分页请求参数",
+            "description": "该结构体用于指定事件分页查询时所需的参数。通过设置这些参数，可以灵活地获取符合条件的事件数据。",
             "type": "object",
-            "required": [
-                "page",
-                "size"
-            ],
             "properties": {
-                "keyword": {
-                    "description": "关键词用于事件筛选\nrequired: true\nexample: \"连接错误\"",
+                "end": {
+                    "description": "EndTime 事件的结束时间。\n以时间戳格式指定事件的截止筛选时间，应大于或等于 StartTime。\nin: query\nrequired: false\nexample: 1625334000",
+                    "type": "integer"
+                },
+                "eventLike": {
+                    "description": "EventLike 事件的模糊匹配关键词。\n通过关键词进行模糊搜索来进一步筛选事件。\nexample: \"error\"\nin: query",
                     "type": "string"
                 },
-                "page": {
-                    "description": "Page 是页码。\nexample: 1\nrequired: true",
+                "eventType": {
+                    "description": "EventType 指定要查询的事件类型。\n可选的类型包括 \"Critical\", \"Warning\", 或 \"Info\"。\nexample: \"Critical\"\nin: query",
+                    "type": "string"
+                },
+                "nodeName": {
+                    "description": "NodeName 节点名称。\n在查询类型为节点时使用，对应于节点列表中的 instanceName。\nexample: \"node-01\"\nin: query",
+                    "type": "string"
+                },
+                "pageNo": {
+                    "description": "PageNo 页码。\n指定请求的页码，页码从1开始。\nrequired: true\nin: query\nexample: 1",
                     "type": "integer"
                 },
-                "size": {
-                    "description": "Size 是每页条数。\nexample: 10\nrequired: true",
+                "pageSize": {
+                    "description": "PageSize 每页条数。\n指定每页返回的记录数。\nrequired: true\nin: query\nexample: 20",
                     "type": "integer"
                 },
-                "time": {
-                    "description": "事件发生的时间\nrequired: true\nexample: 2006-01-02 15:04:05",
+                "regionID": {
+                    "description": "RegionID 指定事件所属区域的ID。\n此参数用于限定事件的地理或逻辑区域。\nrequired: true\nexample: \"/central//elasticsearch/\"\nin: query",
+                    "type": "string"
+                },
+                "resourceGroupID": {
+                    "description": "ResourceGroupID 指定事件所属资源组的ID。\n用于对事件进行组织和管理。\nrequired: true\nexample: \"rg-12345\"\nin: query",
+                    "type": "string"
+                },
+                "sortType": {
+                    "description": "SortType 排序类型。\n指定排序类型，默认按事件发生时间倒序。如不指定将使用默认排序。\nexample: false\nin: query",
+                    "type": "boolean"
+                },
+                "start": {
+                    "description": "StartTime 事件的开始时间。\n以时间戳格式指定事件的起始筛选时间。\nin: query\nrequired: false\nexample: 1625247600",
+                    "type": "integer"
+                },
+                "taskID": {
+                    "description": "TaskID 任务的ID。\n在查询类型为任务时使用，仅此时有效。\nexample: \"task-12345\"\nin: query",
                     "type": "string"
                 }
             }

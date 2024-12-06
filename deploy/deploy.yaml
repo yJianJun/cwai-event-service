@@ -1,131 +1,68 @@
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: cwai-openapi-watcher
-  namespace: cbi
-spec:
-  rules:
-  - host: shanghai15.cwai.ctyun.cn
-    http:
-      paths:
-      - backend:
-          service:
-            name: cwai-watcher
-            port:
-              number: 8081
-        path: /openapi/v4/cwai/server/topo
-        pathType: Exact
-  tls:
-  - hosts:
-    - shanghai15.cwai.ctyun.cn
-    secretName: cwai-ctyun-cn-secret
----
 apiVersion: v1
 kind: Service
 metadata:
-  name: cwai-watcher
-  namespace: cbi
+  name: cwai-event-service
+  namespace: cwai
 spec:
   ports:
-  - name: cwai-watcher
+  - name: cwai-event-service
     port: 8081
     protocol: TCP
     targetPort: 8081
   selector:
-    k8s-app: cwai-watcher
+    k8s-app: cwai-event-service
   type: ClusterIP
 ---
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: cwai-watcher
-  namespace: cbi
+  name: cwai-event-service
+  namespace: cwai
 data:
   config.yaml: |
-    ccaeServer:
-        protocol: https
-        host: 192.168.0.44
-        port: 26335
-        userName: ccaeuser
-        userPassword: Shdx@ccae2024
-        tokenTimeOut: 1800
-    ccaeAPIs:
-        tokenUrl: /rest/plat/smapp/v1/oauth/token
-        qureyTopoUrl: /api/monitor/v1/query-topo  
+    logger:
+      name: cwai-event-service
+      level: debug
+      traceLevel: error
+      logToDir: .
+      maxSizeInMiB: 10
+      maxAgeInDays: 30
+    app:
+      host: 192.168.0.44
+      port: 26335
+      configFile: 
+    elasticSearch:
+
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: cwai-watcher
-  namespace: cbi
+  name: cwai-event-service
+  namespace: cwai
 spec:
   replicas: 1
   revisionHistoryLimit: 10
   selector:
     matchLabels:
-      k8s-app: cwai-watcher
+      k8s-app: cwai-event-service
   template:
     metadata:
       labels:
-        k8s-app: cwai-watcher
-      name: cwai-watcher
+        k8s-app: cwai-event-service
+      name: cwai-event-service
     spec:
       containers:
-      - image: shanghai15.ccr.ctyun.cn:15000/cbi/cwai-watcher:v1.0
+      - image: shanghai15.ccr.ctyun.cn:15000/cbi/cwai-event-service:v1.0
         imagePullPolicy: Always
-        name: cwai-watcher
+        name: cwai-event-service
         volumeMounts:
-        - mountPath: /etc/cwai-watcher/config.yaml
+        - mountPath: /etc/cwai-event-service/config.yaml
           name: config
           subPath: config.yaml
       volumes:
       - configMap:
           defaultMode: 420
-          name: cwai-watcher
+          name: cwai-event-service
         name: config
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  labels:
-    app: yunxiao-ui
-  name: yunxiao-ui
-  namespace: cbi
-spec:
-  progressDeadlineSeconds: 600
-  replicas: 1
-  revisionHistoryLimit: 10
-  selector:
-    matchLabels:
-      app: yunxiao-ui
-  strategy:
-    rollingUpdate:
-      maxSurge: 25%
-      maxUnavailable: 25%
-    type: RollingUpdate
-  template:
-    metadata:
-      creationTimestamp: null
-      labels:
-        app: yunxiao-ui
-    spec:
-      containers:
-      - image: shanghai15.ccr.ctyun.cn:15000/cbi/yunxiao-ui:v1.8.5 # 根据多区域不同
-        imagePullPolicy: Always
-        name: violet
-        ports:
-        - containerPort: 9999
-          protocol: TCP
-        resources: {}
-        terminationMessagePath: /dev/termination-log
-        terminationMessagePolicy: File
-        #volumeMounts:
-        #- mountPath: /app/dist/static/conf
-        #  name: config
-      dnsPolicy: ClusterFirst
-      restartPolicy: Always
-      schedulerName: default-scheduler
-      securityContext: {}
-      terminationGracePeriodSeconds: 30
 
 

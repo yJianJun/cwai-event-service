@@ -14,8 +14,8 @@ Total : 1594 files,  526907 codes, 71622 comments, 57077 blanks, all 655606 line
 | [Makefile](/Makefile) | Makefile | 10 | 0 | 4 | 14 |
 | [README.md](/README.md) | Markdown | 39 | 0 | 3 | 42 |
 | [build/Dockerfile](/build/Dockerfile) | Docker | 8 | 0 | 5 | 13 |
-| [cmd/server/app/cmd.go](/app/cmd.go) | Go | 68 | 3 | 13 | 84 |
-| [cmd/server/app/daemon.go](/app/daemon.go) | Go | 58 | 4 | 14 | 76 |
+| [cmd/server/app/cmd.go](/cmd/app/cmd.go) | Go | 68 | 3 | 13 | 84 |
+| [cmd/server/app/daemon.go](/cmd/app/daemon.go) | Go | 58 | 4 | 14 | 76 |
 | [cmd/server/server.go](/cmd/server/server.go) | Go | 19 | 1 | 7 | 27 |
 | [conf/config.yaml](/conf/config.yaml) | YAML | 10 | 0 | 4 | 14 |
 | [deploy/deploy.yaml](/deploy/deploy.yaml) | YAML | 85 | 0 | 3 | 88 |

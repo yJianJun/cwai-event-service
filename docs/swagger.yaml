@@ -1,140 +1,125 @@
 basePath: /ctccl
 definitions:
+  common.CommonError:
+    properties:
+      code:
+        type: integer
+      msg:
+        type: string
+    type: object
   common.PageVo:
-    description: 分页响应结构
+    description: 分页响应结构体包含分页信息
     properties:
       data:
         description: |-
           数据
           @json:"data"
+          @Description 当前页的数据
+      pageNo:
+        description: |-
+          当前页码
+          @json:"pageNo"
+          @Description 当前页码
+        type: integer
       totalCount:
         description: |-
           总条数
           @json:"totalCount,omitempty"
+          @Description 总记录数
         type: integer
       totalPage:
         description: |-
           总页数
           @json:"totalPage,omitempty"
+          @Description 总页数
         type: integer
-    type: object
-  common.Response:
-    description: 接口响应结构
-    properties:
-      code:
-        description: |-
-          响应代码
-          Example: 200
-        type: integer
-      data:
-        description: 响应数据
-      message:
-        description: |-
-          响应消息
-          Example: "请求成功"
-          omitempty: 可选字段
-        type: string
-    type: object
-  model.Event:
-    description: 代表一个事件
-    properties:
-      bandwidth:
-        description: |-
-          BandWidth 带宽Gb/s
-          Required: false
-          Example: 10
-        type: integer
-      data_size:
-        description: |-
-          DataSize 数据量（B）
-          Required: false
-          Example: 1048576
-        type: integer
-      error_code:
-        description: |-
-          ErrorCode 异常代码
-          Required: false
-          Example: 1012
-        type: integer
-      event_type:
-        description: |-
-          EventType 事件类型
-          @description 事件类型，例如"ctccl-inter-node-bandwidth"
-          @example "ctccl-inter-node-bandwidth"
-        example: ctccl-inter-node-bandwidth
-        type: string
-      id:
-        description: |-
-          ID 事件的唯一标识符
-          @description 事件的唯一标识符
-          @example "ctccl-regionid-accountid-taskid-时间戳-pid-eventcount"
-        type: string
-      level:
-        description: |-
-          Level 事件等级
-          @description 事件等级，例如"High"
-          @example "High"
-        type: string
-      local_guid:
-        description: |-
-          LocalGuid 本端ib/roce设备nodegid
-          Required: true
-          Example: "0x98039b03009a2b3a"
-        type: string
-      remote_guid:
-        description: |-
-          RemoteGuid 对端ib/roce设备nodegid
-          Required: true
-          Example: "0xc49b150003a1420c"
-        type: string
-      time_duration:
-        description: |-
-          TimeDuration 时间间隔(ms)
-          Required: false
-          Example: 5000
-        type: integer
-      timestamp:
-        description: |-
-          Timestamp 时间戳
-          @description 事件发生的时间戳，格式为"2006-01-02 15:04:05"
-          @example "2006-01-02 15:04:05"
-        type: string
-    required:
-    - event_type
-    - local_guid
-    - remote_guid
-    - timestamp
     type: object
   model.EventPage:
-    description: 事件分页请求参数
+    description: 该结构体用于指定事件分页查询时所需的参数。通过设置这些参数，可以灵活地获取符合条件的事件数据。
     properties:
-      keyword:
+      end:
         description: |-
-          关键词用于事件筛选
-          required: true
-          example: "连接错误"
+          EndTime 事件的结束时间。
+          以时间戳格式指定事件的截止筛选时间，应大于或等于 StartTime。
+          in: query
+          required: false
+          example: 1625334000
+        type: integer
+      eventLike:
+        description: |-
+          EventLike 事件的模糊匹配关键词。
+          通过关键词进行模糊搜索来进一步筛选事件。
+          example: "error"
+          in: query
         type: string
-      page:
+      eventType:
         description: |-
-          Page 是页码。
+          EventType 指定要查询的事件类型。
+          可选的类型包括 "Critical", "Warning", 或 "Info"。
+          example: "Critical"
+          in: query
+        type: string
+      nodeName:
+        description: |-
+          NodeName 节点名称。
+          在查询类型为节点时使用，对应于节点列表中的 instanceName。
+          example: "node-01"
+          in: query
+        type: string
+      pageNo:
+        description: |-
+          PageNo 页码。
+          指定请求的页码，页码从1开始。
+          required: true
+          in: query
           example: 1
-          required: true
         type: integer
-      size:
+      pageSize:
         description: |-
-          Size 是每页条数。
-          example: 10
+          PageSize 每页条数。
+          指定每页返回的记录数。
           required: true
+          in: query
+          example: 20
         type: integer
-      time:
+      regionID:
         description: |-
-          事件发生的时间
+          RegionID 指定事件所属区域的ID。
+          此参数用于限定事件的地理或逻辑区域。
           required: true
-          example: 2006-01-02 15:04:05
+          example: "/central//elasticsearch/"
+          in: query
         type: string
-    required:
-    - page
-    - size
+      resourceGroupID:
+        description: |-
+          ResourceGroupID 指定事件所属资源组的ID。
+          用于对事件进行组织和管理。
+          required: true
+          example: "rg-12345"
+          in: query
+        type: string
+      sortType:
+        description: |-
+          SortType 排序类型。
+          指定排序类型，默认按事件发生时间倒序。如不指定将使用默认排序。
+          example: false
+          in: query
+        type: boolean
+      start:
+        description: |-
+          StartTime 事件的开始时间。
+          以时间戳格式指定事件的起始筛选时间。
+          in: query
+          required: false
+          example: 1625247600
+        type: integer
+      taskID:
+        description: |-
+          TaskID 任务的ID。
+          在查询类型为任务时使用，仅此时有效。
+          example: "task-12345"
+          in: query
+        type: string
     type: object
 host: localhost:8081
 info:
@@ -150,213 +135,13 @@ info:
   title: CTCCL事件监听
   version: "1.0"
 paths:
-  /db/delete/{id}:
-    delete:
-      consumes:
-      - application/json
-      description: 通过ID从数据库删除事件
-      parameters:
-      - description: 事件ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: 数据删除成功
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "400":
-          description: Invalid ID parameter
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "404":
-          description: Record not found!
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: 数据删除失败
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      summary: 删除事件
-      tags:
-      - ctccl DB
-  /db/query:
-    get:
-      consumes:
-      - application/json
-      description: 查询所有事件
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/model.Event'
-            type: array
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      summary: 获取事件列表
-      tags:
-      - ctccl DB
-  /db/query/{id}:
-    get:
-      consumes:
-      - application/json
-      description: 从数据库中通过 ID 获取特定事件
-      parameters:
-      - description: Event ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            additionalProperties:
-              $ref: '#/definitions/model.Event'
-            type: object
-        "400":
-          description: Bad Request
-          schema:
-            type: string
-        "404":
-          description: Not Found
-          schema:
-            type: string
-      summary: 按 ID 查找事件
-      tags:
-      - ctccl DB
-  /db/save:
+  /apis/v1/cwai-event-service/list:
     post:
       consumes:
       - application/json
-      description: 从数据库中创建一个新的事件
+      description: 根据请求参数从ElasticSearch中分页获取事件。如果请求类型为"task"，则会执行事件搜索。
       parameters:
-      - description: Event数据
-        in: body
-        name: event
-        required: true
-        schema:
-          $ref: '#/definitions/model.Event'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Created
-          schema:
-            additionalProperties: true
-            type: object
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties: true
-            type: object
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties: true
-            type: object
-      summary: 创建一个新的事件
-      tags:
-      - ctccl DB
-  /db/update/{id}:
-    put:
-      consumes:
-      - application/json
-      description: 根据id修改事件
-      parameters:
-      - description: Event ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: 编辑参数
-        in: body
-        name: event
-        required: true
-        schema:
-          $ref: '#/definitions/model.Event'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            additionalProperties: true
-            type: object
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties: true
-            type: object
-        "404":
-          description: Not Found
-          schema:
-            additionalProperties: true
-            type: object
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties: true
-            type: object
-      summary: 修改事件
-      tags:
-      - ctccl DB
-  /es/delete/{id}:
-    delete:
-      description: 根据给定的ID删除ES中的事件
-      parameters:
-      - description: 事件ID
-        in: path
-        name: id
-        required: true
-        type: string
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/common.Response'
-        "400":
-          description: 无效的ID消息
-          schema:
-            type: string
-        "404":
-          description: 未找到记录的消息
-          schema:
-            type: string
-        "500":
-          description: 内部服务器错误消息
-          schema:
-            type: string
-      summary: 删除ES中的事件
-      tags:
-      - ctccl ES
-  /es/page:
-    post:
-      consumes:
-      - application/json
-      description: 根据请求参数从ElasticSearch中分页获取事件
-      parameters:
-      - description: 分页请求参数
+      - description: 分页请求参数，包括查询类型(queryType)和大小(size)
         in: body
         name: pageRequest
         required: true
@@ -366,92 +151,20 @@ paths:
       - application/json
       responses:
         "200":
-          description: OK
+          description: 返回分页信息，包括总数(totalCount)、总页数(totalPage)、以及事件数据(data)
           schema:
             $ref: '#/definitions/common.PageVo'
+        "400":
+          description: 参数绑定失败
+          schema:
+            $ref: '#/definitions/common.CommonError'
+        "404":
+          description: 搜索数据失败
+          schema:
+            $ref: '#/definitions/common.CommonError'
       summary: 分页获取事件
       tags:
-      - ctccl ES
-  /es/query/{id}:
-    get:
-      consumes:
-      - application/json
-      description: 通过ID从Elasticsearch中查找事件
-      parameters:
-      - description: 事件ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            additionalProperties:
-              $ref: '#/definitions/common.Response'
-            type: object
-        "404":
-          description: Not Found
-          schema:
-            type: string
-      summary: 查找事件
-      tags:
-      - ctccl ES
-  /es/save:
-    post:
-      consumes:
-      - application/json
-      description: 从请求中解析JSON并在Elasticsearch中存储一个新的事件
-      parameters:
-      - description: 事件详情
-        in: body
-        name: event
-        required: true
-        schema:
-          $ref: '#/definitions/model.Event'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: '{"message": "数据创建成功"}'
-          schema:
-            $ref: '#/definitions/common.Response'
-        "400":
-          description: '{"error": "invalid request"}'
-          schema:
-            type: string
-        "500":
-          description: '{"error": "internal server error"}'
-          schema:
-            type: string
-      summary: 创建新的事件
-      tags:
-      - ctccl ES
-  /es/update/{id}:
-    put:
-      consumes:
-      - application/json
-      description: 更新来自Elasticsearch的事件
-      parameters:
-      - description: Event ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: Event data
-        in: body
-        name: event
-        required: true
-        schema:
-          $ref: '#/definitions/model.Event'
-      produces:
-      - application/json
-      responses: {}
-      summary: Update an event from Elasticsearch
-      tags:
-      - ctccl ES
+      - events
 securityDefinitions:
   ApiKeyAuth:
     in: header
