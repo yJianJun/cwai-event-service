@@ -1,7 +1,7 @@
 #!/bin/sh
 set -e
 echo "============init template==============\n" 
-HTTP_CODE=$(curl  -s -o ./resp.md -w "%{http_code}" -L -XPUT -k --user elastic:$1 -H "Content-Type: application/json"  https://$2:9200/_template/events_template -d '
+HTTP_CODE=$(curl  -s -o ./resp.md -w "%{http_code}" -L -XPUT -k --user elastic:$1 -H "Content-Type: application/json"  http://$2:9200/_template/events_template -d '
 {
   "index_patterns": "events-*",
   "order": 1,
@@ -9,7 +9,7 @@ HTTP_CODE=$(curl  -s -o ./resp.md -w "%{http_code}" -L -XPUT -k --user elastic:$
     "number_of_shards": 3,
     "number_of_replicas": 1,
     "index.lifecycle.name": "hot_delete",
-    "index.lifecycle.rollover_alias": "events"
+    "index.lifecycle.rollover_alias": "yuxiao-events"
   },
   "mappings": {
     "properties": {
@@ -115,7 +115,7 @@ HTTP_CODE=$(curl  -s -o ./resp.md -w "%{http_code}" -L -XPUT -k --user elastic:$
     }
   },
   "aliases": {
-    "events" : {
+    "yunxiao-events" : {
       "is_write_index": true
     }
   }
@@ -128,7 +128,7 @@ else
   echo "\n ============init template failed\n"
 fi
 echo "=============init ilm================= \n"
-HTTP_CODE=$(curl -s -o ./resp.md -w "%{http_code}" -L -XPUT -k --user elastic:$1 -H "Content-Type: application/json" https://$2:9200/_ilm/policy/hot_delete  -d '
+HTTP_CODE=$(curl -s -o ./resp.md -w "%{http_code}" -L -XPUT -k --user elastic:$1 -H "Content-Type: application/json" http://$2:9200/_ilm/policy/hot_delete  -d '
 {
   "policy": {
     "phases": {
