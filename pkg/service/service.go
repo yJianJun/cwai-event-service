@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 	"encoding/json"
-	"log"
 	"strconv"
 	"time"
 
@@ -12,6 +11,7 @@ import (
 	"github.com/elastic/go-elasticsearch/v8/typedapi/types/enums/sortorder"
 	"work.ctyun.cn/git/cwai/cwai-event-service/pkg/model"
 	util "work.ctyun.cn/git/cwai/cwai-event-service/pkg/utils"
+	"work.ctyun.cn/git/cwai/cwai-toolbox/logger"
 )
 
 func SearchEventsFromES(pageRequest model.EventPage, userInfo model.UserInfo) (*core_search.Response, error) {
