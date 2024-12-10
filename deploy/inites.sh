@@ -142,7 +142,7 @@ HTTP_CODE=$(curl -s -o ./resp.md -w "%{http_code}" -L -XPUT -k --user elastic:$1
         }
       },
       "delete": {
-        "min_age": "0ms",
+        "min_age": "3.5m",
         "actions": {
           "delete": {"delete_searchable_snapshot": true}
         }
