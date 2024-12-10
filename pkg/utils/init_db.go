@@ -29,9 +29,10 @@ func InitElasticSearch() error {
 
 func createElasticClient(esConfig config.ElaticSearch) (*elasticsearch.TypedClient, error) {
 	elasticConfig := elasticsearch.Config{
-		Addresses: []string{esConfig.Url},
-		Username:  esConfig.Username,
-		Password:  esConfig.Password,
+		Addresses:              []string{esConfig.Url},
+		Username:               esConfig.Username,
+		Password:               esConfig.Password,
+		CertificateFingerprint: esConfig.FingerPrint,
 	}
 	client, err := elasticsearch.NewTypedClient(elasticConfig)
 	if err != nil {

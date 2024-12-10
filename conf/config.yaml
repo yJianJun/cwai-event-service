@@ -9,8 +9,9 @@ elasticSearch:
     healthcheckInterval: 5
     # 日志前缀
     logPre: ES-
-    password: xwViJm3InjSCXAhN
+    password: 930927
     username: elastic
+    fingerPrint: 41EFFE0EEE40EAF84B133B639C23FC49A82DB16FB850324562B9AB1A1E62FD8D
 log: # 日志配置
     # 日志路径
     name: cwai-event-service
