@@ -2,11 +2,14 @@ package utils
 
 import (
 	"errors"
+	"fmt"
 	"reflect"
 	"regexp"
 	"strconv"
 	"strings"
 	"unicode"
+
+	"github.com/go-playground/validator/v10"
 )
 
 type Rules map[string][]string
@@ -304,4 +307,100 @@ func CheckName(str string) bool {
 	}
 
 	return true
+}
+
+func VolidatorRequest(req interface{}) (string, error) {
+	validate := validator.New()
+	validate.RegisterValidation("nameValidator", func(fl validator.FieldLevel) bool {
+		name := fl.Field().Interface().(string)
+		name = TrimSpace(name)
+		return CheckName(name)
+	})
+
+	var errMsg string
+	if err := validate.Struct(req); err != nil {
+		for _, err := range err.(validator.ValidationErrors) {
+			errMsg += TranslateError(err) + ";"
+		}
+		return errMsg, err
+	}
+	return "", nil
+}
+
+// 自定义错误信息翻译函数
+func TranslateError(err validator.FieldError) string {
+	switch err.Tag() {
+	case "required":
+		return fmt.Sprintf("%s 字段是必填的", err.Field())
+	case "gt":
+		return fmt.Sprintf("%s 字段的值必须大于 %s", err.Field(), err.Param())
+	case "min":
+		return fmt.Sprintf("%s 字段的最小长度为 %s", err.Field(), err.Param())
+	case "max":
+		return fmt.Sprintf("%s 字段的最大长度为 %s", err.Field(), err.Param())
+	case "email":
+		return fmt.Sprintf("%s 字段必须是有效的电子邮件地址", err.Field())
+	case "gte":
+		return fmt.Sprintf("%s 字段的值必须大于或等于 %s", err.Field(), err.Param())
+	case "lte":
+		return fmt.Sprintf("%s 字段的值必须小于或等于 %s", err.Field(), err.Param())
+	case "oneof":
+		return fmt.Sprintf("%s 字段的取值范围是 %s", err.Field(), err.Param())
+	case "nameValidator":
+		return fmt.Sprintf("%s 字段的命名规则是 %s", err.Field(), "名称字符串非空、长度不超过20个字符、并且只能包含字母、数字、汉字或下划线且首字符不能为下划线")
+	default:
+		return fmt.Sprintf("%s 字段校验失败", err.Field())
+	}
+}
+
+func TranslateErrorWithDesc(err validator.FieldError, data interface{}) string {
+	field := err.StructField()
+	description := getFieldDescription(data, field)
+
+	switch err.Tag() {
+	case "required":
+		return fmt.Sprintf("%s(%s) 字段是必填的", description, err.Field())
+	case "gt":
+		return fmt.Sprintf("%s(%s) 字段的值必须大于 %s", description, err.Field(), err.Param())
+	case "min":
+		return fmt.Sprintf("%s(%s) 字段的最小长度为 %s", description, err.Field(), err.Param())
+	case "max":
+		return fmt.Sprintf("%s(%s) 字段的最大长度为 %s", description, err.Field(), err.Param())
+	case "email":
+		return fmt.Sprintf("%s(%s) 字段必须是有效的电子邮件地址", description, err.Field())
+	case "gte":
+		return fmt.Sprintf("%s(%s) 字段的值必须大于或等于 %s", description, err.Field(), err.Param())
+	case "lte":
+		return fmt.Sprintf("%s(%s) 字段的值必须小于或等于 %s", description, err.Field(), err.Param())
+	case "oneof":
+		return fmt.Sprintf("%s(%s) 字段的取值范围是 %s", description, err.Field(), err.Param())
+	case "nameValidator":
+		return fmt.Sprintf("%s(%s) 字段的命名规则是 %s", description, err.Field(), "名称字符串非空、长度不超过20个字符、并且只能包含字母、数字、汉字或下划线且首字符不能为下划线")
+	case "k8sName":
+		return fmt.Sprintf("%s(%s) 字段的命名规则是 %s", description, err.Field(), "名称必须以字母开头，必须以字母或者数字或者结尾，长度不超过64个字符，只能包含小写字母、数字、连字符 -且连字符 -不能连续使用")
+	case "k8sLabel":
+		return fmt.Sprintf("%s(%s) 字段的命名规则是 %s", description, err.Field(), "键值必填、唯一、键长度1-56字符，值长度1-63字符，以字母或数字开头和结尾，中间可以包含字母、数字、减号（-）、下划线（_）、小数点（.）")
+	default:
+		return fmt.Sprintf("%s 字段校验失败", err.Field())
+	}
+}
+
+// 获取字段描述
+func getFieldDescription(data interface{}, fieldName string) string {
+	t := reflect.TypeOf(data)
+	if t.Kind() == reflect.Ptr {
+		t = t.Elem()
+	}
+
+	field, found := t.FieldByName(fieldName)
+	if !found {
+		return fieldName
+	}
+
+	tag := field.Tag.Get("description")
+	if tag == "" {
+		return fieldName
+	}
+
+	return tag
 }
