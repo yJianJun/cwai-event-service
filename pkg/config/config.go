@@ -34,7 +34,6 @@ type ElaticSearch struct {
 	LogPre              string `yaml:"logPre"`
 	Password            string `yaml:"password"`
 	Username            string `yaml:"username"`
-	FingerPrint         string `yaml:"fingerPrint"`
 }
 
 type LoggerInfo struct {
