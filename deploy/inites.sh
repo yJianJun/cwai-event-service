@@ -113,11 +113,6 @@ HTTP_CODE=$(curl  -s -o ./resp.md -w "%{http_code}" -L -XPUT -k --user elastic:$
         }
       }
     }
-  },
-  "aliases": {
-    "yunxiao-events" : {
-      "is_write_index": true
-    }
   }
 }')
 
@@ -133,22 +128,23 @@ HTTP_CODE=$(curl -s -o ./resp.md -w "%{http_code}" -L -XPUT -k --user elastic:$1
   "policy": {
     "phases": {
       "hot": {
-        "min_age": "0ms",
-        "actions": {
-          "rollover": {
-            "max_docs": 10
+            "min_age": "0ms",
+            "actions": {
+              "set_priority": {"priority": 100},
+              "rollover": {"max_age": "3m"}
+            }
           },
-          "set_priority": {
-            "priority": 50
-          }
+      "warm": {
+        "min_age": "3m",
+        "actions": {
+          "forcemerge": {"max_num_segments": 1},
+          "set_priority": {"priority": 50}
         }
       },
       "delete": {
-        "min_age": "30d",
+        "min_age": "0ms",
         "actions": {
-          "delete": {
-            "delete_searchable_snapshot": true
-          }
+          "delete": {"delete_searchable_snapshot": true}
         }
       }
     }
