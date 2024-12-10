@@ -9,8 +9,6 @@ import (
 	"github.com/elastic/go-elasticsearch/v8"
 	"work.ctyun.cn/git/cwai/cwai-event-service/pkg/config"
 	"work.ctyun.cn/git/cwai/cwai-toolbox/logger"
-
-	"fmt"
 )
 
 var ESclient *elasticsearch.TypedClient // ES客户端
