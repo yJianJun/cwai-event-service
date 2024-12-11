@@ -41,7 +41,7 @@ type EventPage struct {
 	// 可选的类型包括 "Critical", "Warning", 或 "Info"。
 	// example: "Critical"
 	// in: query
-	EventType string `json:"eventType" binding:"oneof=Critical Warning Info"`
+	EventType string `json:"eventType" binding:"omitempty,oneof=Critical Warning Info"`
 
 	// ResourceGroupID 指定事件所属资源组的ID。
 	// 用于对事件进行组织和管理。
