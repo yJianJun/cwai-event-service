@@ -2,7 +2,9 @@ package utils
 
 import (
 	"context"
+	"crypto/tls"
 	"errors"
+	"net/http"
 
 	"github.com/elastic/go-elasticsearch/v8"
 	"work.ctyun.cn/git/cwai/cwai-event-service/pkg/config"
@@ -32,6 +34,9 @@ func createElasticClient(esConfig config.ElaticSearch) (*elasticsearch.TypedClie
 		Addresses: []string{esConfig.Url},
 		Username:  esConfig.Username,
 		Password:  esConfig.Password,
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		},
 	}
 	client, err := elasticsearch.NewTypedClient(elasticConfig)
 	if err != nil {
