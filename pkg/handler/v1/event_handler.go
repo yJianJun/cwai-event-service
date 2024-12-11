@@ -41,6 +41,15 @@ func PageEventFromES(c *gin.Context) {
 		common.BadRequestMessage(c, common.EventInvalidParam, "", errors.New("结束时间不能小于开始时间"))
 		return
 	}
+	if len(pageRequest.EventType) != 0 {
+		for _, value := range pageRequest.EventType { // 忽略索引
+			if value != "Critical" && value != "Warning" && value != "Info" {
+				logger.Error(context.TODO(), "查询的事件类型必须是Critical或者Warning或者Info")
+				common.BadRequestMessage(c, common.EventInvalidParam, "", errors.New("查询的事件类型必须是Critical或者Warning或者Info"))
+				return
+			}
+		}
+	}
 
 	//parse header
 	if err := c.BindHeader(&userInfo); err != nil {

@@ -22,7 +22,7 @@ func SearchEventsFromES(pageRequest model.EventPage, userInfo model.UserInfo) (*
 	timeQuery := buildTimeQuery(pageRequest.Start, pageRequest.End)
 
 	// 构建事件类型查询
-	eventTypeQuery := buildTermQuery(pageRequest.EventType, "type")
+	eventTypeQuery := buildEventTypeQuery(pageRequest.EventType)
 
 	// 构建任务ID查询
 	taskIdQuery := buildTermQuery(pageRequest.TaskID, "data.task_id")
@@ -53,7 +53,7 @@ func SearchEventsFromES(pageRequest model.EventPage, userInfo model.UserInfo) (*
 		query.Filter = append(query.Filter, types.Query{Range: timeQuery})
 	}
 	if eventTypeQuery != nil {
-		query.Filter = append(query.Filter, types.Query{Term: eventTypeQuery})
+		query.Filter = append(query.Filter, types.Query{Bool: eventTypeQuery})
 	}
 	if taskIdQuery != nil {
 		query.Filter = append(query.Filter, types.Query{Term: taskIdQuery})
@@ -110,6 +110,18 @@ func buildTimeQuery(start, end int64) map[string]types.RangeQuery {
 				Lte: &endTimeStr,
 			},
 		}
+	}
+	return nil
+}
+
+func buildEventTypeQuery(eventType []string) *types.BoolQuery {
+	if len(eventType) != 0 {
+		eventTypeQuery := types.NewBoolQuery()
+		for _, value := range eventType {
+			// 构建事件类型查询 数组中的事件类型之间，关系是or
+			eventTypeQuery.Should = append(eventTypeQuery.Should, types.Query{Term: buildTermQuery(value, "type")})
+		}
+		return eventTypeQuery
 	}
 	return nil
 }
