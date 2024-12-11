@@ -128,6 +128,29 @@ func (cli *Client) Do(method string, path string, pid int, params url.Values, da
 	return cli.handleRequest(req)
 }
 
+// DoAPI 发送Http或者Https请求，可以兼容cwai前端和服务端请求，
+func (cli *Client) DoApi(method string, url string, pid int, params url.Values, data string, header map[string]string) ([]byte, string, error) {
+	msg := ""
+	// prepare request
+	req, err := http.NewRequest(method, url, bytes.NewReader([]byte(data)))
+	if err != nil {
+		msg += fmt.Sprintf("new http req error %s\n", err.Error())
+		return nil, msg, err
+	}
+	req.Header = cli.Header.Clone()
+	req.Header.Add("cwaiToken", cli.Token) // todo toolbox是个业务无关的工程，不能依赖api工程，所以这里暂时用字符串代替，更好的办法是在pai工程里封装这个方法
+	req.Header.Add("Content-Type", cli.ContentType)
+	for k, v := range header {
+		req.Header.Set(k, v)
+	}
+	req.URL.RawQuery = params.Encode()
+
+	// do request
+	content, m, err := cli.handleApiRequest(req)
+	msg += m
+	return content, m, err
+}
+
 // DoRequest 发送HTTP请求
 func (cli *Client) DoRequest(method string, path string, pid int, params interface{}, data interface{}) ([]byte, error) {
 	if params == nil {
