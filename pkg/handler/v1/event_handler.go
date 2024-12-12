@@ -49,6 +49,7 @@ func PageEventFromES(c *gin.Context) {
 				return
 			}
 		}
+		pageRequest.EventType = removeDuplicates(pageRequest.EventType)
 	}
 
 	//parse header
@@ -95,4 +96,20 @@ func PageEventFromES(c *gin.Context) {
 	}
 
 	common.Success(c, pageVo)
+}
+
+// 去重函数（适用于字符串切片）
+func removeDuplicates(slice []string) []string {
+	// 创建一个 map 来跟踪已存在的值
+	seen := make(map[string]struct{})
+	result := []string{}
+
+	// 遍历输入切片
+	for _, value := range slice {
+		if _, exists := seen[value]; !exists {
+			seen[value] = struct{}{}  // 标记已存在
+			result = append(result, value) // 添加到结果
+		}
+	}
+	return result
 }
