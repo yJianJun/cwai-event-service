@@ -445,6 +445,7 @@ var IamTriadsMap map[string]string = map[string]string{
 	http.MethodGet + ":" + "/apis/v1/monitor" + "/query_talent_gpu":       "cwai:monitor:detail|cwai:workspace:detail",
 	http.MethodGet + ":" + "/apis/v1/monitor" + "/query_range":            "cwai:monitor:detail|cwai:workspace:detail",
 	http.MethodPost + ":" + "/apis/v1/monitor" + "/get-history-metrics":   "cwai:monitor:detail|cwai:workspace:detail",
+	http.MethodPost +":" + "/apis/v1/event-service" + "/list":            "cwai:monitor:detail|cwai:workspace:detail",
 }
 
 // // 定义路由三元组映射关系，为了支持URL里的路径参数
