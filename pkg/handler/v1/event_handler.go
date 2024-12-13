@@ -32,20 +32,20 @@ func PageEventFromES(c *gin.Context) {
 	//validatorx.ShouldBindJSON(c, &pageRequest)
 	if err := c.ShouldBindJSON(&pageRequest); err != nil {
 		logger.Errorf(context.TODO(), "parse param failed: %s\n", err)
-		common.BadRequestMessage(c, common.EventInvalidParam, "", err)
+		common.BadRequestMessage(c, common.EventInvalidParam, err.Error(), err)
 		return
 	}
 
 	if pageRequest.End < pageRequest.Start {
 		logger.Error(context.TODO(), "结束时间不能小于开始时间")
-		common.BadRequestMessage(c, common.EventInvalidParam, "", errors.New("结束时间不能小于开始时间"))
+		common.BadRequestMessage(c, common.EventInvalidParam, "结束时间不能小于开始时间", errors.New("结束时间不能小于开始时间"))
 		return
 	}
 	if len(pageRequest.EventType) != 0 {
 		for _, value := range pageRequest.EventType { // 忽略索引
 			if value != "Critical" && value != "Warning" && value != "Info" {
 				logger.Error(context.TODO(), "查询的事件类型必须是Critical或者Warning或者Info")
-				common.BadRequestMessage(c, common.EventInvalidParam, "", errors.New("查询的事件类型必须是Critical或者Warning或者Info"))
+				common.BadRequestMessage(c, common.EventInvalidParam, "查询的事件类型必须是Critical或者Warning或者Info", errors.New("查询的事件类型必须是Critical或者Warning或者Info"))
 				return
 			}
 		}
@@ -55,7 +55,7 @@ func PageEventFromES(c *gin.Context) {
 	//parse header
 	if err := c.BindHeader(&userInfo); err != nil {
 		logger.Errorf(context.TODO(), "parse header failed: %s\n", err)
-		common.BadRequestMessage(c, common.EventInvalidParam, "", err)
+		common.BadRequestMessage(c, common.EventInvalidParam, err.Error(), err)
 		return
 	}
 
@@ -64,7 +64,7 @@ func PageEventFromES(c *gin.Context) {
 		eopAuthInfo := model.AuthInfo{}
 		if err := json.Unmarshal([]byte(authInfo), &eopAuthInfo); err != nil {
 			logger.Errorf(context.TODO(), "get eop auth info %s err: %s\n", authInfo, err.Error())
-			common.BadRequestMessage(c, common.EventInvalidParam, "", err)
+			common.BadRequestMessage(c, common.EventInvalidParam, err.Error(), err)
 			return
 		}
 		userInfo.UserID = eopAuthInfo.UserID
@@ -82,7 +82,7 @@ func PageEventFromES(c *gin.Context) {
 	events, err := service.ParseSearchResults(searchResult, userInfo)
 	if err != nil {
 		logger.Errorf(context.TODO(), "failed parse events, err: %v\n", err.Error())
-		common.BadRequestMessage(c, common.EventDataError, "", err)
+		common.BadRequestMessage(c, common.EventDataError, err.Error(), err)
 		return
 	}
 
@@ -107,7 +107,7 @@ func removeDuplicates(slice []string) []string {
 	// 遍历输入切片
 	for _, value := range slice {
 		if _, exists := seen[value]; !exists {
-			seen[value] = struct{}{}  // 标记已存在
+			seen[value] = struct{}{}       // 标记已存在
 			result = append(result, value) // 添加到结果
 		}
 	}

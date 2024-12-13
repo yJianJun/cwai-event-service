@@ -151,7 +151,8 @@ func ParseSearchResults(searchResult *core_search.Response, userInfo model.UserI
 			var eventResponse model.EventResponse
 			if err := json.Unmarshal(hit.Source_, &eventResponse); err == nil {
 				evenTime := time.Unix(eventResponse.Data.EventTime, 0)
-				eventResponse.EventTimeUTC = evenTime.UTC()
+				eventResponse.CreateTime = evenTime.Format("2006-01-02 15:04:05")
+				eventResponse.EventMessage = eventResponse.Data.EventMessage
 				eventResponses = append(eventResponses, eventResponse)
 			} else {
 				return nil, err
