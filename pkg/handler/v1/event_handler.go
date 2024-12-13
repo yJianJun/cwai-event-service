@@ -41,6 +41,16 @@ func PageEventFromES(c *gin.Context) {
 		common.BadRequestMessage(c, common.EventInvalidParam, "", errors.New("结束时间不能小于开始时间"))
 		return
 	}
+	if len(pageRequest.EventType) != 0 {
+		for _, value := range pageRequest.EventType { // 忽略索引
+			if value != "Critical" && value != "Warning" && value != "Info" {
+				logger.Error(context.TODO(), "查询的事件类型必须是Critical或者Warning或者Info")
+				common.BadRequestMessage(c, common.EventInvalidParam, "", errors.New("查询的事件类型必须是Critical或者Warning或者Info"))
+				return
+			}
+		}
+		pageRequest.EventType = removeDuplicates(pageRequest.EventType)
+	}
 
 	//parse header
 	if err := c.BindHeader(&userInfo); err != nil {
@@ -86,4 +96,20 @@ func PageEventFromES(c *gin.Context) {
 	}
 
 	common.Success(c, pageVo)
+}
+
+// 去重函数（适用于字符串切片）
+func removeDuplicates(slice []string) []string {
+	// 创建一个 map 来跟踪已存在的值
+	seen := make(map[string]struct{})
+	result := []string{}
+
+	// 遍历输入切片
+	for _, value := range slice {
+		if _, exists := seen[value]; !exists {
+			seen[value] = struct{}{}  // 标记已存在
+			result = append(result, value) // 添加到结果
+		}
+	}
+	return result
 }

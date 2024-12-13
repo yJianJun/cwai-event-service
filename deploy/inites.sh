@@ -3,117 +3,117 @@ set -e
 echo "============init template==============\n" 
 HTTP_CODE=$(curl  -s -o ./resp.md -w "%{http_code}" -L -XPUT -k --user elastic:$1 -H "Content-Type: application/json"  http://$2:9200/_template/events_template -d '
 {
-  "index_patterns": "events-*",
-  "order": 1,
-  "settings": {
-    "number_of_shards": 3,
-    "number_of_replicas": 1,
-    "index.lifecycle.name": "hot_delete",
-    "index.lifecycle.rollover_alias": "yuxiao-events"
-  },
-  "mappings": {
-    "properties": {
-      "specversion": {
-        "type": "keyword"
-      },
-      "id": {
-        "type": "keyword"
-      },
-      "source": {
-        "type": "keyword"
-      },
-      "ctyunregion": {
-        "type": "keyword"
-      },
-      "type": {
-        "type": "keyword"
-      },
-      "datacontenttype": {
-        "type": "keyword"
-      },
-      "subject": {
-        "type": "keyword"
-      },
-      "time": {
-        "type": "date",
-        "format": "strict_date_optional_time"
-      },
-      "data": {
-        "properties": {
-          "task_id": {
-            "type": "keyword"
-          },
-          "task_record_id": {
-            "type": "keyword"
-          },
-          "task_name": {
-            "type": "text"
-          },
-          "account_id": {
-            "type": "keyword"
-          },
-          "user_id": {
-            "type": "keyword"
-          },
-          "compute_type": {
-            "type": "keyword"
-          },
-          "node_ip": {
-            "type": "ip"
-          },
-          "node_name": {
-            "type": "keyword"
-          },
-          "pod_namespace": {
-            "type": "keyword"
-          },
-          "pod_ip": {
-            "type": "ip"
-          },
-          "pod_name": {
-            "type": "keyword"
-          },
-          "region_id": {
-            "type": "keyword"
-          },
-          "resource_group_id": {
-            "type": "keyword"
-          },
-          "resource_group_name": {
+	"index_patterns": "events-*",
+	"order": 1,
+	"settings": {
+		"number_of_shards": 3,
+		"number_of_replicas": 1,
+		"index.lifecycle.name": "hot_delete",
+		"index.lifecycle.rollover_alias": "yuxiao-events"
+	},
+	"mappings": {
+		"properties": {
+			"specversion": {
+				"type": "keyword"
+			},
+			"id": {
+				"type": "keyword"
+			},
+			"source": {
+				"type": "keyword"
+			},
+			"ctyunregion": {
+				"type": "keyword"
+			},
+			"type": {
+				"type": "keyword"
+			},
+			"datacontenttype": {
+				"type": "keyword"
+			},
+			"subject": {
+				"type": "keyword"
+			},
+			"time": {
+				"type": "date",
+				"format": "strict_date_optional_time||yyyy-MM-dd HH:mm:ss||yyyy-MM-dd"
+			},
+			"data": {
+				"properties": {
+					"task_id": {
+						"type": "keyword"
+					},
+					"task_record_id": {
+						"type": "keyword"
+					},
+					"task_name": {
+						"type": "text"
+					},
+					"account_id": {
+						"type": "keyword"
+					},
+					"user_id": {
+						"type": "keyword"
+					},
+					"compute_type": {
+						"type": "keyword"
+					},
+					"node_ip": {
+						"type": "ip"
+					},
+					"node_name": {
+						"type": "keyword"
+					},
+					"pod_namespace": {
+						"type": "keyword"
+					},
+					"pod_ip": {
+						"type": "ip"
+					},
+					"pod_name": {
+						"type": "keyword"
+					},
+					"region_id": {
+						"type": "keyword"
+					},
+					"resource_group_id": {
+						"type": "keyword"
+					},
+					"resource_group_name": {
             "type": "text",
             "analyzer": "ik_smart"
-          },
-          "level": {
-            "type": "keyword"
-          },
-          "status": {
-            "type": "keyword"
-          },
-          "event_message": {
+					},
+					"level": {
+						"type": "keyword"
+					},
+					"status": {
+						"type": "keyword"
+					},
+					"event_message": {
             "type": "text",
             "analyzer": "ik_smart"
-          },
-          "localguid": {
-            "type": "keyword"
-          },
-          "errcode": {
-            "type": "keyword"
-          },
-          "workspace_name": {
+					},
+					"localguid": {
+						"type": "keyword"
+					},
+					"errcode": {
+						"type": "keyword"
+					},
+					"workspace_name": {
             "type": "text",
             "analyzer": "ik_smart"
-          },
-          "workspace_id": {
-            "type": "keyword"
-          },
-          "event_time": {
-            "type": "date",
-            "format": "epoch_millis"
-          }
-        }
-      }
-    }
-  }
+					},
+					"workspace_id": {
+						"type": "keyword"
+					},
+					"event_time": {
+						"type": "date",
+						"format": "strict_date_optional_time||epoch_second||yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+					}
+				}
+			}
+		}
+	}
 }')
 
 if [ "$HTTP_CODE" -eq 200 ]; then
@@ -142,7 +142,7 @@ HTTP_CODE=$(curl -s -o ./resp.md -w "%{http_code}" -L -XPUT -k --user elastic:$1
         }
       },
       "delete": {
-        "min_age": "3.5m",
+        "min_age": "4m",
         "actions": {
           "delete": {"delete_searchable_snapshot": true}
         }
