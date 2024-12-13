@@ -6,6 +6,7 @@ type EventResponse struct {
 	// 事件格式版本
 	// @swagger:description 指定事件格式版本, 默认为1.0
 	// @swagger:example "1.0"
+	// @swagger:required true
 	SpecVersion string `json:"specversion"`
 
 	// 事件唯一标识ID
@@ -56,14 +57,17 @@ type EventResponse struct {
 
 	// 事件的详细数据
 	// @swagger:description 与事件相关的详细数据
-	// @swagger:example "详细事件数据"
+	// @swagger:example "例如：{\"key\":\"value\"}"
 	Data Data `json:"data"`
 
 	// 事件发生的时间
+	// @swagger:description 事件创建的时间
+	// @swagger:example "2006-01-02 15:04:05"
+	// @swagger:required true
 	CreateTime string `json:"create_time"`
 
 	// 状态信息
-	// @swagger:description 状态信息详细
+	// @swagger:description 如 Operational、Error 等状态信息，以便标识事件的当前状态
 	// @swagger:example "Operational"
 	EventMessage string `json:"event_message"`
 }
