@@ -1,9 +1,5 @@
 package model
 
-import (
-	"time"
-)
-
 // EventResponse 包含事件的详细信息和事件发生的 UTC 时间。
 // swagger:response EventResponse
 type EventResponse struct {
@@ -63,7 +59,11 @@ type EventResponse struct {
 	// @swagger:example "详细事件数据"
 	Data Data `json:"data"`
 
-	// 事件发生的 UTC 时间
-	// example: 2021-09-30T15:04:05Z
-	EventTimeUTC time.Time `json:"eventTimeUTC"`
+	// 事件发生的时间
+	CreateTime string `json:"create_time"`
+
+	// 状态信息
+	// @swagger:description 状态信息详细
+	// @swagger:example "Operational"
+	EventMessage string `json:"event_message"`
 }
