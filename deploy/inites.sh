@@ -9,7 +9,7 @@ HTTP_CODE=$(curl  -s -o ./resp.md -w "%{http_code}" -L -XPUT -k --user elastic:$
 		"number_of_shards": 3,
 		"number_of_replicas": 1,
 		"index.lifecycle.name": "hot_delete",
-		"index.lifecycle.rollover_alias": "yuxiao-events"
+		"index.lifecycle.rollover_alias": "yunxiao-events"
 	},
 	"mappings": {
 		"properties": {
@@ -155,4 +155,14 @@ if [ "$HTTP_CODE" -eq 200 ]; then
   echo "============init ilm succeed\n" 
 else 
   echo "============init ilm failed\n"
+fi
+set -e
+echo "============create index and alias==============\n"
+HTTP_CODE=$(curl  -s -o ./resp.md -w "%{http_code}" -L -XPUT -k --user elastic:$1 -H "Content-Type: application/json"  https://$2:9200/events-00001 -d '{"aliases":{"yunxiao-events":{"is_write_index":true}}}')
+
+if [ "$HTTP_CODE" -eq 200 ]; then
+  cat resp.md && rm -rf resp.md
+  echo "\n ============create index and alias succeed\n"
+else
+  echo "\n ============create index and alias failed\n"
 fi
