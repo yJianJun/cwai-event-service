@@ -41,7 +41,7 @@ HTTP_CODE=$(curl  -s -o ./resp.md -w "%{http_code}" -L -XPUT -k --user elastic:$
 			},
 			"time": {
 				"type": "date",
-				"format": "strict_date_optional_time||yyyy-MM-dd HH:mm:ss||yyyy-MM-dd",
+				"format": "date_optional_time||strict_date_optional_time",
 				"index": false
 			},
 			"data": {
@@ -114,7 +114,7 @@ HTTP_CODE=$(curl  -s -o ./resp.md -w "%{http_code}" -L -XPUT -k --user elastic:$
 					},
 					"event_time": {
 						"type": "date",
-						"format": "strict_date_optional_time||epoch_second||yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+						"format": "epoch_second||epoch_millis"
 					}
 				}
 			}
