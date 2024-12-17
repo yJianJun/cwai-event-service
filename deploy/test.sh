@@ -20,7 +20,7 @@ json_template='{
     "task_detail": "This is a test task.",
     "account_id": "1234567890",
     "user_id": "user1234",
-    "region_id": "cn-beijing",
+    "region_id": "__REGION_ID__",
     "resource_group_id": "rg1234",
     "resource_group_name": "Resource Group 1",
     "workspace_name": "Workspace 1",
@@ -43,6 +43,8 @@ counter=1
 type_values=("Critical" "Warning" "Info")
 
 RANDOM=$(date +%s)
+# 前端马三要求region_id固定为200000004062
+region_id="200000004062"
 
 # 无限循环，每 2 秒执行一次
 while true; do
@@ -52,8 +54,8 @@ while true; do
     echo "Failed to get the current time"
     exit 1
   fi
-  # 获取当前事件时间戳（占位符）
-  event_time=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+  # 将当前时间转为时间戳（占位符）
+  event_time=$(date -d "$current_time" + %s)
 
   # 随机选择一个 type 值
   type_index=$(( RANDOM % 3 )) # 0 到 2 的随机数
@@ -69,6 +71,7 @@ while true; do
                                       | sed "s/__TASK_RECORD_ID__/$counter/" \
                                       | sed "s/__TYPE__/$selected_type/" \
                                       | sed "s/__TIME__/$current_time/" \
+                                      | sed "s/__REGION_ID__/$region_id/" \
                                       | sed "s/__EVENT_TIME__/$event_time/")
 
   # 使用 curl 执行请求
