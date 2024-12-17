@@ -137,7 +137,10 @@ HTTP_CODE=$(curl -s -o ./resp.md -w "%{http_code}" -L -XPUT -k --user elastic:$1
             "min_age": "0ms",
             "actions": {
               "set_priority": {"priority": 100},
-              "rollover": {"max_age": "3m"}
+              "rollover": {
+                "max_age": "3m",
+                "max_size": "50gb"
+              }
             }
           },
       "warm": {
