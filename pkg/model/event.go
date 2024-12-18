@@ -180,5 +180,5 @@ type Data struct {
 	// 事件发生时间
 	// @swagger:description 事件发生的时间戳，格式为ISO 8601，例：2024-11-22T07:55:00Z
 	// @swagger:example "2024-11-22T07:55:00Z"
-	EventTime int64 `json:"event_time"`
+	EventTime int64 `json:"event_time,string,omitempty"`
 }
