@@ -55,7 +55,7 @@ while true; do
     exit 1
   fi
   # 将当前时间转为时间戳（占位符）
-  event_time=$(date -d "$current_time" + %s)
+  event_time=$(date +%s)
 
   # 随机选择一个 type 值
   type_index=$(( RANDOM % 3 )) # 0 到 2 的随机数
