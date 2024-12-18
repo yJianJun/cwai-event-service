@@ -9,34 +9,40 @@ HTTP_CODE=$(curl  -s -o ./resp.md -w "%{http_code}" -L -XPUT -k --user elastic:$
 		"number_of_shards": 3,
 		"number_of_replicas": 1,
 		"index.lifecycle.name": "hot_delete",
-		"index.lifecycle.rollover_alias": "yuxiao-events"
+		"index.lifecycle.rollover_alias": "yunxiao-events"
 	},
 	"mappings": {
 		"properties": {
 			"specversion": {
-				"type": "keyword"
+				"type": "keyword",
+				"index": false
 			},
 			"id": {
 				"type": "keyword"
 			},
 			"source": {
-				"type": "keyword"
+				"type": "keyword",
+				"index": false
 			},
 			"ctyunregion": {
-				"type": "keyword"
+				"type": "keyword",
+				"index": false
 			},
 			"type": {
 				"type": "keyword"
 			},
 			"datacontenttype": {
-				"type": "keyword"
+				"type": "keyword",
+				"index": false
 			},
 			"subject": {
-				"type": "keyword"
+				"type": "keyword",
+				"index": false
 			},
 			"time": {
 				"type": "date",
-				"format": "strict_date_optional_time||yyyy-MM-dd HH:mm:ss||yyyy-MM-dd"
+				"format": "date_optional_time||strict_date_optional_time",
+				"index": false
 			},
 			"data": {
 				"properties": {
@@ -108,7 +114,7 @@ HTTP_CODE=$(curl  -s -o ./resp.md -w "%{http_code}" -L -XPUT -k --user elastic:$
 					},
 					"event_time": {
 						"type": "date",
-						"format": "strict_date_optional_time||epoch_second||yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+						"format": "epoch_second||epoch_millis"
 					}
 				}
 			}
@@ -131,7 +137,10 @@ HTTP_CODE=$(curl -s -o ./resp.md -w "%{http_code}" -L -XPUT -k --user elastic:$1
             "min_age": "0ms",
             "actions": {
               "set_priority": {"priority": 100},
-              "rollover": {"max_age": "3m"}
+              "rollover": {
+                "max_age": "3m",
+                "max_size": "50gb"
+              }
             }
           },
       "warm": {
@@ -155,4 +164,14 @@ if [ "$HTTP_CODE" -eq 200 ]; then
   echo "============init ilm succeed\n" 
 else 
   echo "============init ilm failed\n"
+fi
+set -e
+echo "============create index and alias==============\n"
+HTTP_CODE=$(curl  -s -o ./resp.md -w "%{http_code}" -L -XPUT -k --user elastic:$1 -H "Content-Type: application/json"  https://$2:9200/events-00001 -d '{"aliases":{"yunxiao-events":{"is_write_index":true}}}')
+
+if [ "$HTTP_CODE" -eq 200 ]; then
+  cat resp.md && rm -rf resp.md
+  echo "\n ============create index and alias succeed\n"
+else
+  echo "\n ============create index and alias failed\n"
 fi
