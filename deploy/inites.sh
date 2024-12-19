@@ -138,20 +138,19 @@ HTTP_CODE=$(curl -s -o ./resp.md -w "%{http_code}" -L -XPUT -k --user elastic:$1
             "actions": {
               "set_priority": {"priority": 100},
               "rollover": {
-                "max_age": "3m",
+                "max_age": "30d",
                 "max_size": "50gb"
               }
             }
           },
       "warm": {
-        "min_age": "3m",
+        "min_age": "30d",
         "actions": {
           "forcemerge": {"max_num_segments": 1},
           "set_priority": {"priority": 50}
         }
       },
       "delete": {
-        "min_age": "4m",
         "actions": {
           "delete": {"delete_searchable_snapshot": true}
         }
