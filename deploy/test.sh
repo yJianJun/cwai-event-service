@@ -1,7 +1,7 @@
 #!/bin/sh
 set -e
 
-echo "============send event==============\n"
+echo "============仅适用于公有云测试环境创建mock事件==============\n"
 
 # 定义基础 JSON 模板
 json_template='{
@@ -18,13 +18,14 @@ json_template='{
     "task_record_id": "__TASK_RECORD_ID__",
     "task_name": "Test Task",
     "task_detail": "This is a test task.",
-    "account_id": "1234567890",
-    "user_id": "user1234",
+    "account_id": "78a6039b5f3c4d26945784e0b1c799af",
+    "user_id": "41bb284c9b1b4256a49ecd58dd283dd1",
     "region_id": "__REGION_ID__",
     "resource_group_id": "rg1234",
     "resource_group_name": "Resource Group 1",
     "workspace_name": "Workspace 1",
     "workspace_id": "ws1234",
+    "node_name": "pm-weiting-1"
     "level": "Critical",
     "event_time": "__EVENT_TIME__",
     "status": "failed",
@@ -75,18 +76,17 @@ while true; do
                                       | sed "s/__EVENT_TIME__/$event_time/")
 
   # 使用 curl 执行请求
-  HTTP_CODE=$(curl -s -o ./resp.md -w "%{http_code}" -L -XPOST -k \
+  HTTP_CODE=$(curl -s -o ./resp.md -w "%{http_code}" -L -XPOST -k  -u 'elastic:xwViJm3InjSCXAhN' \
     -H "Content-Type: application/json" \
-    -H "EventToken: xwViJm3InjSCXAhNxyTNsdI" \
     -d "$json_body" \
-    http://10.233.87.172:9200/apis/v1/event-agent/events)
+    https://10.233.87.172:9200/yunxiao-events/_doc)
 
   if [ "$HTTP_CODE" -eq 200 ]; then
-    echo "\n============send event succeeded\n"
+    echo "============send event succeeded"
     cat resp.md
     rm -rf resp.md
   else
-    echo "\n============send event failed, HTTP_CODE: $HTTP_CODE\n"
+    echo "============send event failed, HTTP_CODE: $HTTP_CODE"
     [ -f resp.md ] && cat resp.md
   fi
 

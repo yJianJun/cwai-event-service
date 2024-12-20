@@ -73,10 +73,7 @@ func PageEventFromES(c *gin.Context) {
 	pageRequest.Start, pageRequest.End = pageRequest.Start*1000, pageRequest.End*1000
 
 	if pageRequest.NodeName == "" && pageRequest.TaskID == "" {
-		errLog := "TaskID不能为空."
-		if pageRequest.NodeName == "" {
-			errLog = "NodeName不能为空"
-		}
+		errLog := "TaskID、NodeName不能同时为空."
 		logger.Error(context.TODO(), errLog)
 		common.BadRequestMessage(c, common.EventInvalidParam, errLog, errors.New(errLog))
 		return

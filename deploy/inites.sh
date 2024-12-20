@@ -1,7 +1,7 @@
 #!/bin/sh
 set -e
-echo "============init template==============\n" 
-HTTP_CODE=$(curl  -s -o ./resp.md -w "%{http_code}" -L -XPUT -k --user elastic:$1 -H "Content-Type: application/json"  http://$2:9200/_template/events_template -d '
+echo "============init template==============" 
+HTTP_CODE=$(curl  -s -o ./resp.md -w "%{http_code}" -L -XPUT -k --user elastic:$1 -H "Content-Type: application/json"  https://$2:9200/_template/events_template -d '
 {
 	"index_patterns": "events-*",
 	"order": 1,
@@ -41,7 +41,7 @@ HTTP_CODE=$(curl  -s -o ./resp.md -w "%{http_code}" -L -XPUT -k --user elastic:$
 			},
 			"time": {
 				"type": "date",
-				"format": "date_optional_time||strict_date_optional_time",
+				"format": "strict_date_optional_time",
 				"index": false
 			},
 			"data": {
@@ -50,34 +50,46 @@ HTTP_CODE=$(curl  -s -o ./resp.md -w "%{http_code}" -L -XPUT -k --user elastic:$
 						"type": "keyword"
 					},
 					"task_record_id": {
-						"type": "keyword"
+						"type": "keyword",
+						"index": false
 					},
 					"task_name": {
-						"type": "text"
+						"type": "keyword",
+						"index": false
 					},
 					"account_id": {
-						"type": "keyword"
+						"type": "keyword",
+						"index": false
 					},
 					"user_id": {
 						"type": "keyword"
 					},
 					"compute_type": {
-						"type": "keyword"
+						"type": "keyword",
+						"index": false
 					},
 					"node_ip": {
-						"type": "ip"
+						"type": "ip",
+						"index": false
 					},
 					"node_name": {
 						"type": "keyword"
 					},
+					"node_uuid": {
+						"type": "keyword",
+						"index": false
+					},
 					"pod_namespace": {
-						"type": "keyword"
+						"type": "keyword",
+						"index": false
 					},
 					"pod_ip": {
-						"type": "ip"
+						"type": "ip",
+						"index": false
 					},
 					"pod_name": {
-						"type": "keyword"
+						"type": "keyword",
+						"index": false
 					},
 					"region_id": {
 						"type": "keyword"
@@ -86,35 +98,38 @@ HTTP_CODE=$(curl  -s -o ./resp.md -w "%{http_code}" -L -XPUT -k --user elastic:$
 						"type": "keyword"
 					},
 					"resource_group_name": {
-            "type": "text",
-            "analyzer": "ik_smart"
+						"type": "keyword",
+						"index": false
 					},
 					"level": {
 						"type": "keyword"
 					},
 					"status": {
-						"type": "keyword"
+						"type": "keyword",
+						"index": false
 					},
 					"event_message": {
-            "type": "text",
-            "analyzer": "ik_smart"
+            			"type": "text",
+            			"analyzer": "ik_smart"
 					},
 					"localguid": {
-						"type": "keyword"
+						"type": "keyword",
+						"index": false
 					},
 					"errcode": {
-						"type": "keyword"
+						"type": "keyword",
+						"index": false
 					},
 					"workspace_name": {
-            "type": "text",
-            "analyzer": "ik_smart"
+						"type": "keyword",
+						"index": false
 					},
 					"workspace_id": {
 						"type": "keyword"
 					},
 					"event_time": {
 						"type": "date",
-						"format": "epoch_second||epoch_millis"
+						"format": "epoch_second"
 					}
 				}
 			}
@@ -124,12 +139,13 @@ HTTP_CODE=$(curl  -s -o ./resp.md -w "%{http_code}" -L -XPUT -k --user elastic:$
 
 if [ "$HTTP_CODE" -eq 200 ]; then
   cat resp.md && rm -rf resp.md
-  echo "\n ============init template succeed\n" 
+  echo "============init template succeed" 
 else 
-  echo "\n ============init template failed\n"
+  echo "============init template failed"
 fi
-echo "=============init ilm================= \n"
-HTTP_CODE=$(curl -s -o ./resp.md -w "%{http_code}" -L -XPUT -k --user elastic:$1 -H "Content-Type: application/json" http://$2:9200/_ilm/policy/hot_delete  -d '
+
+echo "=============init ilm================="
+HTTP_CODE=$(curl -s -o ./resp.md -w "%{http_code}" -L -XPUT -k --user elastic:$1 -H "Content-Type: application/json" https://$2:9200/_ilm/policy/hot_delete  -d '
 {
   "policy": {
     "phases": {
@@ -160,17 +176,17 @@ HTTP_CODE=$(curl -s -o ./resp.md -w "%{http_code}" -L -XPUT -k --user elastic:$1
 }')
 if [ "$HTTP_CODE" -eq 200 ]; then
   cat resp.md && rm -rf resp.md
-  echo "============init ilm succeed\n" 
+  echo "============init ilm succeed" 
 else 
-  echo "============init ilm failed\n"
+  echo "============init ilm failed"
 fi
-set -e
-echo "============create index and alias==============\n"
+
+echo "============create index and alias=============="
 HTTP_CODE=$(curl  -s -o ./resp.md -w "%{http_code}" -L -XPUT -k --user elastic:$1 -H "Content-Type: application/json"  https://$2:9200/events-00001 -d '{"aliases":{"yunxiao-events":{"is_write_index":true}}}')
 
 if [ "$HTTP_CODE" -eq 200 ]; then
   cat resp.md && rm -rf resp.md
-  echo "\n ============create index and alias succeed\n"
+  echo "============create index and alias succeed"
 else
-  echo "\n ============create index and alias failed\n"
+  echo "============create index and alias failed"
 fi
