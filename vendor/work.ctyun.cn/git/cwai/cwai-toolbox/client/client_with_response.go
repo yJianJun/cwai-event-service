@@ -6,14 +6,13 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
+	"github.com/google/go-querystring/query"
+	"go.uber.org/zap"
 	"io"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
 	"time"
-
-	"github.com/google/go-querystring/query"
-	"go.uber.org/zap"
 	"work.ctyun.cn/git/cwai/cwai-toolbox/logger"
 )
 

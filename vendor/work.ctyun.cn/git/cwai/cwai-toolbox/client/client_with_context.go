@@ -73,49 +73,6 @@ func (cli *Client) handleRequest(req *http.Request) ([]byte, error) {
 	return content, nil
 }
 
-func (cli *Client) handleApiRequest(req *http.Request) ([]byte, string, error) {
-	msg := ""
-	// do request
-	start := time.Now()
-	traceID := uuid.New().String()
-	requestDump, _ := httputil.DumpRequest(req, true)
-	msg += fmt.Sprintln(string(requestDump))
-	if os.Getenv("API_SDK_DEBUG") == "true" {
-		fmt.Printf("cwaiTraceID: %v, request: %v\n", traceID, string(requestDump))
-	}
-	resp, err := cli.HTTPClient.Do(req)
-	if err != nil {
-		msg += fmt.Sprintf("do http request error %s\n", err.Error())
-		return nil, msg, err
-	}
-	responseDump, _ := httputil.DumpResponse(resp, true)
-	msg += fmt.Sprintln(string(responseDump))
-	if os.Getenv("API_SDK_DEBUG") == "true" {
-		fmt.Printf("cwaiTraceID: %v, request: %v\n", traceID, string(responseDump))
-	}
-	defer resp.Body.Close()
-	if !cli.DisableVerboseLog {
-		if cli.UseZapLogger {
-			logger.Info(req.Context(), "HTTP client handleRequest",
-				zap.String("method", req.Method),
-				zap.String("url", req.URL.String()),
-				zap.Int("statusCode", resp.StatusCode),
-				zap.Duration("latency", time.Since(start)),
-			)
-		} else {
-			glog.Infof("\"%s %s\": code=%v, consumed=%v", req.Method, req.URL.String(), resp.StatusCode, time.Since(start))
-		}
-	}
-
-	// handle response
-	content, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		msg += fmt.Sprintf("read http resp body error %s\n", err.Error())
-		return nil, msg, err
-	}
-	return content, msg, nil
-}
-
 // DoContext 发送HTTP请求
 func (cli *Client) DoContext(ctx context.Context, method string, path string, header http.Header, params url.Values, data interface{}) ([]byte, error) {
 	// prepare request

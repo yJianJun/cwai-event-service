@@ -7,7 +7,6 @@ package utils
 import (
 	"strings"
 	"unicode"
-
 )
 
 var extraWhiteSpaces = map[rune]bool{

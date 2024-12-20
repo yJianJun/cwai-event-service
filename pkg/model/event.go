@@ -1,5 +1,12 @@
 package model
 
+const (
+	Critical     string = "Critical"
+	Warning      string = "Warning"
+	Info         string = "Info"
+	IndexAliases string = "yunxiao-events"
+)
+
 // Event 表示云端事件的结构
 type Event struct {
 	// 事件格式版本
