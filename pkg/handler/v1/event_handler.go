@@ -14,7 +14,7 @@ import (
 	"work.ctyun.cn/git/cwai/cwai-toolbox/logger"
 )
 
-// PageEventFromES godoc
+// ListEvents godoc
 // @Summary      分页获取事件
 // @Description  根据请求参数从ElasticSearch中分页获取事件。如果请求类型为"task"，则会执行事件搜索。
 // @Tags         events
@@ -25,7 +25,7 @@ import (
 // @Failure      400 {object} common.CommonError "参数绑定失败"
 // @Failure      404 {object} common.CommonError "搜索数据失败"
 // @Router       /apis/v1/cwai-event-service/list [post]
-func PageEventFromES(c *gin.Context) {
+func ListEvents(c *gin.Context) {
 	var (
 		pageRequest model.EventPage
 	)
@@ -70,9 +70,8 @@ func PageEventFromES(c *gin.Context) {
 		common.BadRequestMessage(c, common.EventInvalidParam, "结束时间不能小于开始时间", errors.New("结束时间不能小于开始时间"))
 		return
 	}
-	pageRequest.Start, pageRequest.End = pageRequest.Start*1000, pageRequest.End*1000
 
-	if pageRequest.NodeName == "" && pageRequest.TaskID == "" {
+	if pageRequest.NodeName == "" && pageRequest.TaskRecordID == "" {
 		errLog := "TaskID、NodeName不能同时为空."
 		logger.Error(context.TODO(), errLog)
 		common.BadRequestMessage(c, common.EventInvalidParam, errLog, errors.New(errLog))

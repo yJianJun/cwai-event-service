@@ -28,7 +28,7 @@ func SearchEventsFromES(pageRequest model.EventPage, userInfo *permission.UserWs
 	eventTypeQuery := buildEventTypeQuery(pageRequest.EventType)
 
 	// 构建任务ID查询
-	taskIdQuery := buildTermQuery(pageRequest.TaskID, "data.task_id")
+	taskIdQuery := buildTermQuery(pageRequest.TaskRecordID, "data.task_record_id")
 
 	// 构建节点名称查询
 	nodeNameQuery := buildTermQuery(pageRequest.NodeName, "data.node_name")
@@ -76,7 +76,7 @@ func SearchEventsFromES(pageRequest model.EventPage, userInfo *permission.UserWs
 
 	// 应用排序
 	search = applySort(search, pageRequest.IsDesc)
-	logger.Infof(context.TODO(), "ES查询Search: %s", search)
+	logger.Infof(context.TODO(), "ES查询Search: %+v", search)
 
 	// 执行搜索请求
 	res, err := search.Do(context.Background())

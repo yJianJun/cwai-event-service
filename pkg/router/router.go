@@ -23,7 +23,7 @@ func InitRoute() *gin.Engine {
 	router.Use(sdkMiddleware.AuthUserInfo(config.EventServerConfig.AuthInfo.AuthHost, config.EventServerConfig.AuthInfo.AuthPath), sdkMiddleware.AuthPathPermission())
 
 	groupv1 := router.Group(GROUP_V1)
-	groupv1.POST("/list", handlerv1.PageEventFromES)
+	groupv1.POST("/list", handlerv1.ListEvents)
 
 	return router
 }
