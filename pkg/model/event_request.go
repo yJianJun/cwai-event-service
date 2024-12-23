@@ -58,7 +58,7 @@ type EventPage struct {
 	// @required false
 	// @example "task-12345"
 	// @in query
-	TaskID string `json:"taskID"`
+	TaskRecordID string `json:"taskRecordID"`
 
 	// SortType 排序类型。
 	// @description 指定排序类型，默认为按事件发生时间倒序（false）。
