@@ -31,6 +31,7 @@ data:
       host: "0.0.0.0"
       port: "8081"
       configFile: "./conf/config.yaml"
+      dataILM: 720
     elasticSearch:
       # 是否开启
       enable: true

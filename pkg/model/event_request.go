@@ -44,7 +44,8 @@ type EventPage struct {
 	// @required true
 	// @example "rg-12345"
 	// @in query
-	ResourceGroupID string `json:"resourceGroupID" binding:"required"`
+	ResourceGroupID string `json:"resourceGroupID"`
+	//ResourceGroupID string `json:"resourceGroupID" binding:"required"`
 
 	// NodeName 节点名称。
 	// @description 在查询类型为节点时使用，对应节点的 instanceName。
