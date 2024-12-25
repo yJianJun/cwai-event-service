@@ -1,5 +1,7 @@
 package model
 
+import "time"
+
 const (
 	Critical     string = "Critical"
 	Warning      string = "Warning"
@@ -53,7 +55,7 @@ type Event struct {
 	// 上报时间
 	// @swagger:description 事件被上报的时间, 格式遵循ISO 8601标准
 	// @swagger:example "2024-11-22T07:55:00.652213323Z"
-	Time MyTime `json:"time,omitempty"`
+	Time time.Time `json:"time,omitempty"`
 
 	// ElasticSearch生成的ID
 	// @swagger:description ElasticSearch自动生成的标识符
@@ -187,5 +189,5 @@ type Data struct {
 	// 事件发生时间
 	// @swagger:description 事件发生的时间戳，格式为ISO 8601，例：2024-11-22T07:55:00Z
 	// @swagger:example "2024-11-22T07:55:00Z"
-	EventTime int64 `json:"event_time,string,omitempty"`
+	EventTime int64 `json:"event_time,omitempty"`
 }

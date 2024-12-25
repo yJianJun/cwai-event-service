@@ -48,12 +48,14 @@ func SearchEventsFromES(pageRequest model.EventPage, userInfo *permission.UserWs
 	// 构建布尔查询
 	query := types.NewBoolQuery()
 	query.Filter = []types.Query{
-		{Term: resourceGroupIdQuery},
 		{Term: regionIdQuery},
 		{Range: timeQuery},
 		{Term: userIdQuery},
 	}
 
+	if resourceGroupIdQuery != nil {
+		query.Filter = append(query.Filter, types.Query{Term: resourceGroupIdQuery})
+	}
 	if eventTypeQuery != nil {
 		query.Filter = append(query.Filter, types.Query{Bool: eventTypeQuery})
 	}
@@ -66,6 +68,7 @@ func SearchEventsFromES(pageRequest model.EventPage, userInfo *permission.UserWs
 	if eventLikeQuery != nil {
 		query.Filter = append(query.Filter, types.Query{MatchPhrase: eventLikeQuery})
 	}
+	logger.Infof(context.TODO(), "ES查询Index: %+v\nFilter: %+v\n", model.IndexAliases, query.Filter)
 
 	// 创建搜索请求
 	search := util.ESclient.Search().
@@ -76,7 +79,6 @@ func SearchEventsFromES(pageRequest model.EventPage, userInfo *permission.UserWs
 
 	// 应用排序
 	search = applySort(search, pageRequest.IsDesc)
-	logger.Infof(context.TODO(), "ES查询Search: %+v", search)
 
 	// 执行搜索请求
 	res, err := search.Do(context.Background())
@@ -154,7 +156,7 @@ func ParseSearchResults(searchResult *core_search.Response, userInfo *permission
 				eventResponse.EventMessage = eventResponse.Data.EventMessage
 				eventResponses = append(eventResponses, eventResponse)
 			} else {
-				return nil, err
+				logger.Errorf(context.TODO(), "ParseSearchResults error: %v\n", err.Error())
 			}
 		}
 		return eventResponses, nil

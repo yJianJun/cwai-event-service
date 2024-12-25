@@ -9,6 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"work.ctyun.cn/git/cwai/cwai-api-sdk/pkg/common"
 	"work.ctyun.cn/git/cwai/cwai-api-sdk/pkg/model/permission"
+	"work.ctyun.cn/git/cwai/cwai-event-service/pkg/config"
 	"work.ctyun.cn/git/cwai/cwai-event-service/pkg/model"
 	"work.ctyun.cn/git/cwai/cwai-event-service/pkg/service"
 	"work.ctyun.cn/git/cwai/cwai-toolbox/logger"
@@ -54,8 +55,9 @@ func ListEvents(c *gin.Context) {
 
 	// 判断start、end是否为空，为空set end时间为当前时间，start时间为 before 30天时间
 	// 判断start是否before当前时间30d，如果超出start设置为before 30天前时间
+	pageRequest.Start, pageRequest.End = pageRequest.Start/1000, pageRequest.End/1000
 	endLimitTimeStamp := time.Now().Unix()
-	startLimitTimeStamp := time.Now().AddDate(0, 0, -30).Unix()
+	startLimitTimeStamp := time.Now().Add(-time.Hour * time.Duration(config.EventServerConfig.App.DataILM)).Unix()
 	if pageRequest.Start == 0 {
 		pageRequest.Start = startLimitTimeStamp
 	} else if pageRequest.Start < startLimitTimeStamp {

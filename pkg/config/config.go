@@ -24,6 +24,7 @@ type App struct {
 	Port        string `json:"port"`
 	Host        string `json:"host"`
 	ShutTimeOut int    `json:"shuttimeout"`
+	DataILM     int    `json:"dataILM"` //单位：小时
 }
 
 type ElaticSearch struct {
@@ -63,6 +64,7 @@ func (mo *ServerConfig) Init() {
 	viper.SetDefault("app.host", "0.0.0.0")
 	viper.SetDefault("app.port", "8081")
 	viper.SetDefault("app.shuttimeout", 60)
+	viper.SetDefault("app.dataILM", 720)
 	viper.SetDefault("logger.name", "cwai-event-service")
 	viper.SetDefault("logger.level", "debug")
 	viper.SetDefault("logger.traceLevel", "error")
